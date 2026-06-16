@@ -15,14 +15,40 @@
   <main class="app">
     <section class="viewer-shell" aria-label="3D viewer">
       <div class="viewer-meta">
-        <button id="widthLabel" type="button" data-edit-dimension="width">Width 3820 mm</button>
-        <button id="depthLabel" type="button" data-edit-dimension="depth">Projection 5980 mm</button>
-        <button id="heightLabel" type="button" data-edit-dimension="height">Height 3200 mm</button>
-        <span id="countLabel">25 lamellas</span>
+        <button id="positionEditBtn" class="position-pill" type="button">
+          <strong>B-Cube Freedom Poz1</strong>
+          <span id="positionSummary">Width 3820 mm / Projection 5980 mm / Height 3200 mm / 25 lamellas</span>
+        </button>
       </div>
       <iframe id="viewerFrame" title="B-CUBE FREEDOM 3D viewer"></iframe>
     </section>
   </main>
+
+  <div id="positionDialog" class="dialog-backdrop" hidden>
+    <form id="positionForm" class="dialog-card">
+      <h2>B-Cube Freedom Poz1</h2>
+      <label>
+        Width (mm)
+        <input id="widthInput" type="number" inputmode="decimal" min="1000" required />
+      </label>
+      <label>
+        Projection / Depth (mm)
+        <input id="depthInput" type="number" inputmode="decimal" min="796" required />
+      </label>
+      <label>
+        Height (mm)
+        <input id="heightInput" type="number" inputmode="decimal" min="1600" required />
+      </label>
+      <div class="lamella-readout">
+        <span>Lamellas</span>
+        <strong id="dialogLamellaCount">25</strong>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" id="cancelPositionBtn" class="ghost">Cancel</button>
+        <button type="submit">Uygula</button>
+      </div>
+    </form>
+  </div>
 
   <script src="./app.js"></script>
 </body>

@@ -15,12 +15,15 @@
 
   const ids = {
     frame: 'viewerFrame',
-    labels: {
-      width: 'widthLabel',
-      depth: 'depthLabel',
-      height: 'heightLabel',
-      count: 'countLabel'
-    }
+    positionEdit: 'positionEditBtn',
+    positionSummary: 'positionSummary',
+    dialog: 'positionDialog',
+    form: 'positionForm',
+    width: 'widthInput',
+    depth: 'depthInput',
+    height: 'heightInput',
+    dialogLamella: 'dialogLamellaCount',
+    cancel: 'cancelPositionBtn'
   };
 
   const $ = (id) => document.getElementById(id);
@@ -49,10 +52,7 @@
 
   function updateReadouts() {
     const model = readModel();
-    setText(ids.labels.width, `Width ${model.width} mm`);
-    setText(ids.labels.depth, `Projection ${model.depth} mm`);
-    setText(ids.labels.height, `Height ${model.height} mm`);
-    setText(ids.labels.count, `${model.lamellaCount} lamellas`);
+    setText(ids.positionSummary, `Width ${model.width} mm / Projection ${model.depth} mm / Height ${model.height} mm / ${model.lamellaCount} lamellas`);
     return model;
   }
 
@@ -61,49 +61,73 @@
     $(ids.frame).srcdoc = buildViewerHtml(model);
   }
 
-  function numberFromPrompt(message, currentValue, minValue) {
-    const raw = prompt(message, String(currentValue));
-    if (raw === null) return null;
-    const value = Math.round(Number(String(raw).replace(',', '.')));
-    if (!Number.isFinite(value) || value < minValue) {
-      alert(`Please enter a value of ${minValue} mm or more.`);
-      return null;
-    }
+  function setDialogValues() {
+    $(ids.width).value = modelState.width;
+    $(ids.depth).value = modelState.depth;
+    $(ids.height).value = modelState.height;
+    updateDialogLamella();
+  }
+
+  function updateDialogLamella() {
+    const depth = Math.round(Number(String($(ids.depth).value || '').replace(',', '.')));
+    $(ids.dialogLamella).textContent = String(lamellaCountFromProjection(Number.isFinite(depth) ? depth : modelState.depth));
+  }
+
+  function openPositionDialog() {
+    setDialogValues();
+    $(ids.dialog).hidden = false;
+    $(ids.width).focus();
+    $(ids.width).select();
+  }
+
+  function closePositionDialog() {
+    $(ids.dialog).hidden = true;
+  }
+
+  function readDialogNumber(id, minimum) {
+    const value = Math.round(Number(String($(id).value || '').replace(',', '.')));
+    if (!Number.isFinite(value) || value < minimum) return null;
     return value;
   }
 
-  function editDimension(dimension) {
-    const labels = {
-      width: 'Width (mm)',
-      depth: 'Projection / Depth (mm)',
-      height: 'Height (mm)'
-    };
-    const minimums = { width: 1000, depth: 796, height: 1600 };
-    const value = numberFromPrompt(labels[dimension], modelState[dimension], minimums[dimension]);
-    if (value === null) return;
-    const previousValue = modelState[dimension];
-    modelState[dimension] = value;
+  function dimensionsFit(model) {
+    return (
+      model.postSections[0].x + model.postSections[1].x <= model.width - 120 &&
+      model.postSections[2].x + model.postSections[3].x <= model.width - 120 &&
+      model.postSections[0].z + model.postSections[2].z <= model.depth - 120 &&
+      model.postSections[1].z + model.postSections[3].z <= model.depth - 120 &&
+      model.beamSection.vertical < model.height - 200 &&
+      model.beamSection.thickness < Math.min(model.width, model.depth) / 2
+    );
+  }
+
+  function applyPositionForm() {
+    const nextWidth = readDialogNumber(ids.width, 1000);
+    const nextDepth = readDialogNumber(ids.depth, 796);
+    const nextHeight = readDialogNumber(ids.height, 1600);
+    if (nextWidth === null || nextDepth === null || nextHeight === null) {
+      alert('Please enter valid Width, Projection and Height values.');
+      return;
+    }
+    const previous = { width: modelState.width, depth: modelState.depth, height: modelState.height };
+    modelState.width = nextWidth;
+    modelState.depth = nextDepth;
+    modelState.height = nextHeight;
     const model = readModel();
-    const tooTight =
-      !(
-        model.postSections[0].x + model.postSections[1].x <= model.width - 120 &&
-        model.postSections[2].x + model.postSections[3].x <= model.width - 120 &&
-        model.postSections[0].z + model.postSections[2].z <= model.depth - 120 &&
-        model.postSections[1].z + model.postSections[3].z <= model.depth - 120
-      ) ||
-      model.beamSection.vertical >= model.height - 200 ||
-      model.beamSection.thickness >= Math.min(model.width, model.depth) / 2;
-    if (tooTight) {
-      modelState[dimension] = previousValue;
+    if (!dimensionsFit(model)) {
+      modelState.width = previous.width;
+      modelState.depth = previous.depth;
+      modelState.height = previous.height;
       alert('This dimension is too small for the current post/profile sections.');
       return;
     }
+    closePositionDialog();
     renderViewer();
   }
 
   window.addEventListener('message', (event) => {
     if (!event.data || event.data.source !== 'product-3d-viewer') return;
-    if (event.data.type === 'edit-dimension') editDimension(event.data.dimension);
+    if (event.data.type === 'edit-dimension') openPositionDialog();
   });
 
   function buildViewerHtml({ width, depth, height, lamellaCount, orientations, postSections, beamSection }) {
@@ -560,7 +584,7 @@ function animate(){
   renderer.render(scene,camera);
 }
 
-buildModel(false);
+buildModel(true);
 animate();
 })();
 </scr` + `ipt>
@@ -569,8 +593,17 @@ animate();
   }
 
   function bindEvents() {
-    document.querySelectorAll('[data-edit-dimension]').forEach((button) => {
-      button.addEventListener('click', () => editDimension(button.dataset.editDimension));
+    $(ids.positionEdit).addEventListener('click', openPositionDialog);
+    $(ids.cancel).addEventListener('click', closePositionDialog);
+    $(ids.dialog).addEventListener('click', (event) => {
+      if (event.target === $(ids.dialog)) closePositionDialog();
+    });
+    [ids.width, ids.depth, ids.height].forEach((id) => {
+      $(id).addEventListener('input', updateDialogLamella);
+    });
+    $(ids.form).addEventListener('submit', (event) => {
+      event.preventDefault();
+      applyPositionForm();
     });
   }
 
