@@ -13,72 +13,11 @@
   </header>
 
   <main class="app">
-    <section class="controls" aria-label="B-CUBE FREEDOM controls">
-      <div class="control-grid">
-        <label>
-          <span>Width (mm)</span>
-          <input id="widthInput" type="number" inputmode="decimal" min="1000" value="3820" />
-          <em>editable</em>
-        </label>
-        <label>
-          <span>Projection / Depth (mm)</span>
-          <input id="depthInput" type="number" inputmode="decimal" min="796" value="5980" />
-          <em>editable</em>
-        </label>
-        <label>
-          <span>Height (mm)</span>
-          <input id="heightInput" type="number" inputmode="decimal" min="1600" value="3200" />
-          <em>editable</em>
-        </label>
-        <label class="auto-row">
-          <span>Lamella count</span>
-          <output id="lamellaCount">25</output>
-          <em>automatic</em>
-        </label>
-      </div>
-
-      <details class="advanced">
-        <summary>Post directions</summary>
-        <div class="post-grid">
-          <label>Front Left
-            <select id="postFrontLeft">
-              <option value="0">0 deg</option>
-              <option value="90">90 deg</option>
-            </select>
-          </label>
-          <label>Front Right
-            <select id="postFrontRight">
-              <option value="0">0 deg</option>
-              <option value="90">90 deg</option>
-            </select>
-          </label>
-          <label>Back Left
-            <select id="postBackLeft">
-              <option value="0">0 deg</option>
-              <option value="90">90 deg</option>
-            </select>
-          </label>
-          <label>Back Right
-            <select id="postBackRight">
-              <option value="0">0 deg</option>
-              <option value="90">90 deg</option>
-            </select>
-          </label>
-        </div>
-      </details>
-
-      <div class="actions">
-        <button id="makeDrawingBtn" type="button">MAKE A DRAWING</button>
-        <button id="replayBtn" class="secondary" type="button">Replay</button>
-        <button id="resetBtn" class="ghost" type="button">Reset</button>
-      </div>
-    </section>
-
     <section class="viewer-shell" aria-label="3D viewer">
       <div class="viewer-meta">
-        <span id="widthLabel">Width 3820 mm</span>
-        <span id="depthLabel">Projection 5980 mm</span>
-        <span id="heightLabel">Height 3200 mm</span>
+        <button id="widthLabel" type="button" data-edit-dimension="width">Width 3820 mm</button>
+        <button id="depthLabel" type="button" data-edit-dimension="depth">Projection 5980 mm</button>
+        <button id="heightLabel" type="button" data-edit-dimension="height">Height 3200 mm</button>
         <span id="countLabel">25 lamellas</span>
       </div>
       <iframe id="viewerFrame" title="B-CUBE FREEDOM 3D viewer"></iframe>

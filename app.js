@@ -3,33 +3,28 @@
     width: 3820,
     depth: 5980,
     height: 3200,
-    orientations: [0, 0, 0, 0]
+    orientations: [0, 0, 0, 0],
+    postSections: [
+      { x: 100, z: 220 },
+      { x: 100, z: 220 },
+      { x: 100, z: 220 },
+      { x: 100, z: 220 }
+    ],
+    beamSection: { vertical: 220, thickness: 100 }
   };
 
   const ids = {
-    width: 'widthInput',
-    depth: 'depthInput',
-    height: 'heightInput',
-    lamella: 'lamellaCount',
     frame: 'viewerFrame',
-    make: 'makeDrawingBtn',
-    replay: 'replayBtn',
-    reset: 'resetBtn',
     labels: {
       width: 'widthLabel',
       depth: 'depthLabel',
       height: 'heightLabel',
       count: 'countLabel'
-    },
-    posts: ['postFrontLeft', 'postFrontRight', 'postBackLeft', 'postBackRight']
+    }
   };
 
   const $ = (id) => document.getElementById(id);
-
-  function parseNumber(id, fallback) {
-    const value = Number(String($(id).value || '').replace(',', '.'));
-    return Number.isFinite(value) && value > 0 ? Math.round(value) : fallback;
-  }
+  const modelState = JSON.parse(JSON.stringify(defaults));
 
   function lamellaCountFromProjection(depth) {
     const raw = Math.floor((depth - 796) / 216) + 1;
@@ -37,16 +32,14 @@
   }
 
   function readModel() {
-    const width = parseNumber(ids.width, defaults.width);
-    const depth = parseNumber(ids.depth, defaults.depth);
-    const height = parseNumber(ids.height, defaults.height);
-    const orientations = ids.posts.map((id) => Number($(id).value) || 0);
     return {
-      width,
-      depth,
-      height,
-      lamellaCount: lamellaCountFromProjection(depth),
-      orientations
+      width: modelState.width,
+      depth: modelState.depth,
+      height: modelState.height,
+      lamellaCount: lamellaCountFromProjection(modelState.depth),
+      orientations: [...modelState.orientations],
+      postSections: modelState.postSections.map((section) => ({ ...section })),
+      beamSection: { ...modelState.beamSection }
     };
   }
 
@@ -56,7 +49,6 @@
 
   function updateReadouts() {
     const model = readModel();
-    setText(ids.lamella, String(model.lamellaCount));
     setText(ids.labels.width, `Width ${model.width} mm`);
     setText(ids.labels.depth, `Projection ${model.depth} mm`);
     setText(ids.labels.height, `Height ${model.height} mm`);
@@ -69,31 +61,59 @@
     $(ids.frame).srcdoc = buildViewerHtml(model);
   }
 
-  function replayViewer() {
-    const frameWindow = $(ids.frame).contentWindow;
-    if (frameWindow && typeof frameWindow.replayAnimation === 'function') {
-      frameWindow.replayAnimation();
-    } else {
-      renderViewer();
+  function numberFromPrompt(message, currentValue, minValue) {
+    const raw = prompt(message, String(currentValue));
+    if (raw === null) return null;
+    const value = Math.round(Number(String(raw).replace(',', '.')));
+    if (!Number.isFinite(value) || value < minValue) {
+      alert(`Please enter a value of ${minValue} mm or more.`);
+      return null;
     }
+    return value;
   }
 
-  function resetForm() {
-    $(ids.width).value = defaults.width;
-    $(ids.depth).value = defaults.depth;
-    $(ids.height).value = defaults.height;
-    ids.posts.forEach((id, index) => {
-      $(id).value = String(defaults.orientations[index]);
-    });
+  function editDimension(dimension) {
+    const labels = {
+      width: 'Width (mm)',
+      depth: 'Projection / Depth (mm)',
+      height: 'Height (mm)'
+    };
+    const minimums = { width: 1000, depth: 796, height: 1600 };
+    const value = numberFromPrompt(labels[dimension], modelState[dimension], minimums[dimension]);
+    if (value === null) return;
+    const previousValue = modelState[dimension];
+    modelState[dimension] = value;
+    const model = readModel();
+    const tooTight =
+      !(
+        model.postSections[0].x + model.postSections[1].x <= model.width - 120 &&
+        model.postSections[2].x + model.postSections[3].x <= model.width - 120 &&
+        model.postSections[0].z + model.postSections[2].z <= model.depth - 120 &&
+        model.postSections[1].z + model.postSections[3].z <= model.depth - 120
+      ) ||
+      model.beamSection.vertical >= model.height - 200 ||
+      model.beamSection.thickness >= Math.min(model.width, model.depth) / 2;
+    if (tooTight) {
+      modelState[dimension] = previousValue;
+      alert('This dimension is too small for the current post/profile sections.');
+      return;
+    }
     renderViewer();
   }
 
-  function buildViewerHtml({ width, depth, height, lamellaCount, orientations }) {
+  window.addEventListener('message', (event) => {
+    if (!event.data || event.data.source !== 'product-3d-viewer') return;
+    if (event.data.type === 'edit-dimension') editDimension(event.data.dimension);
+  });
+
+  function buildViewerHtml({ width, depth, height, lamellaCount, orientations, postSections, beamSection }) {
     const W = width;
     const D = depth;
     const H = height;
     const LC = lamellaCount;
     const [O1, O2, O3, O4] = orientations;
+    const postJson = JSON.stringify(postSections);
+    const beamJson = JSON.stringify(beamSection);
 
     return `<!doctype html>
 <html lang="en">
@@ -103,7 +123,7 @@
 <title>B-CUBE FREEDOM 3D</title>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at top,#334155,#0f172a 60%);font-family:Segoe UI,Arial,sans-serif;color:#e5eefb}
-.dim{position:absolute;padding:4px 8px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:none;z-index:30}
+.dim{position:absolute;padding:4px 8px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:11px;white-space:nowrap;pointer-events:auto;z-index:30;cursor:pointer}
 #fallback{display:none;position:absolute;inset:0;place-items:center;padding:22px;text-align:center;line-height:1.5;background:#0f172a;color:#e5e7eb;z-index:50}
 @media(max-width:640px){.dim{font-size:10px}}
 </style>
@@ -127,7 +147,9 @@ const GW=W-200, GD=D-200;
 const RW=W-208, RD=D-303;
 const LC=${LC};
 let orientations=[${O1},${O2},${O3},${O4}];
-let lamellaOpenMode=false;
+let postSections=${postJson};
+let beamSection=${beamJson};
+const lamellaOpenMode=true;
 
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,1,30000);
@@ -179,7 +201,60 @@ let parts=[];
 let animStep=0;
 let timer=null;
 
-function postDims(ori){return (ori%180===0)?{x:100,z:220}:{x:220,z:100};}
+function postDims(index){
+  return postSections[index] || {x:100,z:220};
+}
+
+function parseSectionInput(raw){
+  if(raw===null)return null;
+  const parts=String(raw).toLowerCase().replace(/,/g,'.').split(/[x*\\/ ]+/).filter(Boolean);
+  if(parts.length<2)return null;
+  const a=Math.round(Number(parts[0]));
+  const b=Math.round(Number(parts[1]));
+  if(!Number.isFinite(a)||!Number.isFinite(b)||a<20||b<20)return null;
+  return {a,b};
+}
+
+function postLayoutFits(sections){
+  const minOpening=120;
+  return (
+    sections[0].x + sections[1].x <= W - minOpening &&
+    sections[2].x + sections[3].x <= W - minOpening &&
+    sections[0].z + sections[2].z <= D - minOpening &&
+    sections[1].z + sections[3].z <= D - minOpening
+  );
+}
+
+function editPostSection(index){
+  const current=postDims(index);
+  const next=parseSectionInput(prompt('Post section X x Z (mm)', current.x+'x'+current.z));
+  if(!next){
+    alert('Enter section like 100x220.');
+    return;
+  }
+  const sections=postSections.map(section=>({...section}));
+  sections[index]={x:next.a,z:next.b};
+  if(!postLayoutFits(sections)){
+    alert('This post section does not fit inside the current total width/projection.');
+    return;
+  }
+  postSections=sections;
+  buildModel(true);
+}
+
+function editBeamSection(){
+  const next=parseSectionInput(prompt('Blue profile section height x thickness (mm)', beamSection.vertical+'x'+beamSection.thickness));
+  if(!next){
+    alert('Enter section like 220x100.');
+    return;
+  }
+  if(next.a >= H-200 || next.b >= Math.min(W,D)/2){
+    alert('This blue profile section is too large for the current system dimensions.');
+    return;
+  }
+  beamSection={vertical:next.a,thickness:next.b};
+  buildModel(true);
+}
 
 function addBox(cfg,color,isPost){
   const geo=new THREE.BoxGeometry(cfg.sx,cfg.sy,cfg.sz);
@@ -188,7 +263,7 @@ function addBox(cfg,color,isPost){
   mesh.castShadow=true;
   mesh.receiveShadow=true;
   mesh.position.set(cfg.px,cfg.py,cfg.pz);
-  mesh.userData={name:cfg.name,isPost,postIndex:(cfg.idx===undefined?-1:cfg.idx)};
+  mesh.userData={name:cfg.name,isPost,isBeam:Boolean(cfg.isBeam),postIndex:(cfg.idx===undefined?-1:cfg.idx)};
   mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0x111111,transparent:true,opacity:.25})));
   mesh.visible=false;
   group.add(mesh);
@@ -331,20 +406,22 @@ function setObjectByBounds(obj,opts){
 function buildModel(showAll){
   while(group.children.length)group.remove(group.children[0]);
   parts=[];
-  const p=[postDims(orientations[0]),postDims(orientations[1]),postDims(orientations[2]),postDims(orientations[3])];
+  const p=[postDims(0),postDims(1),postDims(2),postDims(3)];
   const magenta=0xff00ff,blue=0x2563eb,orange=0xff8c00,amber=0xffb347,grass=0x7cfc00;
+  const beamVertical=beamSection.vertical;
+  const beamThickness=beamSection.thickness;
 
   addBox({name:'Front Left Post',px:-W/2+p[0].x/2,py:0,pz:-D/2+p[0].z/2,sx:p[0].x,sy:H,sz:p[0].z,idx:0},magenta,true);
   addBox({name:'Front Right Post',px:W/2-p[1].x/2,py:0,pz:-D/2+p[1].z/2,sx:p[1].x,sy:H,sz:p[1].z,idx:1},magenta,true);
   addBox({name:'Back Left Post',px:-W/2+p[2].x/2,py:0,pz:D/2-p[2].z/2,sx:p[2].x,sy:H,sz:p[2].z,idx:2},magenta,true);
   addBox({name:'Back Right Post',px:W/2-p[3].x/2,py:0,pz:D/2-p[3].z/2,sx:p[3].x,sy:H,sz:p[3].z,idx:3},magenta,true);
 
-  const beamCenterY=H/2-110;
-  const beamBottomY=beamCenterY-110;
-  addBox({name:'Front Beam',px:((-W/2+p[0].x)+(W/2-p[1].x))/2,py:beamCenterY,pz:-D/2+50,sx:W-p[0].x-p[1].x,sy:220,sz:100},blue,false);
-  addBox({name:'Back Beam',px:((-W/2+p[2].x)+(W/2-p[3].x))/2,py:beamCenterY,pz:D/2-50,sx:W-p[2].x-p[3].x,sy:220,sz:100},blue,false);
-  addBox({name:'Left Beam',px:-W/2+50,py:beamCenterY,pz:((-D/2+p[0].z)+(D/2-p[2].z))/2,sx:100,sy:220,sz:D-p[0].z-p[2].z},blue,false);
-  addBox({name:'Right Beam',px:W/2-50,py:beamCenterY,pz:((-D/2+p[1].z)+(D/2-p[3].z))/2,sx:100,sy:220,sz:D-p[1].z-p[3].z},blue,false);
+  const beamCenterY=H/2-beamVertical/2;
+  const beamBottomY=beamCenterY-beamVertical/2;
+  addBox({name:'Front Beam',px:((-W/2+p[0].x)+(W/2-p[1].x))/2,py:beamCenterY,pz:-D/2+beamThickness/2,sx:W-p[0].x-p[1].x,sy:beamVertical,sz:beamThickness,isBeam:true},blue,false);
+  addBox({name:'Back Beam',px:((-W/2+p[2].x)+(W/2-p[3].x))/2,py:beamCenterY,pz:D/2-beamThickness/2,sx:W-p[2].x-p[3].x,sy:beamVertical,sz:beamThickness,isBeam:true},blue,false);
+  addBox({name:'Left Beam',px:-W/2+beamThickness/2,py:beamCenterY,pz:((-D/2+p[0].z)+(D/2-p[2].z))/2,sx:beamThickness,sy:beamVertical,sz:D-p[0].z-p[2].z,isBeam:true},blue,false);
+  addBox({name:'Right Beam',px:W/2-beamThickness/2,py:beamCenterY,pz:((-D/2+p[1].z)+(D/2-p[3].z))/2,sx:beamThickness,sy:beamVertical,sz:D-p[1].z-p[3].z,isBeam:true},blue,false);
 
   const frontG=createExtrudedGutter('Front Gutter',210,172,GW,orange,'back');
   setMeshByBounds(frontG,{centerX:0,minZ:-GD/2,bottomY:beamBottomY});
@@ -429,19 +506,30 @@ function updateDims(){
   setDim('h',new THREE.Vector3(W/2+135,0,D/2+135),'Height '+H+' mm');
 }
 
-window.addEventListener('dblclick',event=>{
+dimEls.w.addEventListener('click',()=>parent.postMessage({source:'product-3d-viewer',type:'edit-dimension',dimension:'width'},'*'));
+dimEls.d.addEventListener('click',()=>parent.postMessage({source:'product-3d-viewer',type:'edit-dimension',dimension:'depth'},'*'));
+dimEls.h.addEventListener('click',()=>parent.postMessage({source:'product-3d-viewer',type:'edit-dimension',dimension:'height'},'*'));
+
+function pickVisibleObject(event){
   mouse.x=event.clientX/innerWidth*2-1;
   mouse.y=-(event.clientY/innerHeight)*2+1;
   raycaster.setFromCamera(mouse,camera);
   const hits=raycaster.intersectObjects(parts.filter(part=>part.visible));
-  if(!hits.length)return;
-  const obj=hits[0].object;
-  if(obj.userData.isPost){
-    orientations[obj.userData.postIndex]=(orientations[obj.userData.postIndex]+90)%180;
-    buildModel(true);
-  }else if(obj.userData.isLamel){
-    lamellaOpenMode=!lamellaOpenMode;
-    buildModel(true);
+  return hits.length ? hits[0].object : null;
+}
+
+window.addEventListener('click',event=>{
+  const obj=pickVisibleObject(event);
+  if(obj && obj.userData.isPost){
+    editPostSection(obj.userData.postIndex);
+  }
+});
+
+window.addEventListener('dblclick',event=>{
+  const obj=pickVisibleObject(event);
+  if(!obj)return;
+  if(obj.userData.isBeam){
+    editBeamSection();
   }
 });
 
@@ -481,13 +569,9 @@ animate();
   }
 
   function bindEvents() {
-    [ids.width, ids.depth, ids.height, ...ids.posts].forEach((id) => {
-      $(id).addEventListener('input', updateReadouts);
-      $(id).addEventListener('change', renderViewer);
+    document.querySelectorAll('[data-edit-dimension]').forEach((button) => {
+      button.addEventListener('click', () => editDimension(button.dataset.editDimension));
     });
-    $(ids.make).addEventListener('click', renderViewer);
-    $(ids.replay).addEventListener('click', replayViewer);
-    $(ids.reset).addEventListener('click', resetForm);
   }
 
   bindEvents();
