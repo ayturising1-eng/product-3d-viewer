@@ -113,7 +113,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.4**
+Current package: **p3dv.v3.6**
 
 
 ## V2.8 Notes
@@ -226,3 +226,17 @@ Current package: **p3dv.v3.4**
 - Yatay bölme sayısı varsayılan 1'dir; profil adedi bölme sayısının bir eksiğidir.
 - Yatay bölme yükseklikleri alt dış uçtan başlayarak segment ölçüleri olarak girilir ve toplamı ürün dış yüksekliğine eşit olmalıdır.
 - Yatay ölçüler doğramanın orta aksında alt dış uç → profil merkezi, merkez → merkez ve son merkez → üst dış uç biçiminde gösterilir.
+
+
+## P3DV V3.6 Freedom Giriş Paneli
+
+Sayfanın sol tarafındaki sabit panelden Genişlik, Açılım, Yükseklik ve Panel Sayısı girilir. İlk açılışta hücreler boştur ve geçerli ölçüler uygulanmadan 3D model oluşturulmaz.
+
+- Genişlik: en fazla 4050 mm
+- Açılım: en fazla 7060 mm
+- Panel sayısı: en fazla 30
+- Kanonik hesap: `Açılım = Panel Sayısı × 216 + 580`
+
+Panel sayısı girildiğinde açılım otomatik hesaplanır. Açılım elle girildiğinde en yakın panel sayısı önerilir; elle girilen açılım korunur.
+
+Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçüleri değişmeden yalnız ön montaj katmanına alınır. Dikmenin Önü seçimi ise dıştan dışa genişlik ve +150 mm yükseklik kuralını kullanır.

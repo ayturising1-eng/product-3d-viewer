@@ -1,8 +1,9 @@
 (function () {
   const defaults = {
-    width: 3820,
-    depth: 5980,
-    height: 3200,
+    width: 0,
+    depth: 0,
+    height: 0,
+    panelCount: 0,
     orientations: [0, 0, 0, 0],
     postSections: [
       { x: 100, z: 220 },
@@ -30,6 +31,13 @@
     depth: 'depthInput',
     height: 'heightInput',
     dialogLamella: 'dialogLamellaCount',
+    freedomForm: 'freedomInputForm',
+    freedomWidth: 'freedomWidthInput',
+    freedomDepth: 'freedomDepthInput',
+    freedomHeight: 'freedomHeightInput',
+    freedomPanelCount: 'freedomPanelCountInput',
+    freedomValidation: 'freedomInputValidation',
+    freedomApply: 'freedomApplyBtn',
     cancel: 'cancelPositionBtn',
     productStatus: 'productStatus',
     replay: 'replayAnimationBtn',
@@ -171,9 +179,26 @@
   let bulkProfileZones = null;
   let activeProductSlot = 'primary';
 
+  function projectionFromPanelCount(panelCount) {
+    const count = Math.max(0, Math.min(30, Math.round(Number(panelCount) || 0)));
+    return count > 0 ? count * 216 + 580 : 0;
+  }
+
+  function panelCountFromProjection(depth) {
+    const projection = Number(depth) || 0;
+    if (projection <= 0) return 0;
+    return Math.max(3, Math.min(30, Math.round((projection - 580) / 216)));
+  }
+
   function lamellaCountFromProjection(depth) {
-    const raw = Math.floor((depth - 796) / 216) + 1;
-    return Math.max(1, Math.min(30, raw));
+    return panelCountFromProjection(depth);
+  }
+
+  function modelReady(model = modelState) {
+    return Number(model.width) >= 1000 && Number(model.width) <= 4050 &&
+      Number(model.depth) >= 796 && Number(model.depth) <= 7060 &&
+      Number(model.height) >= 1600 &&
+      Number(model.panelCount) >= 3 && Number(model.panelCount) <= 30;
   }
 
   function readModel() {
@@ -181,7 +206,8 @@
       width: modelState.width,
       depth: modelState.depth,
       height: modelState.height,
-      lamellaCount: lamellaCountFromProjection(modelState.depth),
+      lamellaCount: Math.max(0, Math.min(30, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth)))),
+      panelCount: Math.max(0, Math.min(30, Math.round(Number(modelState.panelCount) || 0))),
       orientations: [...modelState.orientations],
       postSections: modelState.postSections.map((section) => ({ ...section })),
       beamSection: { ...modelState.beamSection },
@@ -201,7 +227,12 @@
 
   function updateReadouts() {
     const model = readModel();
-    setText(ids.positionSummary, `Width ${model.width} mm / Projection ${model.depth} mm / Height ${model.height} mm / ${model.lamellaCount} lamellas`);
+    if (!modelReady(model)) {
+      setText(ids.positionSummary, 'Ölçüleri girin');
+      setText(ids.productStatus, '3D model için sol paneldeki ölçüleri tamamlayın');
+      return model;
+    }
+    setText(ids.positionSummary, `Genişlik ${model.width} mm / Açılım ${model.depth} mm / Yükseklik ${model.height} mm / ${model.lamellaCount} panel`);
     const placementCount = Object.keys(model.placements || {}).length + Object.keys(model.zipPlacements || {}).length;
     const profileCount = Object.values(model.facadeProfiles || {}).reduce((total, list) => total + (Array.isArray(list) ? list.length : 0), 0);
     const statusParts = [];
@@ -289,9 +320,18 @@
     });
   }
 
+  function buildEmptyViewerHtml(message) {
+    const safe = String(message || 'Ölçüleri girin').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+    return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:radial-gradient(circle at top,#334155,#0f172a 60%);font-family:Segoe UI,Arial,sans-serif;color:#dbeafe}.empty{max-width:520px;padding:24px;text-align:center;border:1px solid rgba(125,211,252,.3);border-radius:14px;background:rgba(15,23,42,.7)}strong{display:block;margin-bottom:8px;font-size:20px}span{font-size:13px;line-height:1.5;color:#bfdbfe}</style></head><body><div class="empty"><strong>B-Cube Freedom · Modül 1</strong><span>${safe}</span></div></body></html>`;
+  }
+
   function renderViewer() {
     pruneProductStates();
     const model = updateReadouts();
+    if (!modelReady(model)) {
+      $(ids.frame).srcdoc = buildEmptyViewerHtml('Sol taraftaki Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
+      return;
+    }
     $(ids.frame).srcdoc = buildViewerHtml({
       ...model,
       cameraState: viewerCameraState,
@@ -307,22 +347,20 @@
   }
 
   function setDialogValues() {
-    $(ids.width).value = modelState.width;
-    $(ids.depth).value = modelState.depth;
-    $(ids.height).value = modelState.height;
+    $(ids.width).value = modelState.width || '';
+    $(ids.depth).value = modelState.depth || '';
+    $(ids.height).value = modelState.height || '';
     updateDialogLamella();
   }
 
   function updateDialogLamella() {
     const depth = Math.round(Number(String($(ids.depth).value || '').replace(',', '.')));
-    $(ids.dialogLamella).textContent = String(lamellaCountFromProjection(Number.isFinite(depth) ? depth : modelState.depth));
+    $(ids.dialogLamella).textContent = String(panelCountFromProjection(Number.isFinite(depth) ? depth : modelState.depth));
   }
 
   function openPositionDialog() {
-    setDialogValues();
-    $(ids.dialog).hidden = false;
-    $(ids.width).focus();
-    $(ids.width).select();
+    $(ids.freedomWidth).focus();
+    $(ids.freedomWidth).select();
   }
 
   function closePositionDialog() {
@@ -354,20 +392,95 @@
       alert('Please enter valid Width, Projection and Height values.');
       return;
     }
-    const previous = { width: modelState.width, depth: modelState.depth, height: modelState.height };
+    const previous = { width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: modelState.panelCount };
     modelState.width = nextWidth;
     modelState.depth = nextDepth;
     modelState.height = nextHeight;
+    modelState.panelCount = panelCountFromProjection(nextDepth);
     const model = readModel();
     if (!dimensionsFit(model)) {
       modelState.width = previous.width;
       modelState.depth = previous.depth;
       modelState.height = previous.height;
+      modelState.panelCount = previous.panelCount;
       alert('This dimension is too small for the current post/profile sections.');
       return;
     }
     closePositionDialog();
     renderViewer();
+  }
+
+  function readFreedomNumber(id) {
+    const raw = String($(id).value || '').trim().replace(',', '.');
+    if (!raw) return null;
+    const value = Math.round(Number(raw));
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function setFreedomValidation(message) {
+    $(ids.freedomValidation).textContent = message || '';
+  }
+
+  function syncProjectionFromPanelCount() {
+    const count = readFreedomNumber(ids.freedomPanelCount);
+    setFreedomValidation('');
+    if (count === null) return;
+    if (count < 3 || count > 30) {
+      setFreedomValidation('Panel sayısı 3–30 arasında olmalıdır.');
+      return;
+    }
+    $(ids.freedomDepth).value = String(projectionFromPanelCount(count));
+  }
+
+  function syncPanelCountFromProjection() {
+    const depth = readFreedomNumber(ids.freedomDepth);
+    setFreedomValidation('');
+    if (depth === null) return;
+    if (depth < 796 || depth > 7060) {
+      setFreedomValidation('Açılım 796–7060 mm arasında olmalıdır.');
+      return;
+    }
+    $(ids.freedomPanelCount).value = String(panelCountFromProjection(depth));
+  }
+
+  function applyFreedomInputs() {
+    const width = readFreedomNumber(ids.freedomWidth);
+    const depth = readFreedomNumber(ids.freedomDepth);
+    const height = readFreedomNumber(ids.freedomHeight);
+    const panelCount = readFreedomNumber(ids.freedomPanelCount);
+    if (width === null || depth === null || height === null || panelCount === null) {
+      setFreedomValidation('Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
+      return false;
+    }
+    if (width < 1000 || width > 4050) {
+      setFreedomValidation('Genişlik 1000–4050 mm arasında olmalıdır.');
+      return false;
+    }
+    if (depth < 796 || depth > 7060) {
+      setFreedomValidation('Açılım 796–7060 mm arasında olmalıdır.');
+      return false;
+    }
+    if (height < 1600) {
+      setFreedomValidation('Yükseklik en az 1600 mm olmalıdır.');
+      return false;
+    }
+    if (panelCount < 3 || panelCount > 30) {
+      setFreedomValidation('Panel sayısı 3–30 arasında olmalıdır.');
+      return false;
+    }
+    const previous = { width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: modelState.panelCount };
+    modelState.width = width;
+    modelState.depth = depth;
+    modelState.height = height;
+    modelState.panelCount = panelCount;
+    if (!dimensionsFit(readModel())) {
+      Object.assign(modelState, previous);
+      setFreedomValidation('Bu ölçüler mevcut profil kesitleri için yetersiz.');
+      return false;
+    }
+    setFreedomValidation('');
+    renderViewer();
+    return true;
   }
 
   function zonePlacement(zone) {
@@ -1493,8 +1606,8 @@
     bulkProductZones = Array.isArray(zones) && zones.length > 1 ? zones.map((item) => ({ ...item })) : null;
     const primary = primaryPlacement(zone.id);
     const zip = zipPlacement(zone.id);
-    const placement = primary || zip || null;
-    activeProductSlot = primary ? 'primary' : (zip ? 'zip' : 'primary');
+    const placement = primary || null;
+    activeProductSlot = 'primary';
     if (bulkProductZones) {
       $(ids.productZoneTitle).textContent = `${bulkProductZones.length} alana ürün yerleştir`;
       $(ids.productZoneInfo).textContent = 'Zip Perde dolu alanlara ön katman olarak eklenebilir. Diğer ürünler ana ürün katmanına uygulanır.';
@@ -2291,20 +2404,29 @@ function zipBoxSectionSpec(placement){
 function fitZipProductZone(zone,placement){
   const box=zipBoxSectionSpec(placement);
   if(String(placement.placementLocation||'BETWEEN POSTS')!=='FRONT OF POSTS'){
-    return {...fitProductZone(zone,3),zipOutside:false,zipBox:box};
+    const centered=fitProductZone(zone,3);
+    const automaticFront=Boolean(placement.autoFrontOnly);
+    return {
+      ...centered,
+      cx:zone.cx,
+      cz:zone.cz,
+      zipOutside:automaticFront,
+      zipAutomaticFront:automaticFront,
+      zipSideClearance:1.5,
+      zipBox:box
+    };
   }
   const left=Math.max(0,Number(zone.leftBoundaryWidth)||0);
   const right=Math.max(0,Number(zone.rightBoundaryWidth)||0);
-  const totalReduction=5;
   const shift=(right-left)/2;
-  const beamBottom=Number.isFinite(Number(zone.beamBottomY))?Number(zone.beamBottomY):zone.topY+18;
   const adjusted={
     ...zone,
-    width:Math.max(120,zone.width+left+right-totalReduction),
-    height:Math.max(180,beamBottom+box.height-zone.bottomY),
+    width:Math.max(120,zone.width+left+right),
+    height:Math.max(180,zone.height+150),
     bottomY:zone.bottomY,
-    topY:beamBottom+box.height,
+    topY:zone.topY+150,
     zipOutside:true,
+    zipHeightExtension:150,
     zipBox:box
   };
   if(zone.axis==='x')adjusted.cx=zone.cx+shift;
@@ -2692,7 +2814,8 @@ function addZipFabricPanel(zone,cfg,placement,panelMeta){
 function buildZipScreenProduct(zone,placement){
   const originalInward=zone.inward;
   zone=fitZipProductZone(zone,placement);
-  zone={...zone,inward:-originalInward,zipOriginalInward:originalInward};
+  const zipOutside=Boolean(zone.zipOutside);
+  zone={...zone,inward:zipOutside?-originalInward:originalInward,zipOriginalInward:originalInward};
   const box=zone.zipBox||zipBoxSectionSpec(placement);
   const seriesP=String(placement.series||'G SERIES')==='P SERIES';
   const frameColor=seriesP?0x1e3a5f:0x374151;
@@ -2752,7 +2875,8 @@ function buildZipScreenProduct(zone,placement){
 function buildZipFallbackProduct(zone,placement){
   const originalInward=zone.inward;
   zone=fitZipProductZone(zone,placement);
-  zone={...zone,inward:-originalInward,zipOriginalInward:originalInward};
+  const zipOutside=Boolean(zone.zipOutside);
+  zone={...zone,inward:zipOutside?-originalInward:originalInward,zipOriginalInward:originalInward};
   const open=productIsOpen('zip:'+zone.id);
   const topBoxH=Math.max(100,Math.min(150,zipBoxSectionSpec(placement).height));
   const guide=34;
@@ -3213,8 +3337,9 @@ function buildFacadeProducts(p,beamBottomY){
         }
       }
       if(zipPlacement){
-        try{buildZipScreenProduct(zone,zipPlacement);}
-        catch(error){console.error('Zip overlay build failed',zone.id,error);buildZipFallbackProduct(zone,zipPlacement);}
+        const effectiveZipPlacement={...zipPlacement,autoFrontOnly:Boolean(placement)&&String(zipPlacement.placementLocation||'BETWEEN POSTS')==='BETWEEN POSTS'};
+        try{buildZipScreenProduct(zone,effectiveZipPlacement);}
+        catch(error){console.error('Zip overlay build failed',zone.id,error);buildZipFallbackProduct(zone,effectiveZipPlacement);}
       }
       addZonePicker(zone,Boolean(placement||zipPlacement));
       if(zone.bottomBoundaryId==='BOTTOM')addZoneWidthDimension(zone,index%3);
@@ -3286,9 +3411,11 @@ function buildModel(showAll){
   const lamelCount=Math.max(0,Math.floor(LC||0));
 
   if(lamellaOpenMode){
+    const lamelRearMaxZ=(RD/2-railBottom+railOffsetFrom151)-50;
     for(let i=0;i<lamelCount;i++){
       const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle);
-      setObjectByBounds(opened.pivot,{centerX:0,minZ:lamelStartZ+i*lamelOpenSpacing,bottomY:lamelBottomY});
+      const rearStackMaxZ=lamelRearMaxZ-(lamelCount-1-i)*lamelOpenSpacing;
+      setObjectByBounds(opened.pivot,{centerX:0,maxZ:rearStackMaxZ,bottomY:lamelBottomY});
     }
   }else{
     for(let i=0;i<lamelCount;i++){
@@ -3548,6 +3675,10 @@ animate();
   }
 
   function bindEvents() {
+    $(ids.freedomPanelCount).addEventListener('input', syncProjectionFromPanelCount);
+    $(ids.freedomDepth).addEventListener('input', syncPanelCountFromProjection);
+    [ids.freedomWidth, ids.freedomHeight].forEach((id) => $(id).addEventListener('input', () => setFreedomValidation('')));
+    $(ids.freedomForm).addEventListener('submit', (event) => { event.preventDefault(); applyFreedomInputs(); });
     $(ids.positionEdit).addEventListener('click', openPositionDialog);
     $(ids.cancel).addEventListener('click', closePositionDialog);
     $(ids.replay).addEventListener('click', toggleProductsOpen);

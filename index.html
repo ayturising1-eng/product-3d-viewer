@@ -3,22 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>p3dv.v3.4 · Product 3d Viewer</title>
+  <title>p3dv.v3.6 · Product 3d Viewer</title>
   <link rel="stylesheet" href="./styles.css" />
   <meta name="theme-color" content="#115da8" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.4</span></h1>
+    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.6</span></h1>
   </header>
 
   <main class="app">
     <div class="viewer-workspace">
+
+      <aside class="freedom-input-panel" aria-label="Freedom ürün bilgileri ve sistem ölçüleri">
+        <div class="freedom-input-head">
+          <strong>Freedom Giriş Bilgileri</strong>
+          <span>Modül 1</span>
+        </div>
+        <dl class="freedom-product-info">
+          <div><dt>Ürün Ailesi</dt><dd>Bioclimatic</dd></div>
+          <div><dt>Ürün</dt><dd>B-Cube</dd></div>
+          <div><dt>Ürün Alt Grup</dt><dd>Family</dd></div>
+          <div><dt>Modül</dt><dd>Modül 1</dd></div>
+        </dl>
+        <form id="freedomInputForm" class="freedom-input-form" novalidate>
+          <label>
+            Genişlik
+            <input id="freedomWidthInput" type="number" inputmode="decimal" min="1000" max="4050" step="1" placeholder="Maks. 4050 mm" />
+          </label>
+          <label>
+            Açılım
+            <input id="freedomDepthInput" type="number" inputmode="decimal" min="796" max="7060" step="1" placeholder="Maks. 7060 mm" />
+          </label>
+          <label>
+            Yükseklik
+            <input id="freedomHeightInput" type="number" inputmode="decimal" min="1600" step="1" placeholder="Yükseklik (mm)" />
+          </label>
+          <label>
+            Panel Sayısı
+            <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="3" max="30" step="1" placeholder="Maks. 30 adet" />
+          </label>
+          <small class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
+          <div id="freedomInputValidation" class="freedom-input-validation" aria-live="polite"></div>
+          <button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
+        </form>
+      </aside>
       <section class="viewer-shell" aria-label="3D viewer">
         <div class="viewer-meta">
           <button id="positionEditBtn" class="position-pill" type="button">
             <strong>B-Cube Freedom Poz1</strong>
-            <span id="positionSummary">Width 3820 mm / Projection 5980 mm / Height 3200 mm / 25 lamellas</span>
+            <span id="positionSummary">Ölçüleri girin</span>
           </button>
           <span id="productStatus" class="product-status">Bir cephe alanı seçerek işleme başlayın</span>
         </div>
@@ -84,11 +118,11 @@
       <h2>B-Cube Freedom Poz1</h2>
       <label>
         Width (mm)
-        <input id="widthInput" type="number" inputmode="decimal" min="1000" required />
+        <input id="widthInput" type="number" inputmode="decimal" min="1000" max="4050" required />
       </label>
       <label>
         Projection / Depth (mm)
-        <input id="depthInput" type="number" inputmode="decimal" min="796" required />
+        <input id="depthInput" type="number" inputmode="decimal" min="796" max="7060" required />
       </label>
       <label>
         Height (mm)

@@ -1,3 +1,103 @@
+P3DV.V3.6 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+- Açık Freedom panellerinin arka cephede toplanması istendi.
+- Zip Perde Dikme Arası seçiliyken aynı alanda ana ürün varsa ölçüler değiştirilmeden yalnız dikmelerin önüne taşınması istendi.
+- Önce Zip Perde, sonra Sürme/Giyotin/Sabit Doğrama ekleme sırasındaki hata bildirildi.
+- Freedom ürün giriş bilgilerinin sayfanın sol tarafına sabitlenmesi istendi.
+- İlk açılışta ölçü hücrelerinin boş olması; geçerli giriş olmadan model oluşmaması istendi.
+- Panel sayısı ve açılımın karşılıklı hesaplanması istendi. Formül: Açılım = Panel Sayısı × 216 + 580.
+- Genişlik maksimum 4050 mm, açılım maksimum 7060 mm ve panel sayısı maksimum 30 olacak şekilde hücre içi silik sınır bilgileri istendi.
+
+YAPILANLAR
+----------
+- Başlangıç genişlik, açılım, yükseklik ve panel sayısı state değerleri sıfırlandı; arayüz alanları boş açılıyor.
+- Geçerli dört değer girilmeden Three.js modelinin kurulması engellendi ve açıklayıcı boş viewer ekranı eklendi.
+- Sol tarafa sabit Freedom Giriş Bilgileri paneli eklendi.
+- Sabit bilgiler eklendi: Bioclimatic / B-Cube / Family / Modül 1.
+- Genişlik alanına Maks. 4050 mm, Açılım alanına Maks. 7060 mm, Panel Sayısı alanına Maks. 30 adet placeholder bilgileri eklendi.
+- Panel sayısı değiştirilince açılım otomatik olarak N × 216 + 580 formülüyle hesaplanıyor.
+- Açılım elle değiştirilince en yakın panel sayısı öneriliyor; manuel açılım değeri korunuyor ve öneri 30 panelde sınırlandırılıyor.
+- Açık lamellerin 65 mm paket aralığı korunarak paket konumu arka cepheye taşındı; açık açı 80° olarak korundu.
+- Zip Perde Dikme Arası ve alanda ana ürün yoksa 3 mm toplam boşlukla merkezli ve içeride kalıyor.
+- Zip Perde Dikme Arası ve aynı alanda ana ürün varsa genişlik/yükseklik değiştirilmeden yalnız ön derinlik katmanına alınıyor.
+- Kullanıcının Dikmenin Önü seçimi için dıştan dışa genişlik ve +150 mm yükseklik kuralı değişmeden korundu.
+- Zip-only bir alan yeniden açıldığında ürün penceresi ana ürün slotunda başlıyor; böylece Zip → Giyotin, Zip → Sürme ve Zip → Sabit Doğrama sırası destekleniyor.
+- Zip Perde state kaydı ana ürün eklendiğinde korunuyor; kullanıcı yerleşim seçimi otomatik çakışma çözümü nedeniyle yeniden yazılmıyor.
+
+TESTLER
+-------
+- app.js Node.js syntax: PASS
+- index.html parse ve benzersiz ID: PASS
+- boş başlangıç alanları: PASS
+- geçersiz/eksik başlangıçta model oluşturmama: PASS
+- 25 panel → 5980 mm açılım: PASS
+- 7060 mm manuel açılım → 30 panel önerisi: PASS
+- 4050 mm genişlik sınırı ve placeholder sözleşmesi: PASS
+- arka cephe lamel paket konumu: PASS
+- 80° açık panel regresyonu: PASS
+- Zip önce, Giyotin sonra ekleme: PASS
+- aynı alanda ana ürün + Zip state koruması: PASS
+- Dikme Arası Zip için yalnız derinlik yönünde otomatik ön katman: PASS
+- açıkça Dikmenin Önü seçimi V3.5 regresyonu: PASS
+- generated iframe script syntax: PASS
+- mevcut Sabit Doğrama, ölçü ve ürün durumu regresyonları: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render testi, çalışma ortamındaki dış CDN bağımlılığı nedeniyle güvenilir şekilde tamamlanamadı.
+- Açılım 6628 mm üzerinde elle girildiğinde, panel sayısı maksimum 30 olarak önerilir ve elle girilen açılım korunur.
+
+
+P3DV.V3.5 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Zip Perde yerleşim ölçülerinin iki moda göre kesinleştirilmesi istendi. Dikme Arası yerleşimde ürünün iki yanda eşit boşlukla açıklığın içinde kalması ve sistem dışına taşmaması; Dikmenin Önü yerleşimde genişliğin bağlı dikmelerin tam dıştan dışa ölçüsüne ulaşması ve yüksekliğin 150 mm artırılması talep edildi.
+
+YAPILANLAR
+----------
+- Dikme Arası Zip Perde yerleşimi toplam 3 mm boşlukla merkezlendi; her iki yana 1,5 mm eşit pay bırakıldı.
+- Dikme Arası modunda Zip Perde derinlik yönü sistem içine çevrildi; dış cepheye taşan ön katman davranışı kaldırıldı.
+- Dikmenin Önü modunda önceki 5 mm genişlik azaltması kaldırıldı.
+- Dikmenin Önü genişliği net açıklık + sol sınır dikmesi + sağ sınır dikmesi olarak, tam dıştan dışa ölçüye bağlandı.
+- Farklı sol ve sağ dikme genişliklerinde merkez kayması dış kenarları tam yakalayacak şekilde korundu.
+- Dikmenin Önü yüksekliği mevcut alan yüksekliğine tam 150 mm eklenerek hesaplandı.
+- Dikmenin Önü üst sınırı mevcut alan üst sınırından 150 mm yukarı taşındı.
+- Ana Zip builder ve güvenli fallback builder aynı yerleşim sözleşmesine bağlandı.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.5-tests.js
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- index.html parse ve benzersiz ID kontrolü: PASS
+- Dikme Arası toplam 3 mm / iki yanda 1,5 mm sözleşmesi: PASS
+- Dikme Arası merkez koordinatı koruma sözleşmesi: PASS
+- Dikme Arası sistem dışı yön dönüşünün kaldırılması: PASS
+- Dikmenin Önü tam dikmeler dıştan dışa genişlik sözleşmesi: PASS
+- Dikmenin Önü +150 mm yükseklik ve üst sınır sözleşmesi: PASS
+- Ana ve fallback Zip builder yön seçimi: PASS
+- generated iframe script syntax kontrolü: PASS
+- ZIP bütünlük kontrolü: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render testi çalışma ortamındaki dış CDN bağımlılığı nedeniyle güvenilir şekilde tamamlanamadı.
+- PLMR kaynaklarında hiçbir değişiklik yapılmadı.
+
+
 P3DV.V3.4 UPDATE
 ================
 
