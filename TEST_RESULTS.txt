@@ -1,0 +1,33 @@
+P3DV V3.4 TEST RESULTS
+======================
+
+PASS
+----
+- app.js Node.js syntax kontrolü
+- index.html parse ve 135 benzersiz ID kontrolü
+- p3dv.v3.4 sürüm etiketi kontrolü
+- Zip Perde kablo yönü Arkadan / Üstten / Yandan kontrolü
+- Dikmenin Önü metni ve FRONT OF POSTS state kontrolü
+- Zip Perde geometrisinin dış/ön cephe yönüne taşınması kod kontrolü
+- placements + zipPlacements çift katman veri modeli
+- aynı alanda Sabit Doğrama ana ürünü + Zip Perde ön katman state testi
+- ürün durum listesinde ana ürün ve Zip Perde ayrı satır testi
+- Paneller Açık kutusunun Ürün Durumları içinde bulunması
+- Paneller Açık → yeşil çatı panelleri 80 derece state kontrolü
+- Sabit Doğrama otomatik dikey bölme önerisi
+- Sabit Doğrama manuel 4 dikey bölme state testi
+- 4 bölme → 3 dikey ara profil sözleşmesi
+- yatay bölme default 1 sözleşmesi
+- 3 yatay bölme → 2 yatay profil sözleşmesi
+- Yatay Bölme Yerleşim Mantığı alanının kaldırılması
+- yatay segment yüksekliklerinin ürün yüksekliğine toplam kontrolü
+- yatay ölçülerin doğrama orta aksında gösterilmesi
+- generated iframe script syntax kontrolü
+- UTF-8 / mojibake taraması
+- secret taraması
+- ZIP bütünlük kontrolü
+
+ÇALIŞTIRILAMADI
+---------------
+- Gerçek Three.js piksel/render testi
+  Neden: Headless Chromium D-Bus ve dış CDN bağımlılıklarında 25 saniyede zaman aşımına uğradı.

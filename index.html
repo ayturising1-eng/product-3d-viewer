@@ -3,25 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Product 3d Viewer</title>
+  <title>p3dv.v3.4 · Product 3d Viewer</title>
   <link rel="stylesheet" href="./styles.css" />
   <meta name="theme-color" content="#115da8" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Product 3d Viewer</h1>
+    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.4</span></h1>
   </header>
 
   <main class="app">
-    <section class="viewer-shell" aria-label="3D viewer">
-      <div class="viewer-meta">
-        <button id="positionEditBtn" class="position-pill" type="button">
-          <strong>B-Cube Freedom Poz1</strong>
-          <span id="positionSummary">Width 3820 mm / Projection 5980 mm / Height 3200 mm / 25 lamellas</span>
-        </button>
-      </div>
-      <iframe id="viewerFrame" title="B-CUBE FREEDOM 3D viewer"></iframe>
-    </section>
+    <div class="viewer-workspace">
+      <section class="viewer-shell" aria-label="3D viewer">
+        <div class="viewer-meta">
+          <button id="positionEditBtn" class="position-pill" type="button">
+            <strong>B-Cube Freedom Poz1</strong>
+            <span id="positionSummary">Width 3820 mm / Projection 5980 mm / Height 3200 mm / 25 lamellas</span>
+          </button>
+          <span id="productStatus" class="product-status">Bir cephe alanı seçerek işleme başlayın</span>
+        </div>
+        <div id="toolboxSelectionBanner" class="toolbox-selection-banner" hidden>
+          <div>
+            <strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong>
+            <span id="toolboxSelectionBannerText">Uygun alanları seçin.</span>
+          </div>
+          <div class="toolbox-selection-banner-actions">
+            <button id="toolboxSelectionDoneBtn" type="button">Tamam · Enter</button>
+            <button id="toolboxSelectionCancelBtn" class="ghost" type="button">İptal · Esc</button>
+          </div>
+        </div>
+        <iframe id="viewerFrame" title="B-CUBE FREEDOM 3D viewer"></iframe>
+      </section>
+
+      <aside class="viewer-toolbox" aria-label="3D ön izleme araç kutusu">
+        <div class="toolbox-head">
+          <div>
+            <strong>Toolbox</strong>
+            <span>Büyük ön izleme araçları</span>
+          </div>
+          <span class="toolbox-badge">P3DV</span>
+        </div>
+
+        <div class="toolbox-section-title">Görünüm</div>
+        <div class="dimension-filter" role="group" aria-label="Ölçü görünürlüğü">
+          <strong>Ölçü Filtresi</strong>
+          <label><input id="toolboxIntermediateDimensionsInput" type="checkbox" checked /> Ara Ölçüler</label>
+          <label><input id="toolboxMainDimensionsInput" type="checkbox" checked /> Ana Ölçüler</label>
+        </div>
+        <div class="toolbox-actions utility-actions">
+          <button id="toolboxResetCameraBtn" type="button">Kamerayı Sıfırla</button>
+          <button id="replayAnimationBtn" class="product-state-toggle is-closed" type="button">Ürünler Kapalı</button>
+        </div>
+        <div class="product-open-filter" role="group" aria-label="Ürün açık kapalı durumları">
+          <strong>Ürün Durumları</strong>
+          <label class="panel-master-toggle"><input id="toolboxPanelMasterInput" type="checkbox" /> Paneller Açık</label>
+          <span id="toolboxProductOpenEmpty" class="product-open-empty">Henüz yerleştirilmiş ürün yok.</span>
+          <div id="toolboxProductOpenList" class="product-open-list"></div>
+        </div>
+
+        <div class="toolbox-separator"></div>
+        <div class="toolbox-section-title">Çoklu İşlemler</div>
+        <div class="toolbox-actions multi-actions">
+          <button id="multiProductBtn" type="button">Çoklu Ürün Ekleme</button>
+          <button id="multiDeleteBtn" type="button">Çoklu Ürün Silme</button>
+          <button id="multiProfileAddBtn" type="button">Çoklu Profil Ekleme</button>
+          <button id="multiProfileDeleteBtn" type="button">Çoklu Profil Silme</button>
+          <button id="fitProductsBtn" type="button">Ürünleri Alana Uydur</button>
+        </div>
+
+        <div class="toolbox-separator"></div>
+        <div class="toolbox-actions">
+          <button id="clearProductsBtn" class="danger-tool" type="button">Tüm Ürünleri Sil</button>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <div id="positionDialog" class="dialog-backdrop" hidden>
@@ -46,6 +101,347 @@
       <div class="dialog-actions">
         <button type="button" id="cancelPositionBtn" class="ghost">Cancel</button>
         <button type="submit">Uygula</button>
+      </div>
+    </form>
+  </div>
+
+
+  <div id="zoneActionDialog" class="dialog-backdrop context-backdrop" hidden>
+    <section class="dialog-card zone-action-card" role="dialog" aria-modal="true" aria-labelledby="zoneActionTitle">
+      <div>
+        <h2 id="zoneActionTitle">Cephe alanı</h2>
+        <p id="zoneActionInfo" class="dialog-copy">Yapılacak işlemi seçin.</p>
+      </div>
+      <div class="zone-action-grid">
+        <button id="zoneActionAddProfileBtn" type="button">Profil Ekle</button>
+        <button id="zoneActionEditDimensionBtn" type="button">Ölçüyü Düzenle</button>
+        <button id="zoneActionPlaceProductBtn" type="button">Ürün Yerleştir</button>
+        <button id="zoneActionDeleteProductBtn" class="danger-action" type="button" disabled>Ürünü Sil</button>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelZoneActionBtn" class="ghost" type="button">Kapat</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="profileDialog" class="dialog-backdrop" hidden>
+    <form id="profileForm" class="dialog-card">
+      <div>
+        <h2>Profil Ekle</h2>
+        <p class="dialog-copy">Dikey profil toplam sistem yüksekliğinden 220 mm kısa olur. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
+      </div>
+      <label>
+        Yerleşim Yönü
+        <select id="profileOrientationInput">
+          <option value="vertical">Dikey Profil</option>
+          <option value="horizontal">Yatay Profil</option>
+        </select>
+      </label>
+      <label>
+        Profil Tipi
+        <select id="profileTypeInput">
+          <option value="100x100">100 × 100 mm</option>
+          <option value="CUSTOM">Özel Kesit</option>
+        </select>
+      </label>
+      <div id="profileCustomFields" class="two-field-grid" hidden>
+        <label>
+          Profil Yüz Genişliği (mm)
+          <input id="profileWidthInput" type="number" min="40" max="300" step="1" value="100" required />
+        </label>
+        <label>
+          Profil Derinliği (mm)
+          <input id="profileDepthInput" type="number" min="30" max="300" step="1" value="100" required />
+        </label>
+      </div>
+      <div id="profileValidation" class="product-validation" aria-live="polite"></div>
+      <div class="dialog-actions">
+        <button id="cancelProfileBtn" class="ghost" type="button">İptal</button>
+        <button type="submit">Ortaya Yerleştir</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="dividerProfileDialog" class="dialog-backdrop" hidden>
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dividerProfileTitle">
+      <div>
+        <h2 id="dividerProfileTitle">Eklenen Profil</h2>
+        <p id="dividerProfileInfo" class="dialog-copy">Profil bilgisi</p>
+      </div>
+      <div class="dialog-actions split-actions">
+        <button id="deleteDividerProfileBtn" class="danger-action" type="button">Profili Sil</button>
+        <span class="action-spacer"></span>
+        <button id="cancelDividerProfileBtn" class="ghost" type="button">Kapat</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="postActionDialog" class="dialog-backdrop" hidden>
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="postActionTitle">
+      <div>
+        <h2 id="postActionTitle">Ana Dikme</h2>
+        <p id="postActionInfo" class="dialog-copy">Dikme işlemini seçin.</p>
+      </div>
+      <div class="zone-action-grid two-actions">
+        <button id="postChangeProfileBtn" type="button">Profili Değiştir</button>
+        <button id="postRotateProfileBtn" type="button">Profili Döndür</button>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelPostActionBtn" class="ghost" type="button">Kapat</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="postProfileDialog" class="dialog-backdrop" hidden>
+    <form id="postProfileForm" class="dialog-card">
+      <div>
+        <h2 id="postProfileTitle">Ana Dikme Profilini Değiştir</h2>
+        <p class="dialog-copy">Toplam sistem genişliği, açılımı ve yüksekliği değişmez. Bağlı profiller ve ürün alanları otomatik uyarlanır.</p>
+      </div>
+      <label>
+        Profil Tipi
+        <select id="postProfileTypeInput">
+          <option value="100x220">100 × 220 mm</option>
+          <option value="100x100">100 × 100 mm</option>
+          <option value="CUSTOM">Özel Kesit</option>
+        </select>
+      </label>
+      <div id="postCustomFields" class="two-field-grid" hidden>
+        <label>
+          X Ölçüsü (mm)
+          <input id="postXInput" type="number" min="40" max="300" step="1" required />
+        </label>
+        <label>
+          Z Ölçüsü (mm)
+          <input id="postZInput" type="number" min="40" max="300" step="1" required />
+        </label>
+      </div>
+      <div id="postValidation" class="product-validation" aria-live="polite"></div>
+      <div class="dialog-actions">
+        <button id="cancelPostProfileBtn" class="ghost" type="button">İptal</button>
+        <button type="submit">Uygula</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="zoneDimensionDialog" class="dialog-backdrop" hidden>
+    <form id="zoneDimensionForm" class="dialog-card">
+      <div>
+        <h2 id="zoneDimensionTitle">Alan Ölçüsünü Düzenle</h2>
+        <p class="dialog-copy">Bölünmüş alanda genişlik değişikliği en yakın ara profili kaydırır. Bölünmemiş alanda sistem ölçüsü güncellenir.</p>
+      </div>
+      <label>
+        Net Alan Genişliği (mm)
+        <input id="zoneWidthInput" type="number" min="250" step="1" required />
+      </label>
+      <label>
+        Net Alan Yüksekliği (mm)
+        <input id="zoneHeightInput" type="number" min="400" step="1" required />
+      </label>
+      <div id="zoneDimensionValidation" class="product-validation" aria-live="polite"></div>
+      <div class="dialog-actions">
+        <button id="cancelZoneDimensionBtn" class="ghost" type="button">İptal</button>
+        <button type="submit">Uygula</button>
+      </div>
+    </form>
+  </div>
+
+
+  <div id="productDialog" class="dialog-backdrop" hidden>
+    <form id="productForm" class="dialog-card product-dialog-card">
+      <div class="product-dialog-head">
+        <div>
+          <h2 id="productZoneTitle">Cephe açıklığı</h2>
+          <p id="productZoneInfo" class="dialog-copy">Ürün tipini seçin.</p>
+        </div>
+        <span id="productRuleBadge" class="rule-badge">PLMR seçimleri</span>
+      </div>
+
+      <div class="product-type-row">
+        <label id="productTypeWrap">
+          Ürün
+          <select id="productTypeInput">
+            <option value="sliding">Sürme Sistem</option>
+            <option value="guillotine">Giyotin Sistem</option>
+            <option value="zip">Zip Perde</option>
+            <option value="fixed">Sabit Doğrama</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="product-form-grid">
+        <label id="productSeriesWrap">
+          Ürün Serisi
+          <select id="productSeriesInput">
+            <option value="A SERIES">A Serisi</option>
+            <option value="K SERIES">K Serisi</option>
+          </select>
+        </label>
+
+        <label id="productSubtypeWrap">
+          Tip
+          <select id="productSubtypeInput"></select>
+        </label>
+
+        <label id="productPlacementWrap" hidden>
+          Yerleşim Yeri
+          <select id="productPlacementInput">
+            <option value="BETWEEN POSTS">Dikme Arası</option>
+            <option value="FRONT OF POSTS">Dikmenin Önü</option>
+          </select>
+        </label>
+
+        <label id="productMechanismWrap" hidden>
+          Mekanizma
+          <select id="productMechanismInput"></select>
+        </label>
+
+        <label id="productOpeningWrap">
+          Açılım Tipi
+          <select id="productOpeningInput"></select>
+        </label>
+
+        <label id="productDirectionWrap">
+          <span id="productDirectionLabel">Açılım Yönü</span>
+          <select id="productDirectionInput"></select>
+        </label>
+
+        <label id="productGlassThicknessWrap">
+          Cam Kalınlığı
+          <select id="productGlassThicknessInput"></select>
+        </label>
+
+        <label id="productGlassColorWrap">
+          <span id="productGlassColorLabel">Cam Rengi</span>
+          <select id="productGlassColorInput">
+            <option value="TRANSPARENT">Şeffaf</option>
+            <option value="GREY">Gri</option>
+            <option value="BRONZE">Bronz</option>
+            <option value="LOW-E GLASS">Low-e Cam</option>
+            <option value="OTHER">Diğer</option>
+          </select>
+        </label>
+
+        <label id="productCustomGlassWrap" hidden>
+          <span id="productCustomGlassLabel">Özel Cam Rengi</span>
+          <input id="productCustomGlassInput" type="text" autocomplete="off" placeholder="Renk adını yazın" />
+        </label>
+
+        <label id="productPanelsWrap">
+          Panel Sayısı <span class="manual-chip">Manuel</span>
+          <input id="productPanelsInput" type="number" inputmode="numeric" min="2" max="12" step="1" required />
+          <small id="productPanelHint" class="field-hint">2–12 panel</small>
+        </label>
+
+        <label id="productFixedVerticalCountWrap" hidden>
+          Dikey Bölme Sayısı
+          <input id="productFixedVerticalCountInput" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" />
+          <small class="field-hint">Ölçüye göre otomatik gelir; gerektiğinde manuel değiştirilebilir.</small>
+        </label>
+
+        <label id="productFixedHorizontalCountWrap" hidden>
+          Yatay Bölme Sayısı
+          <input id="productFixedHorizontalCountInput" type="number" inputmode="numeric" min="1" max="10" step="1" value="1" />
+          <small class="field-hint">1 = tek bölme, 2 = arada 1 profil, 3 = arada 2 profil.</small>
+        </label>
+
+        <label id="productFixedHorizontalHeightsWrap" hidden>
+          Yatay Bölme Yükseklikleri (mm)
+          <input id="productFixedHorizontalHeightsInput" type="text" autocomplete="off" placeholder="Örn: 1500;1495" />
+          <small class="field-hint">Alt dış uçtan başlayarak bölme yüksekliklerini ; ile yazın. Toplam ürün yüksekliğine eşit olmalıdır.</small>
+        </label>
+
+        <label id="productPanelTypeWrap" hidden>
+          <span id="productPanelTypeLabel">Giyotin Panel Tipi</span>
+          <select id="productPanelTypeInput">
+            <option value="1+1">1+1</option>
+            <option value="1+2">1+2</option>
+          </select>
+        </label>
+
+        <label id="productMotorDirectionWrap" hidden>
+          Motor Yönü
+          <select id="productMotorDirectionInput">
+            <option value="RIGHT">Sağ</option>
+            <option value="LEFT">Sol</option>
+          </select>
+        </label>
+
+        <span id="productViewWrap" hidden>
+          <input id="productViewInput" type="hidden" value="OUTSIDE VIEW" />
+        </span>
+
+        <label id="productMotorTypeWrap" hidden>
+          Motor Tipi
+          <select id="productMotorTypeInput">
+            <option value="SOMFY RTS">Somfy RTS</option>
+            <option value="SOMFY IO">Somfy IO</option>
+            <option value="RISING">Rising</option>
+          </select>
+        </label>
+
+        <label id="productRemoteWrap" hidden>
+          Kumanda
+          <select id="productRemoteInput">
+            <option value="1 CHANNEL">1 Kanal</option>
+            <option value="2 CHANNELS">2 Kanal</option>
+            <option value="4 CHANNELS">4 Kanal</option>
+            <option value="6 CHANNELS">6 Kanal</option>
+            <option value="16 CHANNELS">16 Kanal</option>
+            <option value="40 CHANNELS">40 Kanal</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="cleanableWindowSection" hidden>
+        <input id="bottomPanelModeInput" type="hidden" value="VASISTAS" />
+        <span id="bottomPanelStateWrap" hidden>
+          <input id="bottomPanelStateInput" type="hidden" value="OPEN" />
+        </span>
+        <span id="bottomPanelHingeWrap" hidden>
+          <input id="bottomPanelHingeInput" type="hidden" value="BOTTOM" />
+        </span>
+      </div>
+
+      <section id="slidingCollectionSection" class="collecting-display-section" hidden>
+        <div class="section-heading collecting-heading">
+          <strong>Sürme · Toplanma Görünümü</strong>
+          <span>Kanatları seçilen açılım düzenine göre toplanmış biçimde gösterin.</span>
+        </div>
+        <div class="product-form-grid compact-grid">
+          <label>
+            3D Gösterim
+            <select id="slidingCollectionStateInput">
+              <option value="NORMAL">Kapalı / normal görünüm</option>
+              <option value="COLLECTED">Toplanmış göster</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section id="collectingDisplaySection" class="collecting-display-section" hidden>
+        <div class="section-heading collecting-heading">
+          <strong>Giyotin · Toplanma Görünümü</strong>
+          <span><b id="collectingDisplayDirection">Yukarı toplanır</b> panel paketini 3D modelde gösterin.</span>
+        </div>
+        <div class="product-form-grid compact-grid">
+          <label>
+            3D Gösterim
+            <select id="collectingDisplayStateInput">
+              <option value="NORMAL">Kapalı / normal görünüm</option>
+              <option value="COLLECTED">Toplanmış göster</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <div id="productValidation" class="product-validation" aria-live="polite"></div>
+
+      <div class="dialog-actions split-actions">
+        <button type="button" id="removeProductBtn" class="danger-action" hidden>Ürünü Sil</button>
+        <span class="action-spacer"></span>
+        <button type="button" id="cancelProductBtn" class="ghost">İptal</button>
+        <button type="submit">Yerleştir / Güncelle</button>
       </div>
     </form>
   </div>

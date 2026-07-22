@@ -1,0 +1,871 @@
+P3DV.V3.4 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+P3DV V3.3 üzerinden Zip Perde kablo çıkış yönlerinin Arkadan / Üstten / Yandan yapılması, Dikmenin Dışı seçeneğinin Dikmenin Önü olarak değiştirilmesi ve bütün Zip Perde geometrisinin sistem dış tarafında gösterilmesi istendi. Zip Perdenin aynı bölmede sürme, giyotin veya sabit doğrama ile birlikte kullanılabilmesi talep edildi. Paneller Açık kutusunun Ürün Durumları içine taşınarak yeşil çatı panellerini 80 derece açık/kapalı göstermesi istendi. Sabit Doğrama dikey bölmelerinin otomatik ancak manuel değiştirilebilir olması, 4 bölme seçimindeki off-by-one hatasının giderilmesi ve yatay bölmelerin gerçek bölme adedi mantığına geçirilmesi talep edildi.
+
+YAPILANLAR
+----------
+- Zip Perde kablo yönü seçenekleri Arkadan, Üstten ve Yandan olarak güncellendi.
+- Dikmenin Dışı adı Dikmenin Önü olarak değiştirildi; eski OUTSIDE POSTS kayıtları FRONT OF POSTS değerine taşınabilir bırakıldı.
+- Zip Perde builder'ı yerel cephe iç yönünü tersine çevirerek bütün kasa, kılavuz, kumaş ve alt profil parçalarını sistemin dış/ön tarafına taşır.
+- Ana ürünler ile Zip Perde için ayrı state depoları oluşturuldu: placements ve zipPlacements.
+- Aynı zone içinde Sürme/Giyotin/Sabit Doğrama ana ürünü korunurken ön katman Zip Perde eklenebilir.
+- Ürün Durumları listesi ana ürün ve Zip Perdeyi ayrı satırlarda gösterir ve bağımsız açık/kapalı state tutar.
+- Paneller Açık kutusu Ürün Durumları içine taşındı ve yalnız yeşil çatı panellerinin 80 derece açık/kapalı durumunu yönetir.
+- Sabit Doğrama dikey bölme sayısı gerçek bölme adedi olarak tanımlandı; 4 bölme artık 3 ara profil ve 4 cam alanı üretir.
+- Dikey bölme sayısı açıklık ölçüsüne göre her 1200 mm için otomatik hesaplanır ve manuel düzenlenebilir.
+- Yatay bölme sayısı varsayılan 1 ve manuel sayı girişidir; 2 bölme 1 profil, 3 bölme 2 profil üretir.
+- Yatay Bölme Yerleşim Mantığı alanı kaldırıldı.
+- Yatay bölme yükseklikleri dış kenarlar ve profil merkezleri arasındaki segment ölçüleri olarak uygulanır.
+- Yatay ölçü çizgileri Sabit Doğramanın orta aksında gösterilir.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.4-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- index.html parse ve benzersiz ID kontrolü: PASS
+- V3.4 state/regresyon testi: PASS
+- generated iframe script syntax kontrolü: PASS
+- aynı alanda Sabit Doğrama + Zip Perde state testi: PASS
+- 4 dikey bölme / 3 ara profil sözleşmesi: PASS
+- 3 yatay bölme / 2 ara profil sözleşmesi: PASS
+- Paneller Açık → 80 derece lamel state testi: PASS
+- UTF-8 ve secret taraması: PASS
+
+ÇALIŞTIRILAMADI
+---------------
+- Gerçek Three.js piksel/render testi.
+  Neden: Headless Chromium çalışma ortamındaki D-Bus ve dış CDN bağımlılıklarında 25 saniyede zaman aşımına uğradı.
+
+
+P3DV.V3.3 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+P3DV V3.2 üzerinden devam edilmesi istendi. Ürünler Açık/Kapalı butonunun altına sabit bir panel açık/kapalı kutucuğu eklenmesi, yeni ürün olarak Sabit Doğrama eklenmesi ve bu üründe yalnız gerekli seçim alanlarının görünmesi talep edildi. Ayrıca Sabit Doğrama için dış çerçevesi 55×55 mm olan, camı seçilen kalınlığa göre ortalanan, her 1200 mm genişlikte otomatik dikey bölmeli ve ayarlanabilir yatay bölmeli sade teknik 3D model istendi.
+
+YAPILANLAR
+----------
+- Toolbox içinde Ürünler Kapalı/Açık butonunun altına sabit Paneller Açık kutucuğu eklendi.
+- Bu kutucuk işaretlenince yerleştirilmiş ürünlerin panel durumları açık, kaldırılınca kapalı olacak şekilde state akışı eklendi.
+- Bireysel ürün durum listesi korunarak sabit master panel kontrolü ile senkron çalışması sağlandı.
+- Ürün listesine Sabit Doğrama eklendi.
+- Sabit Doğrama seçildiğinde yalnız Cam Kalınlığı, Cam Rengi, Otomatik Dikey Bölme Sayısı, Yatay Bölme Sayısı, Yatay Bölme Yerleşim Mantığı ve Yatay Bölme Yükseklikleri alanları gösterilecek şekilde form kuralı eklendi.
+- Sabit Doğrama için 55 mm dış çerçeve, 55 mm derinlik, seçilen kalınlığa göre ortalanmış cam ve her 1200 mm genişlikte otomatik dikey bölme builder’ı eklendi.
+- Yatay bölme sayısı 0–4 arası seçilebilir hale getirildi.
+- Yatay bölme yükseklikleri ; ile girilebilecek şekilde eklendi; değer girilmezse bölmeler eşit dağıtılıyor.
+- Yatay bölmeler için Dıştan Merkeze, Merkezden Merkeze ve Merkezden Dışa mantığında ara ölçü gösterimi eklendi.
+- Mevcut sürme, giyotin ve Zip Perde akışları korunarak builder dispatch zinciri Sabit Doğrama için genişletildi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- VERSION.txt
+- UPDATE.txt
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- index.html parse kontrolü: PASS
+- Sabit Doğrama ürün tipi HTML kontrolü: PASS
+- Paneller Açık toolbox kontrolü: PASS
+- Sabit Doğrama builder varlık kontrolü: PASS
+- sürme/giyotin/zip dispatch regresyonu: PASS
+
+SINIRLAR
+--------
+- Sabit Doğrama yatay bölme yükseklikleri bu sürümde metin alanı üzerinden ; ile girilir. Ayrı satırlı dinamik editör yoktur.
+- Three.js gerçek piksel render doğrulaması CDN bağımlılığı nedeniyle çalışma ortamında sınırlıdır.
+
+
+PRODUCT 3D VIEWER UPDATE
+========================
+
+KULLANICI TALEBİ
+----------------
+B-Cube Freedom 3D prototipinin kendi içinde, PLMR kaynaklarına dokunmadan, dikmeler arasındaki açıklıklara tıklayarak sürme veya giyotin ürün seçme ve 3D olarak yerleştirme özelliği eklenmesi istendi.
+
+YAPILANLAR
+----------
+- Ön, arka, sol ve sağ cephe için görünmez tıklama bölgeleri oluşturuldu.
+- Fare ile üzerine gelinen açıklık teknik renkli şeffaf vurgu ile gösteriliyor.
+- Model döndürmek için yapılan sürükleme ile gerçek tıklama birbirinden ayrıldı.
+- Açıklığa tıklanınca ürün seçim penceresi açılıyor.
+- Sürme sistem için 2, 3 ve 4 panel seçenekleri eklendi.
+- Giyotin sistem için 2 ve 3 panel seçenekleri eklendi.
+- Sürme için sola, sağa ve ortadan açılım bilgisi tutuluyor.
+- Giyotin için yukarı veya aşağı toplanma bilgisi tutuluyor.
+- Sürme ürün; kasa, raylar, panel profilleri ve şeffaf camlarla sade 3D olarak üretildi.
+- Giyotin ürün; kasa, motor kutusu, dikey raylar, panel profilleri ve şeffaf camlarla sade 3D olarak üretildi.
+- Dolu açıklığa yeniden tıklayarak ürünü düzenleme veya silme özelliği eklendi.
+- Tüm ürünleri temizleme butonu eklendi.
+- Montaj animasyonunu yeniden oynatma butonu eklendi.
+- Yerleştirilen ürünler ana model state içinde tutuluyor ve ölçüler değiştiğinde yeni açıklığa göre tekrar oluşturuluyor.
+- README yeni kullanım biçimiyle güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+
+EKLENEN DOSYA
+-------------
+- UPDATE.txt
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- index.html HTML parser kontrolü: PASS
+- iframe srcdoc üretimi: PASS
+- iframe iç script syntax kontrolü: PASS
+- sürme/giyotin builder varlık kontrolü: PASS
+- cephe seçim mesajı kontrolü: PASS
+- ürün yerleştirme state akışı: PASS
+- ürün silme state akışı: PASS
+
+SINIRLAR
+--------
+- Çalışma ortamında CDN alan adları çözümlenemediği için Three.js ile gerçek headless browser render testi tamamlanamadı.
+- Modeller üretim profili veya PLMR kanonik ürün verisi değildir; bu bağımsız prototip için sade teknik 3D temsilidir.
+- PLMR kaynaklarında hiçbir değişiklik yapılmadı.
+
+
+P3DV.V2.1 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Bağımsız Product 3D Viewer içinde PLMR sürme ve giyotin ürün seçimlerinin kullanılmasına yakın bir seçim yapısı istendi. Panel sayısının kullanıcı tarafından manuel girilebilmesi ve temizlenebilir giyotin seçildiğinde en alt panelin pencere kanadı gibi açılabildiğinin 3D modelde gösterilmesi talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız product-3d-viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Sürme ürününe A/K serisi, eşikli/eşiksiz tip, yana/ortadan açılım, sol/sağ/orta yön, cam kalınlığı ve cam rengi seçimleri eklendi.
+- Giyotin ürününe A/K serisi, standart/temizlenebilir/yukarı toplanan tip, zincir/kayış mekanizma, cam kalınlığı, cam rengi, panel tipi, motor yönü, görünüş, motor tipi ve kumanda seçimleri eklendi.
+- K Serisi ve Low-e Cam için PLMR'deki temel uyumluluk kısıtları seçim ekranında uygulandı.
+- Sürme için 2–12, giyotin için 2–8 arasında manuel panel sayısı girişi eklendi.
+- Giyotin 1+1 ve 1+2 seçimleri panel sayısıyla senkronlandı; diğer sayılar Manuel olarak işaretleniyor.
+- Temizlenebilir giyotinde alt panel davranışı için Sabit veya Pencere Gibi Açılır seçimi eklendi.
+- Pencere modu için Kapalı/Açık 3D gösterim ve Sol/Sağ menteşe yönü eklendi.
+- Açık alt panel, dikey menteşe ekseni çevresinde yaklaşık 58 derece döndürülerek pencere kanadı görünümünde çiziliyor.
+- Giyotin yukarı toplanan tipinde paneller üst bölgede paketlenmiş biçimde gösteriliyor.
+- Giyotin motor yönü, mekanizma ve motor tipi basit teknik 3D işaretlerle görselleştiriliyor.
+- Cam rengi seçimleri sade 3D cam tonlarına yansıtılıyor.
+- Ürün kayıtları model state içinde bütün yeni seçimlerle saklanıyor ve ölçü değişiminde yeniden oluşturuluyor.
+- Ürün seçim penceresi masaüstü ve dar ekran için yeniden düzenlendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+
+EKLENEN DOSYALAR
+----------------
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v2.1-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- iframe srcdoc üretimi: PASS
+- iframe iç script syntax kontrolü: PASS
+- HTML ID benzersizlik kontrolü: PASS
+- PLMR sürme seçim alanları kontrolü: PASS
+- PLMR giyotin seçim alanları kontrolü: PASS
+- manuel sürme panel sayısı state testi: PASS
+- manuel giyotin panel sayısı state testi: PASS
+- temizlenebilir giyotin alt pencere state testi: PASS
+- alt panel sol/sağ menteşe verisi kontrolü: PASS
+- ZIP bütünlük testi: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls mevcut prototipte olduğu gibi CDN üzerinden yükleniyor.
+- Çalışma ortamında CDN alan adları çözümlenemediği ve Chromium güvenilir şekilde başlatılamadığı için gerçek görsel browser render testi tamamlanamadı.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+
+P3DV.V2.2 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Temizlenebilir giyotin alt panelinin kapı/pencere gibi yan menteşeli değil, içe açılan vasistas mantığında gösterilmesi istendi. Lamellerin açık konum açısının 80 dereceye çekilmesi ve lamel eksen aralığının 65 mm olması talep edildi. Ayrıca sürme kanatlarının ortadan / sağdan / soldan açılım yönüne göre önde-içte kademeli ray düzlemlerine yerleştirilmesi ve sürme ile giyotin seçim listelerinin birbirine karışmadan yalnız ilgili ürün tipine ait seçenekleri göstermesi istendi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Temizlenebilir giyotin alt panel davranışı 'İçe açılır vasistas' olarak değiştirildi.
+- Alt panel artık üst menteşe ekseninden yaklaşık 58 derece dönerek içe açılır biçimde gösteriliyor.
+- Sol/sağ menteşe mantığı kaldırıldı; bu ürün davranışı artık yalnız üst menteşe vasistas olarak modelleniyor.
+- Açık lamellerin açısı 80 dereceye, ardışık lamel yerleşim aralığı 65 mm'ye güncellendi.
+- Sürme paneller için ray derinlikleri kademeli hale getirildi.
+- Ortadan açılımda ortadaki iki kanat önde, dışa doğru kalan kanatlar birer kanat kalınlığı kadar içe alınarak yerleştiriliyor.
+- Sağa açılımda sağ kanat önde, sola doğru gidildikçe kanatlar kademeli içe; sola açılımda bunun tersi uygulanıyor.
+- Temizlenebilir giyotin alanındaki açıklamalar vasistas mantığına göre güncellendi.
+- Seçim formunda sürme ve giyotin için ilgisiz alanlar daha net gizlenerek karışıklık azaltıldı.
+- Paket sürümü p3dv.v2.2 olarak güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- tests/p3dv-v2.1-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- iframe srcdoc üretimi: PASS
+- iframe iç script syntax kontrolü: PASS
+- vasistas alt panel state ve görünürlük testi: PASS
+- lamel açı/aralık token testi: PASS
+- sürme ray kademesi token testi: PASS
+- ürün tipi bazlı görünürlük testi: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Çalışma ortamında gerçek tarayıcı render testi CDN kısıtı nedeniyle doğrulanamadı.
+- Modeller sade teknik 3D prototip olarak tutuldu; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+P3DV.V2.3 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Ürün seçim ekranında sürme ve giyotin seçeneklerinin birbirine karışmaması, ürün seçiminin en üstte tek satır olması ve diğer seçimlerin iki sütun hâlinde gösterilmesi istendi. Sürmede mekanizma ve giyotin alanlarının; giyotinde açılım tipi/yönü, manuel panel sayısı, motor tipi ve kumanda alanlarının kaldırılması talep edildi. Temizlenebilir giyotin vasistasının alt menteşeli ve içe açılır olması istendi. Ayrıca yukarı toplanan ve aşağı toplanan giyotin tiplerinde panellerin seçime bağlı olarak üstte veya altta toplanmış 3D görünümünün gösterilmesi talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Ürün seçimi formun en üstüne, tam genişlikte ayrı satıra taşındı.
+- Diğer seçim alanları masaüstünde iki sütun, dar ekranda tek sütun olarak düzenlendi.
+- HTML hidden davranışı CSS grid kurallarından etkilenmesin diye zorunlu `[hidden] { display: none !important; }` kuralı eklendi.
+- Sürme seçiminde mekanizma, giyotin panel tipi, motor yönü, görünüş, motor tipi ve kumanda alanları tamamen gizlendi.
+- Giyotin seçiminde açılım tipi, açılım yönü, manuel panel sayısı, motor tipi ve kumanda alanları tamamen gizlendi.
+- Giyotin panel sayısı artık Giyotin Panel Tipi üzerinden belirleniyor: 1+1 = 2 panel, 1+2 = 3 panel.
+- Temizlenebilir giyotin bölümündeki görünür Sistem Notu / menteşe seçimi kaldırıldı.
+- Vasistas alt panel, ortak alt yatay menteşe ekseni çevresinde içeri açılacak şekilde yeniden modellendi.
+- A Serisi giyotin tiplerine Aşağı Toplanan seçeneği eklendi.
+- Yukarı Toplanan ve Aşağı Toplanan tiplerinde ayrı Toplanma Görünümü bölümü eklendi.
+- Bu bölümde Kapalı/normal görünüm veya Toplanmış göster seçimi yapılabiliyor.
+- Yukarı toplanmış seçiminde paneller üst bölgede, aşağı toplanmış seçiminde paneller alt bölgede paketlenmiş biçimde çiziliyor.
+- V2.2 lamel 80 derece, 65 mm aralık ve sürme ray kademesi davranışları korundu.
+- Paket sürümü p3dv.v2.3 olarak güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v2.3-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- ürün seçimi üst satır yerleşim kontrolü: PASS
+- iki sütun form kontrolü: PASS
+- hidden alan görünürlük koruması: PASS
+- sürme alan matrisi testi: PASS
+- giyotin alan matrisi testi: PASS
+- alt menteşeli vasistas state testi: PASS
+- yukarı toplanmış giyotin state testi: PASS
+- aşağı toplanmış giyotin state testi: PASS
+- iframe srcdoc üretimi: PASS
+- iframe iç script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Çalışma ortamında gerçek Three.js görsel render doğrulaması CDN bağımlılığı nedeniyle sınırlıdır.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+P3DV.V2.4 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Giyotin sistemde temizlenebilir vasistasın açılış açısının yarıya düşürülmesi istendi. Giyotin panellerin derinlik sırasının fiziksel olarak düzeltilmesi; en alt panelin sistem içinde, orta panelin bir panel kalınlığı ve 2 mm boşluk kadar dışarıda, varsa en üst panelin en dış yüzeyde olması talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Temizlenebilir giyotin vasistas açısı 58 dereceden 29 dereceye indirildi.
+- Giyotin panel derinliği 44 mm, paneller arası emniyet boşluğu 2 mm kabul edildi.
+- Komşu panel merkezleri arasındaki katman farkı 46 mm olarak hesaplandı.
+- Üç panelli düzende alt panel sistem içine +46 mm, orta panel referans düzlemine 0 mm, üst panel sistem dışına -46 mm yerleştirildi.
+- İki veya daha fazla panelde katmanlar merkezlenmiş biçimde alt panelden üst panele doğru düzenli olarak dışarı ilerliyor.
+- Panel derinlik sırası görünüş seçeneğinden bağımsız fiziksel sistem içi/dışı yönüne bağlandı.
+- Normal, yukarı toplanmış ve aşağı toplanmış giyotin görünümlerinde aynı derinlik sırası korunuyor.
+- Paket sürümü p3dv.v2.4 olarak güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v2.4-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- iframe srcdoc üretimi: PASS
+- iframe iç script syntax kontrolü: PASS
+- vasistas 29 derece token kontrolü: PASS
+- giyotin 44 mm panel derinliği kontrolü: PASS
+- 2 mm panel boşluğu kontrolü: PASS
+- 46 mm katman adımı kontrolü: PASS
+- alt/orta/üst panel katman formülü kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Gerçek görsel browser render testi çalışma ortamının CDN ve tarayıcı kısıtları nedeniyle doğrulanamayabilir.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+P3DV.V2.5 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Ürün yerleştirme veya güncelleme sonrasında 3D kameranın varsayılan açıya dönmemesi; son açı, hedef ve zoom değerlerinin korunması istendi. Sürme ve giyotin camları için cam/çerçeve kalınlık eşleşmeleri, sürme alt profil ölçüleri, hareket yön okları, temizlenebilir giyotinin otomatik vasistas davranışı, giyotin MOTOR etiketi ve Freedom oluk/dış çerçeve çakışmasının giderilmesi talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Kamera pozisyonu, OrbitControls hedefi ve zoom değeri iframe'den ana sayfaya aktarılıp saklanıyor.
+- Ürün ekleme, düzenleme, silme veya modelin yeniden kurulması sırasında saklanan kamera state'i yeni iframe sahnesine uygulanıyor.
+- Görüntü yakalama işlemi geçici varsayılan kamera kullandıktan sonra kullanıcının mevcut kamerasını geri yüklüyor.
+- Sürmede 8 mm cam / 12 mm çerçeve, 10 mm cam / 14 mm çerçeve ve 20 mm yalıtımlı cam / 24 mm çerçeve eşleşmesi uygulandı.
+- Sürme ray katman adımı seçilen çerçeve kalınlığı + 2 mm boşluk olarak güncellendi.
+- Eşikli sürmede alt profil yüksekliği 42 mm, eşiksiz sürmede 15 mm yapıldı.
+- Alt profil derinliği standart 123 mm yapıldı.
+- Eşikli + yana açılım + 6 veya daha fazla panel + yalıtımlı cam koşulunda alt profil derinliği `123 + panel sayısı × 24 mm` olarak hesaplanıyor.
+- Yana açılan sürmede dıştaki ön kanada açılım yönünde kalın ok, karşı uçtaki kanada ters yönde ince ok eklendi.
+- Ok boyları panelin net cam alanını taşmayacak şekilde sınırlandı.
+- Giyotin için 8 mm cam / 12 mm çerçeve ve 20 mm yalıtımlı cam / 24 mm çerçeve eşleşmesi uygulandı.
+- Giyotin panel katman adımı seçilen çerçeve kalınlığı + 2 mm boşluk olarak güncellendi.
+- Giyotin Tip listesindeki Standart seçeneği kaldırıldı.
+- Giyotin Görünüş seçimi kaldırıldı ve ürün davranışı her zaman dış görünüş olarak sabitlendi.
+- Temizlenebilir giyotin alt panel davranışı otomatik `VASISTAS`, 3D durumu otomatik `OPEN` olarak sabitlendi; kullanıcı seçim alanları kaldırıldı.
+- Temizlenebilir ve aşağı toplanır giyotinde en alt panel dışındaki panellere yukarıdan aşağı yönlü kalın ok eklendi.
+- Yukarı toplanır giyotinde üst sabit panel dışındaki panellere aşağıdan yukarı yönlü kalın ok eklendi.
+- Giyotin üst motor kutusuna dış görünüşte, seçilen sağ/sol yönde `MOTOR` etiketi eklendi.
+- Freedom ön, arka, sol ve sağ olukları köşe dikmelerinin iç yüzlerinden 2 mm içeride kalacak şekilde yeniden sınırlandırıldı.
+- P3DV V2.4'teki 29° vasistas, 80° lamel ve 65 mm lamel aralığı davranışları korundu.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v2.5-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- HTML parse ve benzersiz ID kontrolü: PASS
+- ürün form/state regresyonu: PASS
+- kamera state saklama ve yeniden iframe'e verme testi: PASS
+- generated iframe script syntax kontrolü: PASS
+- sürme 8/10/yalıtımlı cam-çerçeve sözleşmesi: PASS
+- eşikli/eşiksiz alt profil yüksekliği kontrolü: PASS
+- 6 panel yalıtımlı özel alt profil hesabı: PASS
+- sürme kalın/ince yön oku kod kontrolü: PASS
+- giyotin Standard seçeneği kaldırma kontrolü: PASS
+- temizlenebilir otomatik açık vasistas kontrolü: PASS
+- giyotin yukarı/aşağı ok dışlama kuralları: PASS
+- dış görünüş MOTOR etiketi kontrolü: PASS
+- Freedom 2 mm oluk boşluğu kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Headless Chromium görsel render denemesi çalışma ortamında zaman aşımına uğradı; gerçek 3D görsel sonuç tamamlanmış gibi raporlanmadı.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+P3DV.V2.6 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Ortadan açılan sürme sistemlerinde ortadaki iki kanada merkezden dış kenarlara yönelen kalın oklar eklenmesi istendi. Yana açılım seçildiğinde açılım yönünün yalnız Sağ/Sol; ortadan açılım seçildiğinde ise Dışta/İçte olması talep edildi. Ortadaki iki panelin çakışmasının giderilmesi, sürmelere toplanma görünümü eklenmesi, giyotin MOTOR yönünün düzeltilmesi, Freedom oluk çerçevesinin genişlik ve açılımdan 2 mm küçük ve tam ortalı olması, hiçbir sürme veya giyotin parçasının sistem dışına taşmaması istendi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Yana açılımda Açılım Yönü seçenekleri yalnız Sol ve Sağ olarak sınırlandı.
+- Ortadan açılımda alan başlığı `Dışta - İçte` olarak değişiyor ve yalnız Dışta/İçte seçenekleri gösteriliyor.
+- Dışta seçiminde ortadaki iki panel dış yüzeye hem yüz, diğer paneller kademeli olarak sistem içine yerleşiyor.
+- İçte seçiminde ortadaki iki panel en iç ray katmanında, dış paneller dış yüzeye doğru kademeleniyor.
+- Ortadan açılım iki bağımsız yarı olarak hesaplanıyor ve orta birleşimde 2 mm boşluk bırakılıyor; orta kanat çakışması giderildi.
+- Ortadan açılım için çift panel sayısı doğrulaması eklendi.
+- Ortadaki sol panele sola, sağ panele sağa yönelen kalın hareket okları eklendi.
+- Sürme sistemine Kapalı/normal ve Toplanmış göster seçenekli Toplanma Görünümü bölümü eklendi.
+- Yana açılımda paneller seçilen açılım davranışına göre karşı kenarda; ortadan açılımda iki yarı dış kenarlarda paketlenmiş gösteriliyor.
+- Toplanmış panellerin yatay konumları ürün iç genişliği dışına çıkmayacak şekilde sınırlandı.
+- Giyotin MOTOR etiketi ve motor yan bileşeni için sağ/sol dış görünüş eşlemesi ters çevrilerek düzeltildi.
+- Freedom oluk çerçevesi tam merkezli `W − 2 mm` ve `D − 2 mm` dış ölçüleriyle yeniden kuruldu; her dış kenarda 1 mm simetrik fark bırakıldı.
+- Sürme ve giyotin ürünleri için dış yüz referansı zone verisine eklendi.
+- Kasa, alt profil, paneller, giyotin motor kutusu, motor yan parçası, mekanizma, oklar ve etiketler dış yüzle hem yüz olacak ve yalnız sistem içine ilerleyecek biçimde konumlandırıldı.
+- Giyotin panel katmanları artık en üst panel dış yüzle hem yüz olacak, alt paneller yalnız içeri ilerleyecek şekilde hesaplanıyor.
+- Kamera state, cam/çerçeve kalınlıkları, vasistas 29°, lamel 80°/65 mm ve önceki ürün seçim kuralları korundu.
+- Paket sürümü p3dv.v2.6 olarak güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v2.6-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- HTML parse ve benzersiz ID kontrolü: PASS
+- yana açılım Sol/Sağ seçenek matrisi: PASS
+- ortadan açılım Dışta/İçte seçenek matrisi: PASS
+- dinamik alan başlığı kontrolü: PASS
+- ortadan açılım çift panel doğrulaması: PASS
+- orta birleşim 2 mm boşluk kontrolü: PASS
+- merkezden dışa iki kalın ok kontrolü: PASS
+- Dışta/İçte ray katmanı sayısal testi: PASS
+- sürme toplanma state ve builder testi: PASS
+- kamera state regresyonu: PASS
+- giyotin motor yönü eşleme kontrolü: PASS
+- dış yüzle hem yüz derinlik formülü testi: PASS
+- giyotin panel katmanlarının yalnız içeri ilerlemesi: PASS
+- Freedom W−2 / D−2 merkezleme kontrolü: PASS
+- iframe iç script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Gerçek 3D görsel render doğrulaması CDN ve headless tarayıcı ortamına bağlıdır.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+
+
+P3DV.V2.7 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Freedom oluk çerçevesinin sistem genişliği ve açılımından 102 mm küçük, tam merkezli yerleşmesi istendi. Sürme ve giyotin ürünlerinin yerleştirildiği net alanın genişlik ve yüksekliğinden 5'er mm küçük ve merkezli olması talep edildi. Cephe alanına tıklandığında PLMR'deki büyük ön izleme mantığına benzer şekilde Farklı Profil Yerleştir, Ölçüyü Düzenle ve Ürün Yerleştir seçeneklerinin açılması; ara profil eklenince profilin otomatik ortaya yerleşip alanı iki bağımsız bölgeye ayırması; ölçülerin not etiketi yerine teknik çizgi, uzatma çizgisi, ok uçları ve değer olarak gösterilmesi; büyük ön izleme toolbox'ının animasyon ekranının sağında sabit bulunması istendi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Freedom oluk çerçevesi `W − 102 mm` ve `D − 102 mm` ölçüleriyle iki eksende tam merkezli kuruldu.
+- Sürme ve giyotin builder'ları seçilen alanın genişlik ve yüksekliğini toplam 5 mm küçülten, her kenarda 2,5 mm simetrik pay bırakan ürün zarfı kullanıyor.
+- Ana model state'ine cephe bazlı `facadeProfiles` veri yapısı eklendi.
+- Cephe alanına tıklanınca bağlam işlem penceresi açılıyor: Farklı Profil Yerleştir, Ölçüyü Düzenle, Ürün Yerleştir / Ürünü Düzenle.
+- Sağ tarafta sabit büyük ön izleme toolbox'ı eklendi. Toolbox seçili alan adı, net ölçüsü ve mevcut ürün bilgisini gösteriyor.
+- Toolbox'a profil yerleştirme, ölçü düzenleme, ürün yerleştirme/düzenleme, ürün silme, ölçüleri göster/gizle, kamerayı sıfırlama, montaj animasyonu ve ürünleri temizleme işlemleri eklendi.
+- Ara profil için 100×50, 80×50, 120×60 ve özel kesit seçenekleri eklendi.
+- Profil seçilen alt alanın tam merkezine dikey yerleşiyor ve gerçek profil genişliği net açıklıklardan düşülüyor.
+- Cepheler profil sınırlarına bağlı kararlı alt alan kimliklerine ayrılıyor; her alt alan ayrı seçilebilir ve ayrı ürün kaydı taşıyabilir.
+- Ürün bulunan alana profil ekleme engellenerek geometri/state çakışması önlendi.
+- Bölünmüş alanda net genişlik düzenlendiğinde en yakın ara profil kaydırılıyor; komşu alan için en az 250 mm güvenlik sınırı korunuyor.
+- Bölünmemiş alanda genişlik düzenleme ilgili sistem genişliği/açılımını; yükseklik düzenleme sistem yüksekliğini güncelliyor.
+- Her alt alan için uzatma çizgileri, ölçü çizgisi, ok uçları ve ortada teknik değer içeren 3D ölçülendirme üretildi.
+- Ölçü yazılarındaki not/kart arka planı kaldırıldı; değer doğrudan ölçü çizgisi üzerinde teknik yazı olarak gösteriliyor.
+- Ölçülendirmeler montaj animasyonundan bağımsız olarak görünür kalıyor ve toolbox üzerinden açılıp kapatılabiliyor.
+- Kamera position/target/zoom koruması, mevcut sürme-giyotin davranışları, oklar, panel katmanları ve sistem dışına taşmama kuralları korundu.
+- Paket sürümü p3dv.v2.7 olarak güncellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v2.7-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- HTML parse ve benzersiz ID kontrolü: PASS
+- sağ sabit toolbox yapı kontrolü: PASS
+- alan tıklama bağlam menüsü state testi: PASS
+- merkeze profil ekleme state testi: PASS
+- kararlı alt alan kimliği ve bağımsız ürün kaydı testi: PASS
+- ürün alanı genişlik/yükseklik eksi 5 mm sözleşmesi: PASS
+- teknik ölçülendirme builder kontrolü: PASS
+- bölünmüş alan ölçüsüyle profil kaydırma testi: PASS
+- iframe iç script syntax kontrolü: PASS
+- Freedom W−102 / D−102 merkezleme kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+- Gerçek piksel/render doğrulaması çalışma ortamındaki CDN ve headless tarayıcı koşullarına bağlıdır.
+
+
+P3DV.V2.8 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Freedom oluk çerçevesinin sistem genişliği ve açılımından 202 mm küçük ve tam merkezli olması istendi. Profil yerleştirme işleminin Profil Değiştir olarak adlandırılması, yalnız 100×100 ve özel kesit seçeneklerinin bulunması, dikey profil yüksekliğinin toplam yükseklik eksi 220 mm olması ve eklenen profillerin silinebilmesi talep edildi. Ana 100×220 dikmelere tıklanınca profili değiştirme veya döndürme menüsü açılması; toplam sistem ölçüleri değişmeden bağlı profillerin ve ürünlerin yeni net alana uyarlanması istendi. Ölçülendirmelerin büyütülmesi ve belirli toplam/net ölçü konumlarında gösterilmesi, yatay profil eklenebilmesi, montaj düğmesinin ürün açık/kapalı görünümüne dönüşmesi ve toolbox içindeki seçili alan işlemlerinin kaldırılması talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Freedom oluk çerçevesi tam merkezli `W − 202 mm` ve `D − 202 mm` ölçülerine güncellendi.
+- Sabit toolbox içindeki Seçili Alan, Profil Değiştir, Ölçüyü Düzenle, Ürün Yerleştir ve Ürünü Sil bölümleri kaldırıldı. Toolbox yalnız ölçü görünürlüğü, kamera sıfırlama, ürün açık/kapalı ve ürünleri temizleme araçlarını taşıyor.
+- Alan bağlam menüsündeki profil işlemi `Profil Değiştir` olarak yeniden adlandırıldı.
+- Profil listesi yalnız `100 × 100 mm` ve `Özel Kesit` seçenekleriyle sınırlandı.
+- Dikey ve yatay profil yönü seçimi eklendi.
+- Dikey ara profil gerçek yüksekliği `H − 220 mm` olarak oluşturuluyor.
+- Yatay profil seçilen alt alanın merkezinde, yalnız o alt alanın iki dikey sınırı arasında oluşturuluyor.
+- Cephe bölme modeli yatay ve dikey sınırları birlikte destekleyen iki boyutlu kararlı alt alan kimliklerine genişletildi.
+- Eklenen ara profile tıklanınca profil bilgisi ve Profili Sil işlemi açılıyor. Dikey sınır silinirken ona bağlı yatay profiller ve geçersiz hale gelen alt alan ürünleri güvenli şekilde kaldırılıyor.
+- Dört ana dikme tıklanabilir hale getirildi. Dikmeye tıklanınca Profili Değiştir ve Profili Döndür işlemleri açılıyor.
+- Ana dikme profil seçeneklerine 100×220, 100×100 ve özel kesit eklendi.
+- Profili Döndür işlemi 100×220 kesiti 220×100 olarak çeviriyor.
+- Ana dikme değişikliklerinde toplam genişlik, açılım ve yükseklik sabit kalıyor; bağlı mavi kirişler, net cephe alanları, yatay profil açıklıkları ve ürünler yeni alana göre yeniden kuruluyor.
+- Ürünlerin seçilen net alandan toplam 5 mm küçük ve merkezli yerleşme kuralı korundu.
+- Teknik ölçü yazıları, ok uçları ve çizgileri büyütüldü.
+- Sistem toplam genişliği arka tarafta, toplam yükseklik sol arka dikme yanında, toplam açılım sol üst tarafta gösteriliyor.
+- Dikmeler/profiller arasındaki alt açıklık ölçüleri ürünlerin altında gösteriliyor.
+- Yalnız ön sol dikme alt noktası ile mavi profil alt noktası arasındaki düşey ölçü ayrıca gösteriliyor.
+- Montaj Animasyonu düğmesi ürün açık/kapalı durum düğmesine dönüştürüldü. Kapalı durum kırmızı, açık durum yeşil gösteriliyor.
+- Açık durumda lameller açılıyor, sürmeler toplanıyor, giyotinler tipine göre toplanıyor ve temizlenebilir vasistas açılıyor; kapalı durumda tümü normal/kapalı görünümde oluşturuluyor.
+- Alan bağlam menüsündeki Ürünü Sil düğmesi yalnız seçilen alanda ürün varsa aktif oluyor.
+- Kamera açı, hedef ve zoom koruması devam ediyor.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v2.8-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- HTML parse ve benzersiz ID kontrolü: PASS
+- toolbox sadeleştirme kontrolü: PASS
+- bağlamsal ürün silme aktif/pasif testi: PASS
+- 100×100 dikey profil merkezleme testi: PASS
+- dikey profil `H − 220 mm` geometri sözleşmesi: PASS
+- yatay profil alt alan bölme testi: PASS
+- eklenen profil silme state testi: PASS
+- ana dikme 100×220 → 220×100 döndürme testi: PASS
+- ana dikme 100×100 değiştirme testi: PASS
+- toplam sistem ölçülerini koruma testi: PASS
+- ürün alanı eksi 5 mm regresyonu: PASS
+- büyük teknik toplam/net ölçü builder kontrolü: PASS
+- ürün açık/kapalı state ve düğme rengi testi: PASS
+- iframe iç script syntax kontrolü: PASS
+- Freedom W−202 / D−202 merkezleme kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls CDN üzerinden yüklenmeye devam ediyor.
+- Modeller sade teknik 3D prototiptir; üretim profili veya PLMR kanonik geometri kaydı değildir.
+- Gerçek piksel/render doğrulaması çalışma ortamındaki CDN ve headless tarayıcı koşullarına bağlıdır.
+
+
+P3DV.V2.9 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Ölçülendirme geometrisi değişmeden yalnız ölçü yazılarının iki kat büyütülmesi, Freedom oluk çerçevesinin W−204 mm ve D−204 mm ölçülerinde tam merkezlenmesi ve karşılıklı kenarlarda 102 mm simetrik pay bırakılması istendi. Alan bağlam menüsündeki Profil Değiştir adının Profil Ekle yapılması ve PLMR büyük ön izleme toolbox'ındaki çoklu ürün ekleme/silme benzeri seçim sözleşmesinin P3DV toolbox'a uyarlanması talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Ölçü çizgileri, uzatma çizgileri ve ok uçları değiştirilmedi. Yalnız ölçü yazısı canvas/font/sprite ölçeği iki katına çıkarıldı.
+- Freedom oluk çerçevesi tam merkezli W−204 mm ve D−204 mm ölçülerine güncellendi; dört karşılıklı yönde 102 mm simetrik pay oluştu.
+- Alan bağlam menüsü ve profil ekleme penceresindeki Profil Değiştir adı Profil Ekle olarak güncellendi. Ana dikme üzerindeki Profili Değiştir işlemi gerçek profil değişikliği olduğu için korundu.
+- Toolbox Görünüm, Çoklu İşlemler ve Genel İşlem gruplarına ayrıldı.
+- Çoklu Ürün Ekleme eklendi; yalnız ürünsüz alanlar seçilebiliyor ve tek ürün formu bütün seçili alanlara atomik olarak uygulanıyor.
+- Çoklu Ürün Silme eklendi; yalnız ürün bulunan alanlar seçilebiliyor ve tek onayla siliniyor.
+- Çoklu Profil Ekleme eklendi; yalnız ürünsüz ve yeterli ölçüdeki alanlar seçilebiliyor, tek profil formu bütün seçili alanlara uygulanıyor.
+- Çoklu Profil Silme eklendi; yalnız sonradan eklenen ara profiller seçilebiliyor, ana dikmeler seçilemiyor. Bağlı alt alan ürünleri onayla birlikte temizleniyor.
+- Ürünleri Alana Uydur eklendi; seçili parametreli ürünler mevcut net alanlarına yeniden oluşturuluyor ve ürün tercihleri korunuyor.
+- Tüm Ürünleri Sil genel komutu korundu.
+- PLMR uyumlu seçim sözleşmesi uygulandı: aynı komut düğmesine tekrar basma iptal eder; tıklama seçimi açıp kapatır; Enter veya sağ tık tamamlar; Escape iptal eder.
+- Seçim bildiriminde komut adı, kullanım yönlendirmesi ve seçilen hedef sayısı gösteriliyor.
+- Uygun alan ve profiller seçim modunda filtrelenip renklerle vurgulanıyor; seçilen hedefler yeşil gösteriliyor.
+- Çoklu ürün ve profil ekleme işlemleri tüm hedefler doğrulanmadan state'e yazılmıyor; kısmi uygulama engellendi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+
+EKLENEN DOSYA
+-------------
+- tests/p3dv-v2.9-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- HTML ID ve toolbox kontrolü: PASS
+- ölçü yazısı 2x sözleşmesi: PASS
+- oluk W−204 / D−204 merkezleme kontrolü: PASS
+- Profil Ekle adlandırma kontrolü: PASS
+- çoklu ürün ekleme state testi: PASS
+- çoklu ürün silme state testi: PASS
+- çoklu profil ekleme state testi: PASS
+- çoklu profil silme state testi: PASS
+- ürünleri alana uydurma state testi: PASS
+- Enter / sağ tık / Escape seçim sözleşmesi: PASS
+- generated iframe script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls dış CDN üzerinden yüklenmeye devam ediyor.
+- Gerçek görsel tarayıcı sonucu, çalışma ortamındaki CDN/D-Bus durumuna göre ayrıca raporlanır.
+
+
+P3DV.V3.0 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Normal ölçü yazılarının V2.9 görünümüne göre 2,5 kat büyütülmesi; toplam genişlik, yükseklik ve açılım ana ölçülerinin 3,5 kat büyük, kalın ve kırmızı gösterilmesi istendi. Giyotin dış görünüşünde sağ iç tarafta görülen turuncumsu hatalı profilin kaldırılması ve ürün listesine Zip Perde eklenmesi talep edildi. Zip Perde için Dikme Arası yerleşimde genişlik ve yükseklikten toplam 3 mm düşülmesi; Dikmenin Dışı yerleşimde bağlı sınır profillerinin genişliklerinin eklenip toplam 5 mm düşülmesi ve üst kutu altının mavi profil altına hizalanması istendi. G/P serileri, kutu tipleri, kumaş rengi, kablo çıkış yönü ve motor yönü seçimleri tanımlandı.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Teknik ölçü çizgileri, uzatma çizgileri ve ok uçları korunarak normal ölçü yazısı sprite ölçeği V2.9'a göre 2,5 kat büyütüldü.
+- Toplam genişlik, toplam yükseklik ve toplam açılım yazıları V2.9'a göre 3,5 kat büyütüldü; kalın ve kırmızı çizildi.
+- Giyotin içindeki zincir/kayış seçimine göre turuncu/mavi üretilen hatalı dikey `Guillotine Mechanism` mesh'i kaldırıldı. Ürün formundaki mekanizma seçimi veri olarak korunuyor.
+- Ürün listesine bağımsız `Zip Perde` tipi eklendi.
+- Zip Perde formunda yalnız ilgili alanlar gösteriliyor: Yerleşim Yeri, Ürün Serisi, Tip, Kumaş Rengi, Kablo Çıkış Yönü ve Motor Yönü.
+- Zip Perde seçildiğinde mekanizma, cam kalınlığı, panel sayısı, sürme açılımı ve giyotin toplama alanları gizleniyor.
+- G Serisi için 100×100 Kutu, 110×110 Kutu ve Hercule tipleri eklendi.
+- P Serisi için 115×115 Kutu ve 130×130 Kutu tipleri eklendi.
+- Kumaş Rengi seçenekleri Soltis ve Diğer olarak tanımlandı; Diğer seçiminde özel kumaş rengi alanı açılıyor.
+- Kablo Çıkış Yönü seçenekleri Arkadan, Önden ve Yandan olarak eklendi.
+- Motor yönü Sağ/Sol seçimi korundu ve üst kutudaki MOTOR etiketi seçilen dış görünüş tarafına yerleştirildi.
+- Dikme Arası Zip Perde net alanı genişlikte ve yükseklikte toplam 3 mm küçültülerek merkezlendi.
+- Dikmenin Dışı Zip Perde genişliği, seçilen alanın net genişliği ile bağlı sol/sağ ana veya ara profil genişlikleri toplamından 5 mm eksik hesaplanıyor.
+- Dış montajda Zip Perde üst kutusunun alt noktası mavi kirişin alt noktasıyla aynı hizaya getirildi.
+- Cephe alt alanlarına bağlı sınır profil genişlikleri zone verisine eklendi; dış montaj hesabı ana dikme ve ara profillerle çalışıyor.
+- Zip Perde için tek, tüm net alanı kaplayan delikli screen kumaş paneli üretildi. Kumaş CanvasTexture üzerinde tekrar eden noktalı/perfore teknik doku kullanıyor.
+- Kablo çıkış yönü basit teknik 3D işaretle üst kutuya yansıtılıyor.
+- Çoklu Ürün Ekleme altyapısı Zip Perdeyi de aynı atomik doğrulama ve yerleştirme akışıyla destekliyor.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v3.0-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- ürün tipine göre form görünürlük matrisi: PASS
+- Zip Perde G/P seri ve kutu tipi state testi: PASS
+- Zip Perde toplam 3 mm dikme arası boşluk sözleşmesi: PASS
+- Zip Perde dış montaj genişlik ve mavi kiriş hizası sözleşmesi: PASS
+- Zip Perde kumaş rengi / özel renk state testi: PASS
+- Zip Perde kablo çıkış yönü ve motor yönü state testi: PASS
+- delikli screen kumaş material builder kontrolü: PASS
+- giyotin hatalı turuncu profil kaldırma kontrolü: PASS
+- normal ölçü yazısı 2,5x sözleşmesi: PASS
+- ana ölçü yazısı 3,5x, kalın ve kırmızı sözleşmesi: PASS
+- çoklu ürün, kamera, sürme ve giyotin regresyonu: PASS
+- generated iframe script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls dış CDN üzerinden yüklenmeye devam ediyor.
+- Hercule kutu kesiti ilk teknik prototipte 150×150 mm sade temsil olarak çiziliyor; gerçek üretim kesiti ayrıca verildiğinde güncellenecektir.
+- Gerçek piksel/render doğrulaması çalışma ortamındaki CDN/D-Bus koşullarına bağlıdır. V3.1 denemesi 25 saniyede exit 124 ile zaman aşımına uğradı.
+
+
+P3DV.V3.1 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Zip Perde çiziminin oluşmadığı bildirildi. Zip Perde panelinin, 1+2 aşağı toplanır giyotinin alt sabit paneliyle aynı yerleşim/derinlik mantığında tek panel olarak çizilmesi; cam yerine gri, iğne ucu kadar delikli teknik perde görünümü kullanılması istendi. Ölçü görünürlüğünün Ara Ölçüler ve Ana Ölçüler olarak iki bağımsız kutucukla filtrelenmesi talep edildi. Ek olarak Zip perde panellerinin çift tıklamayla bağımsız açılıp kapanması ve global Ürünler Açık/Kapalı seçiminden etkilenmemesi istendi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Zip Perde builder, doğrulanmış giyotin cephe yönü, ürün dış yüzü ve panel katman hesabını kullanacak şekilde yeniden kuruldu.
+- Zip paneli tek parça ve tam kullanılabilir alanı kapsayan perde paneli olarak üretildi.
+- Panel derinliği, 3 panelli aşağı toplanır giyotinin en alt sabit paneline karşılık gelen `guillotinePanelLayerInset(0, 3, ...)` referansına bağlandı.
+- Kumaş rengi varsayılan gri yapıldı. 256×256 CanvasTexture üzerinde 4 piksel aralıklı, yaklaşık 0,52 piksel yarıçaplı yoğun iğne ucu perforasyon dokusu oluşturuldu.
+- Zip üst kutu, yan kılavuzlar, alt profil ve çevre çerçevesi giyotin benzeri güvenli cephe yerleşiminden üretiliyor.
+- Her Zip paneline kalıcı `zip:<zoneId>` durum anahtarı verildi. Panel çift tıklanınca açık/kapalı durumu ebeveyn state'e kaydediliyor ve kamera korunarak sahne yeniden kuruluyor.
+- Açık Zip paneli üst kutu altında toplanmış kısa kumaş şeridi; kapalı panel ise tüm kullanılabilir yüksekliği kaplayan perde olarak gösteriliyor.
+- Global Ürünler Açık/Kapalı anahtarı Zip panel state'ini değiştirmiyor.
+- Tek ölçü görünürlük düğmesi kaldırıldı. Toolbox'a Ara Ölçüler ve Ana Ölçüler için bağımsız checkbox filtreleri eklendi.
+- Toplam genişlik, toplam yükseklik ve toplam açılım ölçüleri `mainDimensionObjects`; alt alan ve ön-sol yerel ölçüler `intermediateDimensionObjects` grubunda tutuluyor.
+- Filtre değişiklikleri iframe'e ayrı görünürlük state'i olarak gönderiliyor; kamera ve geometri yeniden kurulmadan ölçüler anında açılıp kapanıyor.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v3.1-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- ürün/form/state regresyonu: PASS
+- Zip Perde giyotin alt sabit panel derinlik referansı: PASS
+- gri iğne ucu perforasyon CanvasTexture sözleşmesi: PASS
+- tek tam-alan Zip panel builder kontrolü: PASS
+- Zip panel çift tıklama mesajı ve kalıcı state: PASS
+- global ürün açık/kapalı durumundan Zip panel bağımsızlığı: PASS
+- Ara Ölçüler / Ana Ölçüler checkbox ve ayrı görünürlük mesajı: PASS
+- ana ve ara ölçü 3D obje grupları: PASS
+- generated iframe script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls dış CDN üzerinden yüklenmeye devam ediyor.
+- Gerçek piksel/render doğrulaması çalışma ortamındaki CDN/D-Bus koşullarına bağlıdır.
+
+
+P3DV.V3.2 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Toolbox içindeki ürün açık/kapalı alanının yerleştirilmiş ürünleri ayrı kutucuklarla listelemesi, her ürünün bağımsız yönetilmesi ve panel çift tıklamasıyla senkron çalışması istendi. Zip Perde yerleştirildiğinde yalnız kırmızımsı seçim alanının göründüğü ve ürün geometrisinin oluşmadığı bildirildi. Yatay profil eklendiğinde profilin üst ve alt net boşluklarının düşey ölçülerinin gösterilmesi talep edildi.
+
+YAPILANLAR
+----------
+- Çalışma yalnız bağımsız Product 3D Viewer projesinde yapıldı; PLMR kaynaklarına dokunulmadı.
+- Ebeveyn modeline ürün alanı bazlı `productOpenStates` kaydı eklendi.
+- Toolbox içinde sahnedeki tüm sürme, giyotin ve Zip Perde ürünlerini otomatik listeleyen Ürün Durumları filtresi eklendi.
+- Her ürün satırındaki checkbox yalnız ilgili ürünün açık/kapalı görünümünü değiştiriyor.
+- Panel çift tıklama mesajı aynı ürün alanı state'ine bağlandı; checkbox ile çift tıklama birbirini otomatik güncelliyor.
+- Global Ürünler Açık/Kapalı durumu yalnız bireysel override bulunmayan ürünlerin varsayılan durumunu belirliyor.
+- Sürme ve giyotin panel parçaları da ürün bazlı çift tıklama hedefi olarak işaretlendi.
+- Hatanın temel nedeni doğrulandı: Zip formunda gizlenen panel sayısı alanı `required min=2` olarak etkin kaldığı için tek panelli Zip (`1`) tarayıcının doğal form doğrulamasında submit edilmeden engelleniyordu.
+- Zip seçildiğinde gizli panel sayısı alanı `1` değerine alınarak devre dışı bırakıldı; sürme/giyotin seçimine dönülünce yeniden etkinleştiriliyor.
+- Zip Perde detaylı builder'ı giyotin alt sabit panel derinlik katmanını kullanmaya devam edecek şekilde sağlamlaştırıldı.
+- Zip kumaş CanvasTexture üretimine context kontrolü ve gri materyal fallback'i eklendi.
+- Zip kumaş panelinin ilk oluşturulmada görünür olması garanti edildi.
+- Zip builder çalışma sırasında hata verirse tek gri panel, üst kutu ve yan kılavuzlardan oluşan güvenli yedek geometri üretiliyor.
+- Başarılı ürün kaydından sonra seçili alan state'i temizlenerek kırmızı/turuncu seçim yüzeyinin ürün üzerinde kalması engellendi.
+- Yatay profille bölünmüş her üst/alt net alan için düşey ölçü çizgisi, uzatma çizgileri, oklar ve mm değeri eklendi.
+- Yeni düşey alt alan ölçüleri Ara Ölçüler görünürlük grubuna bağlandı.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TEST DOSYASI
+------------
+- tests/p3dv-v3.2-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- gerçek Chromium DOM akışında Zip form submit ve placement state testi: PASS
+- ürün durum listesi üretimi ve checkbox state testi: PASS
+- çift tıklama / checkbox senkron state testi: PASS
+- bireysel ürün state'inin global durumdan bağımsızlığı: PASS
+- Zip Perde builder dispatch ve güvenli fallback kontrolü: PASS
+- Zip kumaş paneli görünürlük ve giyotin alt sabit katman sözleşmesi: PASS
+- yatay profil üst/alt düşey ara ölçü sözleşmesi: PASS
+- Ara Ölçüler / Ana Ölçüler filtre regresyonu: PASS
+- generated iframe script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Three.js ve OrbitControls dış CDN üzerinden yüklenmeye devam ediyor.
+- Gerçek piksel/render doğrulaması çalışma ortamındaki CDN/D-Bus koşullarına bağlıdır.
+
