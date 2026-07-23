@@ -1,3 +1,402 @@
+P3DV.V3.16 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Kapı tipi silüetlerinin formda doğrudan görünmemesi; Kapı Tipi alanına tıklanınca ayrı, dört sütunlu seçim görünümünde açılması; adların kısaltılması; düz okların açısal dönme oklarına çevrilmesi; kapıda İçe seçeneğinin geri getirilmesi ve V3.15'te oluşmayan kapı geometrisinin kök nedeninin giderilmesi istendi.
+
+YAPILANLAR
+----------
+- Ürün adı `Kapı (Dış Bakış)` olarak güncellendi.
+- Ayrı `Bakış Yönü` form hücresi kaldırıldı; kanonik `OUTSIDE VIEW` state'i içeride korunur.
+- Kapı Tipi alanı, seçili değeri gösteren açılır seçim hücresine dönüştürüldü.
+- Silüetler yalnız Kapı Tipi hücresine tıklanınca açılan ayrı seçim görünümünde gösterilir.
+- Seçim görünümü masaüstünde dört, tablette iki, dar telefonda tek sütun çalışır.
+- Kart metinleri ana ad ve kısa detay satırına ayrıldı.
+- Hareketli kanatlarda düz yön oku yerine yeşil kavisli açılım/dönme oku kullanıldı.
+- Kapı Açılma Yönü alanına `Dışa` ve `İçe` seçenekleri bağlandı.
+- `INWARD / OUTWARD` değerlerinin normalize, form draft, doğrulama ve placement kayıt zincirinde korunması sağlandı.
+- V3.15 kapı çizimini durduran kök neden giderildi: `buildDoorProduct()` tarafından kullanılan `DOOR_TOP_FIXED_TYPES`, Three.js iframe çalışma kapsamına taşındı.
+- Kapı builder'ını iframe kapsamında tek kanat ve üst sabitli tiplerle gerçekten çağıran çalışma zamanı regresyon testi eklendi.
+- Freedom, Bio-Rise, Sürme, Giyotin, Zip Perde ve Sabit Doğrama kodları refactor edilmedi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.13-door-tests.js
+- tests/p3dv-v3.13-regression-a.js
+- tests/p3dv-v3.13-regression-b.js
+
+TESTLER
+-------
+- `node --check app.js`: PASS
+- Regression A: 73 kontrol PASS
+- Regression B: 78 kontrol PASS
+- Door tests: 206 kontrol PASS
+- iframe kapı builder çalışma zamanı kapsam testi: PASS
+- HTML benzersiz ID kontrolü: PASS
+- UTF-8 / bozuk karakter / secret taraması: PASS
+- ZIP bütünlük kontrolü: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render testi çalıştırılamadı.
+- Chromium tabanlı görsel arayüz denemesi çalışma ortamında headless tarayıcının kapanmaması nedeniyle güvenilir sonuç üretmedi; görsel doğrulama yapılmış kabul edilmemelidir.
+
+
+P3DV.V3.15 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Kapı tipleri seçim ekranının sade açılır liste yerine silüetli görsel seçim ekranına dönüştürülmesi istendi.
+
+YAPILANLAR
+----------
+- Kapı tipi alanı görsel kartlı silüet seçime çevrildi.
+- Tüm kapı tipleri için mini silüet SVG kartları eklendi.
+- Seçili kapı tipi kart üzerinde yeşil vurguyla gösterilir.
+- Kartlardan birine tıklanınca alttaki mevcut kapı kural zinciri aynı şekilde çalışır.
+- Mevcut `select` alanı state/uyumluluk için içeride tutuldu, kullanıcıya gizlendi.
+- Kapı tipi seçimi geometri motoru, kapı varyasyon kuralları, menteşe/kol/panik bar mantığı bozulmadan korunmuştur.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- Regression A: PASS
+- Regression B: PASS
+- Door tests: PASS
+- ZIP bütünlüğü: PASS
+
+
+P3DV.V3.15 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Kapı ürününde kapı kanadı ve sabit cam yükseklik ölçülerinin orta aksta gösterilmesi ve yazıların %50 küçültülmesi; panik bar seçildiğinde barın daima sistemin içinde yer alması; kapının daima dışa açılması ve önceki kapı talepleriyle birlikte 45° açılım, menteşe görünümü, iç yüzde ayna kol ve genişletilmiş kapı tiplerinin eklenmesi istendi.
+
+YAPILANLAR
+----------
+- Kapı tipi listesi tek/çift kanatlı, sağ-sol sabitli ve üst sabitli yeni kombinasyonlarla genişletildi.
+- Kapı açılma yönü kanonik olarak `OUTWARD` olacak şekilde sabitlendi; form alanı yalnız Dışa seçeneğiyle korunur.
+- Hareketli kapılar açık durumda 45° açılır.
+- Hareketli kapılara üç adet görünür menteşe eklendi.
+- Normal kapı kolu iç yüzde de aynalı ikinci kol ile gösterilir.
+- Panik bar seçildiğinde panik bar yalnız iç yüzde çizilir ve ilgili hareketli kanadın tam genişliğini kullanır.
+- Üst sabit camlı kapılarda `Sabit Cam ... mm` ve `Kapı Kanadı ... mm` ölçüleri orta aksa taşındı ve mevcut ara ölçü yazı ölçeğinin %50'sine düşürüldü.
+- Üst sabit cam yükseklik özeti tüm üst sabitli yeni kapı tipleri için aktif hâle getirildi.
+- Freedom, Bio-Rise, Zip, Sürme, Giyotin ve Sabit Doğrama ürünlerinin ana çalışma mantığı korunmuştur.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.13-door-tests.js
+- tests/p3dv-v3.13-regression-a.js
+- tests/p3dv-v3.13-regression-b.js
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- Freedom/Bio-Rise regresyonu: PASS
+- genel regresyon: PASS
+- kapı kuralları / yeni varyasyon sözleşmeleri: PASS
+- ZIP bütünlüğü: PASS
+
+
+P3DV.V3.15 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Kapı ürününde panik barın sabit genişlik sınırı yerine ilgili hareketli/aktif kanadın tam genişliği kadar olması, bakış yönünün formda Dış Bakış olarak yazılması ve Üst Sabit Cam – Alt Hareketli Kanat seçeneğinde sabit cam ile kalan hareketli kapı kanadı yüksekliklerinin gösterilmesi istendi.
+
+YAPILANLAR
+----------
+- Panik bar üzerindeki eski 520 mm üst sınır kaldırıldı.
+- Panik bar genişliği doğrudan ilgili hareketli/aktif kanadın dış kanat genişliğine bağlandı.
+- Çift açılır ve sabit–hareketli kapılarda panik bar yalnız kol taşıyan aktif hareketli kanadın genişliğini kullanır.
+- Kapı formuna salt okunur `Bakış Yönü: Dış Bakış` alanı eklendi.
+- Kapı placement state'inde bakış yönü kanonik olarak `OUTSIDE VIEW` saklanır.
+- Üst sabit cam tipi seçildiğinde formda Sabit Cam Yüksekliği ve Kalan Kapı Kanadı Yüksekliği canlı olarak gösterilir.
+- Kalan hareketli kanat yüksekliği, 5 mm ürün oturma boşluğu ile 50 mm üst kasa, 50 mm ara kayıt ve montaj boşluklarını kullanan gerçek 3D kapı geometrisinden hesaplanır.
+- Üst sabit cam yüksekliği değiştirildiğinde kalan kanat değeri anında güncellenir.
+- Üst sabit camlı kapıda 3D görünüşe Ara Ölçüler filtresine bağlı iki ayrı düşey ölçü eklendi: `Sabit Cam ... mm` ve `Kapı Kanadı ... mm`.
+- Alt hareketli kanadın en az 1200 mm kalması doğrulaması, gösterilen gerçek geometri yüksekliğiyle eşleştirildi.
+- Diğer Kapı tipleri, Zip Perde katmanı, Freedom ve Bio-Rise geometrileri değiştirilmedi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.13-door-tests.js
+- tests/p3dv-v3.13-regression-a.js
+- tests/p3dv-v3.13-regression-b.js
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- Freedom/Bio-Rise regresyonu: 73 kontrol PASS
+- ürün/Zip/Sabit Doğrama regresyonu: 78 kontrol PASS
+- Kapı form/state/geometri testi: 125 kontrol PASS
+- generated iframe script syntax kontrolü: PASS
+- HTML benzersiz ID kontrolü: PASS
+- UTF-8, bozuk karakter ve secret taraması: PASS
+- ZIP bütünlüğü: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render doğrulaması çalışma ortamındaki dış CDN ve tarayıcı erişim kısıtları nedeniyle güvenilir biçimde çalıştırılamamıştır.
+
+
+P3DV.V3.12 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+P3DV ürün listesine farklı menteşeli kapı seçenekleriyle yeni ana ürün olarak Kapı eklenmesi istendi. Kapı profilleri 50 mm genişlik ve 55 mm derinlikte olacak, dış kasada alt eşik bulunmayacak, normal ve panik kapı kolu seçenekleri bulunacak ve bütün kol eksenleri zeminden 900 mm yüksekte kalacak.
+
+YAPILANLAR
+----------
+- Ürün listesine Kapı eklendi.
+- Tek Açılır, Çift Açılır, Sol Sabit–Sağ Hareketli, Sağ Sabit–Sol Hareketli ve Üst Sabit Cam–Alt Hareketli Kanat seçenekleri eklendi.
+- Menteşe yönü, çift kapıda aktif kanat, içe/dışa açılma yönü, normal/panik kol, cam kalınlığı ve cam rengi seçimleri eklendi.
+- Kapı seçildiğinde diğer ürünlere ait gereksiz alanlar gizlendi.
+- Dış kasa ve kanat profilleri 50×55 mm olarak çizildi.
+- Dış kasadaki alt eşik kaldırıldı; kanat alt profili korunarak kapı kanadı tamamlandı.
+- Hareketli kanatlar sabit menteşe pivotu çevresinde 90 derece açılır hâle getirildi.
+- Çift açılır kapıda iki kanat hareket eder; kol yalnız seçilen aktif kanatta bulunur.
+- Sabit kanatlar ve üst sabit cam açık/kapalı durumundan etkilenmez.
+- Normal kol ve panik bar ekseni zeminden tam 900 mm yükseğe bağlandı.
+- Üst sabit cam yüksekliği 250–1200 mm giriş aralığıyla eklendi.
+- Kapı ana ürün katmanına bağlandı; Zip Perde ön katman birlikteliği korundu.
+- Ürün Durumları ve panel çift tıklama açık/kapalı state zinciri Kapı için genişletildi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- UPDATE.txt
+- VERSION.txt
+- TEST_RESULTS.txt
+
+TESTLER
+-------
+- app.js syntax: PASS
+- HTML parse ve benzersiz ID: PASS
+- V3.11 Bio-Rise/Freedom regresyon setleri: PASS
+- Kapı form ve state testi: PASS
+- Beş kapı tipi sözleşmesi: PASS
+- 50×55 profil ve alt eşiksiz dış kasa: PASS
+- 900 mm normal/panik kol ekseni: PASS
+- 90 derece sabit menteşe pivotu: PASS
+- çift kapı aktif kanat kolu: PASS
+- üst sabit cam ve alt hareketli kanat: PASS
+- generated iframe script syntax: PASS
+
+SINIRLAR
+--------
+- Kapı modeli bağımsız P3DV için sade teknik 3D temsildir; üretim bağlantı elemanları ve detaylı kilit/menteşe donanımı modellenmemiştir.
+- Gerçek Three.js piksel/render testi çalışma ortamındaki dış CDN ve tarayıcı erişim kısıtları nedeniyle doğrulanamamıştır.
+
+
+P3DV.V3.11 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Bio-Rise yan oluk profilleri ile 218×50 mm mavi yan kayıt profilleri arasındaki çakışma ve ekrandaki titremenin giderilmesi için oluk genişliğinin 2 mm azaltılması istendi.
+
+YAPILANLAR
+----------
+- Bio-Rise yan oluk kesit genişliği 100 mm'den 98 mm'ye düşürüldü.
+- Her oluk, komşu mavi yan kayıt profilinin iç yüzünden 2 mm içeri ayrıldı.
+- Olukların iç yüz koordinatları korunarak hareketli lamel net genişliği değiştirilmedi.
+- Eş düzlemli yüzeyler kaldırılarak z-fighting/titreme riski giderildi.
+- Oluk uzunluğu, 90 derece düz uçlar, ön/arka sabit kapatma profilleri ve Freedom geometrisi değiştirilmedi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.11-tests.js
+- tests/p3dv-v3.11-regression-tests.js
+
+
+P3DV.V3.10 UPDATE
+=================
+
+KULLANICI TALEBİ
+----------------
+Bio-Rise yan oluklarının sistem dışına taşmaması; oluk dış yüzlerinin iki yandaki 218×50 mm mavi profillerin iç yüzleriyle teğet olması istendi. Ön ve arkada hareketli lameller ile mavi profiller arasında kalan boşlukların, lamel kesitli fakat mavi renkli iki sabit kapatma profiliyle doldurulması; bu profillerin hareketli lamellerle çakışmaması ve paneller açıldığında hareket etmemesi talep edildi.
+
+YAPILANLAR
+----------
+- Bio-Rise sol oluk dış yüzü, sol 218×50 mm mavi profilin iç yüzüne teğet yerleştirildi.
+- Bio-Rise sağ oluk dış yüzü, sağ 218×50 mm mavi profilin iç yüzüne teğet yerleştirildi.
+- İki oluk da tamamen sistem içine taşındı; sistem dışına çıkan yarım kesit kaldırıldı.
+- Hareketli Bio-Rise lamel uzunluğu, iki oluğun gerçek iç yüzleri arasındaki net mesafeden hesaplanıyor.
+- Ön ve arka boşluklar hareketli lamel sınırları ile ön/arka mavi profil iç yüzleri üzerinden hesaplanıyor.
+- Ön boşluğa mavi, lamel kesitli sabit kapatma profili eklendi.
+- Arka boşluğa mavi, lamel kesitli sabit kapatma profili eklendi.
+- Sabit kapatma profilleri ile hareketli lameller arasında iki tarafta 1 mm güvenli boşluk bırakıldı.
+- Kapatma profilleri panel sayısına dahil edilmedi ve `Paneller Açık` durumunda dönmüyor/istiflenmiyor.
+- Bio-Rise yan olukların 100 mm kesiti, `Açılım − 100 mm` uzunluğu ve 90° düz uçları korundu.
+- Freedom geometrisi ve ürün yerleştirme altyapısı değiştirilmedi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.10-tests.js
+- tests/p3dv-v3.10-regression-tests.js
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- index.html parse ve benzersiz ID kontrolü: PASS
+- Bio-Rise oluk/mavi profil teğetlik kaynak sözleşmesi: PASS
+- Bio-Rise olukların sistem içine yerleşim hesabı: PASS
+- Ön/arka sabit kapatma profili kaynak sözleşmesi: PASS
+- Sabit profillerin hareketli lamel state'inden ayrılması: PASS
+- Ön/arka 1 mm çakışma payı sayısal hesabı: PASS
+- V3.8 ürün grubu ve geometri regresyonu: PASS
+- Mevcut ürün yerleştirme/toolbox regresyonu: PASS
+- generated iframe script syntax kontrolü: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render doğrulaması çalışma ortamındaki tarayıcı/CDN kısıtları nedeniyle görsel olarak doğrulanamamıştır.
+
+
+P3DV.V3.8 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+- Sol giriş paneli başlığının Ürün Giriş Bilgileri olarak değiştirilmesi istendi.
+- Ürün Grubu alanına B-Cube ve Bio-Rise açılır listesi; B-Cube için Freedom, Bio-Rise için None alt grup değeri istendi.
+- Freedom işlem ve ürün yerleştirme mantığı değiştirilmeden Bio-Rise için farklı ana profil, oluk ve panel geometrisi tanımlandı.
+- Freedom Açılım alanında 2038–7060 mm aralığı için 216 mm artımlı açılır öneri listesi ve manuel giriş desteği istendi.
+
+YAPILANLAR
+----------
+- Başlık Ürün Giriş Bilgileri olarak değiştirildi ve başlıktaki Modül 1 rozeti kaldırıldı.
+- Ürün Ailesi Bioclimatic sabit tutuldu. Ürün Grubu B-Cube / Bio-Rise seçimi eklendi.
+- B-Cube seçildiğinde Ürün Alt Grup Freedom; Bio-Rise seçildiğinde None gösteriliyor. Module alanı Modul 1 olarak gösteriliyor.
+- Ürün grubu değiştiğinde açılım/panel bağımlı alanları ve ürün özel limitleri güvenli biçimde güncelleniyor.
+- Freedom Açılım alanı manuel yazılabilir datalist yapısına dönüştürüldü. Öneriler 2038 mm'den 216 mm artarak üretiliyor; 7060 mm maksimum değer ayrıca listeleniyor.
+- Freedom panel ilişkisi `Panel × 216 + 580` olarak korundu.
+- Bio-Rise panel ilişkisi `Panel × 200 + 470`; panel aralığı 8–28, açılım 2070–6070, genişlik maksimum 4000 ve yükseklik maksimum 3500 olarak uygulandı.
+- Bio-Rise ana dikmeleri 150×100 mm, ön/arka mavi profilleri 218×100 mm, yan mavi profilleri 218×50 mm olarak oluşturuldu.
+- Bio-Rise'da ön ve arka oluklar kaldırıldı. Yalnız açılım eksi 100 mm uzunluğunda iki yan oluk üretildi.
+- Bio-Rise'da oluk içindeki dört taraflı kutu/ray profilleri oluşturulmuyor.
+- Bio-Rise lamel kesiti 16 mm daraltıldı. Kapalı ve açık panel aralığı 200 mm yapıldı. Arka ilk panel dıştan içeri 216 mm referansına bağlandı.
+- Freedom'ın mevcut oluk, ray, açık panel, ürün yerleştirme, Zip ön katman, çoklu işlem, ölçü ve kamera davranışları korunuyor.
+- Eklenen dikey profil yüksekliği ürünün güncel mavi profil yüksekliğine bağlandı (`H − 220` / `H − 218`).
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- styles.css
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.8-tests.js
+- tests/p3dv-v3.8-regression-tests.js
+
+TESTLER
+-------
+- app.js Node.js syntax kontrolü: PASS
+- index.html parse ve benzersiz ID kontrolü: PASS
+- V3.8 ürün grubu ve geometri testi: 73 kontrol PASS
+- V3.7 işlev regresyon testi: 78 kontrol PASS
+- generated iframe script syntax kontrolü: PASS
+- Freedom/Bio-Rise açılım listeleri ve karşılıklı panel hesabı: PASS
+- Bio-Rise profil, oluk ve panel kaynak sözleşmeleri: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render testi, Chromium yerel gezinmesinin `ERR_BLOCKED_BY_ADMINISTRATOR` ile engellenmesi nedeniyle doğrulanamadı.
+- Freedom 2038 mm başlangıç değeri ile 7060 mm maksimum değeri 216 mm adımda aynı aritmetik dizide buluşmadığından, 7060 mm maksimum seçenek olarak ayrıca listeye eklenmiştir. Manuel giriş her iki ürün grubunda da korunur.
+
+
+P3DV.V3.7 UPDATE
+================
+
+KULLANICI TALEBİ
+----------------
+Freedom panellerinin arka cephede 80 derece açık/toplanmış konumdayken kesit yönünün yanlış olduğu; panellerin konumunu ve pivotunu kaybetmeden 180 derece çevrilerek aynalanması istendi.
+
+YAPILANLAR
+----------
+- Değişiklik yalnız açık Freedom lamellerinin geometri üretimine uygulandı.
+- Açık lamel geometrisi, uzun ekseni olan yerel X ekseni çevresinde 180 derece döndürüldü.
+- 180 derece dönüş bounding-box ve pivot yerleşim hesabından önce uygulandı.
+- Arka cephedeki 65 mm istif aralığı, 80 derece açılma açısı, panel merkezi ve dünya konumu korunuyor.
+- Kapalı lamel geometrisi ve diğer ürün geometrileri değiştirilmedi.
+
+DEĞİŞTİRİLEN DOSYALAR
+---------------------
+- app.js
+- index.html
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.7-tests.js
+
+TESTLER
+-------
+- app.js syntax kontrolü: PASS
+- açık lamel 180 derece yerel X dönüşü kaynak kontrolü: PASS
+- 80 derece arka cephe istif regresyonu: PASS
+- kapalı lamel builder'ında 180 derece dönüş bulunmaması: PASS
+- generated iframe script syntax kontrolü: PASS
+- ZIP bütünlük kontrolü: PASS
+
+SINIRLAR
+--------
+- Gerçek Three.js piksel/render testi dış CDN bağımlılığı nedeniyle çalışma ortamında güvenilir biçimde doğrulanamadı.
+
+
 P3DV.V3.6 UPDATE
 ================
 

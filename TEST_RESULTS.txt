@@ -1,34 +1,29 @@
-P3DV V3.6 TEST RESULTS
+P3DV V3.16 TEST RESULTS
 ======================
 
 PASS
 ----
-- app.js Node.js syntax kontrolü
-- index.html parse ve 142 benzersiz ID kontrolü
-- p3dv.v3.6 sürüm etiketi
-- sol sabit Freedom giriş paneli
-- Bioclimatic / B-Cube / Family / Modül 1 bilgi alanları
-- boş başlangıç ölçü state'i ve boş hücreler
-- geçerli ölçü olmadan Three.js modelini oluşturmama
-- Genişlik Maks. 4050 mm placeholder ve doğrulama
-- Açılım Maks. 7060 mm placeholder ve doğrulama
-- Panel Sayısı Maks. 30 adet placeholder ve doğrulama
-- 25 panelden 5980 mm açılım hesabı
-- 7060 mm manuel açılımdan 30 panel önerisi
-- manuel açılımın korunması
-- açık lamellerin 80° açı regresyonu
-- açık lamel paketinin arka cepheye alınması
-- Zip Perde Dikme Arası boş alanda merkezli ve taşmasız davranış
-- ana ürün varken Dikme Arası Zip'in ölçü değişmeden yalnız ön katmana alınması
-- Dikmenin Önü dıştan dışa genişlik ve +150 mm V3.5 regresyonu
-- Zip önce, Giyotin sonra ekleme sırası
-- ana ürün ve Zip Perde bağımsız slot state koruması
-- Sabit Doğrama bölme kuralları regresyonu
-- ürün durumları ve panel master regresyonu
-- generated iframe script syntax kontrolü
-- V3.6 davranış testi: 78 kontrol
+- `node --check app.js`
+- `node tests/p3dv-v3.13-regression-a.js`: 73 kontrol
+- `node tests/p3dv-v3.13-regression-b.js`: 78 kontrol
+- `node tests/p3dv-v3.13-door-tests.js`: 206 kontrol
+- Generated iframe script syntax kontrolü
+- Kapı builder iframe çalışma zamanı kapsam testi: SINGLE ve TOP_FIXED
+- Kapı tipi seçim görünümü aç/kapat ve 13 kart state bağlantısı
+- Üst sabit kapı tipinin silüet kartından seçimi
+- INWARD kapı açılma yönünün placement state'inde korunması
+- Kapı ürün adı: `Kapı (Dış Bakış)`
+- Ayrı Bakış Yönü form hücresinin kaldırılması
+- HTML benzersiz ID kontrolü
+- UTF-8 ve bozuk karakter kontrolü
+- Secret taraması
+- ZIP bütünlük kontrolü
 
 ÇALIŞTIRILAMADI
 ---------------
 - Gerçek Three.js piksel/render testi
-  Neden: çalışma ortamındaki dış CDN erişimi güvenilir biçimde doğrulanamadı.
+- Güvenilir headless Chromium görsel doğrulaması
+
+NEDEN
+-----
+- Three.js dış CDN erişimi ve çalışma ortamındaki headless Chromium sürecinin güvenilir biçimde tamamlanmaması.

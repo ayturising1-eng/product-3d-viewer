@@ -3,28 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>p3dv.v3.6 · Product 3d Viewer</title>
+  <title>p3dv.v3.16 · Product 3d Viewer</title>
   <link rel="stylesheet" href="./styles.css" />
   <meta name="theme-color" content="#115da8" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.6</span></h1>
+    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.16</span></h1>
   </header>
 
   <main class="app">
     <div class="viewer-workspace">
 
-      <aside class="freedom-input-panel" aria-label="Freedom ürün bilgileri ve sistem ölçüleri">
+      <aside class="freedom-input-panel" aria-label="Ürün bilgileri ve sistem ölçüleri">
         <div class="freedom-input-head">
-          <strong>Freedom Giriş Bilgileri</strong>
-          <span>Modül 1</span>
+          <strong>Ürün Giriş Bilgileri</strong>
         </div>
         <dl class="freedom-product-info">
           <div><dt>Ürün Ailesi</dt><dd>Bioclimatic</dd></div>
-          <div><dt>Ürün</dt><dd>B-Cube</dd></div>
-          <div><dt>Ürün Alt Grup</dt><dd>Family</dd></div>
-          <div><dt>Modül</dt><dd>Modül 1</dd></div>
+          <div class="product-info-control"><dt>Ürün Grubu</dt><dd><select id="productGroupInput" aria-label="Ürün Grubu"><option value="b-cube">B-Cube</option><option value="bio-rise">Bio-Rise</option></select></dd></div>
+          <div><dt>Ürün Alt Grup</dt><dd id="productSubgroupValue">Freedom</dd></div>
+          <div><dt>Module</dt><dd>Modul 1</dd></div>
         </dl>
         <form id="freedomInputForm" class="freedom-input-form" novalidate>
           <label>
@@ -33,7 +32,8 @@
           </label>
           <label>
             Açılım
-            <input id="freedomDepthInput" type="number" inputmode="decimal" min="796" max="7060" step="1" placeholder="Maks. 7060 mm" />
+            <input id="freedomDepthInput" type="number" inputmode="decimal" min="2038" max="7060" step="1" list="projectionOptions" placeholder="2038–7060 mm" />
+            <datalist id="projectionOptions"></datalist>
           </label>
           <label>
             Yükseklik
@@ -41,9 +41,9 @@
           </label>
           <label>
             Panel Sayısı
-            <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="3" max="30" step="1" placeholder="Maks. 30 adet" />
+            <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="7" max="30" step="1" placeholder="Maks. 30 adet" />
           </label>
-          <small class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
+          <small id="productFormulaText" class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
           <div id="freedomInputValidation" class="freedom-input-validation" aria-live="polite"></div>
           <button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
         </form>
@@ -51,7 +51,7 @@
       <section class="viewer-shell" aria-label="3D viewer">
         <div class="viewer-meta">
           <button id="positionEditBtn" class="position-pill" type="button">
-            <strong>B-Cube Freedom Poz1</strong>
+            <strong id="positionTitle">B-Cube Freedom Poz1</strong>
             <span id="positionSummary">Ölçüleri girin</span>
           </button>
           <span id="productStatus" class="product-status">Bir cephe alanı seçerek işleme başlayın</span>
@@ -66,7 +66,7 @@
             <button id="toolboxSelectionCancelBtn" class="ghost" type="button">İptal · Esc</button>
           </div>
         </div>
-        <iframe id="viewerFrame" title="B-CUBE FREEDOM 3D viewer"></iframe>
+        <iframe id="viewerFrame" title="Bioclimatic ürün 3D viewer"></iframe>
       </section>
 
       <aside class="viewer-toolbox" aria-label="3D ön izleme araç kutusu">
@@ -115,14 +115,14 @@
 
   <div id="positionDialog" class="dialog-backdrop" hidden>
     <form id="positionForm" class="dialog-card">
-      <h2>B-Cube Freedom Poz1</h2>
+      <h2 id="positionDialogTitle">B-Cube Freedom Poz1</h2>
       <label>
         Width (mm)
         <input id="widthInput" type="number" inputmode="decimal" min="1000" max="4050" required />
       </label>
       <label>
         Projection / Depth (mm)
-        <input id="depthInput" type="number" inputmode="decimal" min="796" max="7060" required />
+        <input id="depthInput" type="number" inputmode="decimal" min="2038" max="7060" required />
       </label>
       <label>
         Height (mm)
@@ -162,7 +162,7 @@
     <form id="profileForm" class="dialog-card">
       <div>
         <h2>Profil Ekle</h2>
-        <p class="dialog-copy">Dikey profil toplam sistem yüksekliğinden 220 mm kısa olur. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
+        <p class="dialog-copy">Dikey profil, seçilen ürünün üst mavi profil yüksekliği kadar kısalır. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
       </div>
       <label>
         Yerleşim Yönü
@@ -299,6 +299,7 @@
             <option value="guillotine">Giyotin Sistem</option>
             <option value="zip">Zip Perde</option>
             <option value="fixed">Sabit Doğrama</option>
+            <option value="door">Kapı (Dış Bakış)</option>
           </select>
         </label>
       </div>
@@ -385,6 +386,66 @@
           <small class="field-hint">Alt dış uçtan başlayarak bölme yüksekliklerini ; ile yazın. Toplam ürün yüksekliğine eşit olmalıdır.</small>
         </label>
 
+
+        <div id="productDoorTypeWrap" hidden class="door-type-select-wrap">
+          <span class="field-label">Kapı Tipi</span>
+          <select id="productDoorTypeInput" hidden aria-hidden="true" tabindex="-1"></select>
+          <button id="productDoorTypeTrigger" type="button" class="door-type-trigger" aria-haspopup="dialog" aria-expanded="false">
+            <span id="productDoorTypeValue">Tek Kanat · Hareketli</span>
+            <span class="door-type-trigger-icon" aria-hidden="true">⌄</span>
+          </button>
+          <small class="field-hint">Kapı tipi seçim ekranını açmak için tıklayın.</small>
+        </div>
+
+        <label id="productDoorHingeWrap" hidden>
+          Menteşe Yönü
+          <select id="productDoorHingeInput">
+            <option value="LEFT">Sol</option>
+            <option value="RIGHT">Sağ</option>
+          </select>
+        </label>
+
+        <label id="productDoorActiveLeafWrap" hidden>
+          Aktif Kanat
+          <select id="productDoorActiveLeafInput">
+            <option value="RIGHT">Sağ Aktif</option>
+            <option value="LEFT">Sol Aktif</option>
+          </select>
+        </label>
+
+        <label id="productDoorOpenDirectionWrap" hidden>
+          Açılma Yönü
+          <select id="productDoorOpenDirectionInput">
+            <option value="OUTWARD">Dışa</option>
+            <option value="INWARD">İçe</option>
+          </select>
+        </label>
+
+        <label id="productDoorHandleTypeWrap" hidden>
+          Kapı Kolu
+          <select id="productDoorHandleTypeInput">
+            <option value="NORMAL">Normal Kapı Kolu</option>
+            <option value="PANIC">Panik Kapı Kolu</option>
+          </select>
+          <small class="field-hint">Kol ekseni zeminden 900 mm yüksektedir.</small>
+        </label>
+
+        <label id="productDoorTopFixedHeightWrap" hidden>
+          Üst Sabit Cam Yüksekliği (mm)
+          <input id="productDoorTopFixedHeightInput" type="number" inputmode="numeric" min="250" max="1200" step="1" value="500" />
+        </label>
+
+        <div id="productDoorHeightSummaryWrap" class="door-height-summary" hidden aria-live="polite">
+          <div>
+            <span>Sabit Cam Yüksekliği</span>
+            <strong id="productDoorFixedHeightValue">500 mm</strong>
+          </div>
+          <div>
+            <span>Kalan Kapı Kanadı Yüksekliği</span>
+            <strong id="productDoorMovingHeightValue">—</strong>
+          </div>
+        </div>
+
         <label id="productPanelTypeWrap" hidden>
           <span id="productPanelTypeLabel">Giyotin Panel Tipi</span>
           <select id="productPanelTypeInput">
@@ -426,6 +487,18 @@
           </select>
         </label>
       </div>
+
+      <section id="productDoorTypePicker" class="door-type-picker-page" hidden aria-labelledby="productDoorTypePickerTitle">
+        <div class="door-type-picker-head">
+          <div>
+            <span class="door-type-picker-eyebrow">Kapı (Dış Bakış)</span>
+            <h3 id="productDoorTypePickerTitle">Kapı Tipini Seçin</h3>
+            <p>Hareketli kanatlar mavi, sabit alanlar gri ve açılım hareketi yeşil kavisli okla gösterilir.</p>
+          </div>
+          <button id="productDoorTypePickerClose" type="button" class="ghost door-type-picker-close">Geri</button>
+        </div>
+        <div id="productDoorTypeCards" class="door-type-card-grid" role="listbox" aria-label="Kapı tipi silüet seçimi"></div>
+      </section>
 
       <div id="cleanableWindowSection" hidden>
         <input id="bottomPanelModeInput" type="hidden" value="VASISTAS" />

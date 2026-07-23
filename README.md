@@ -2,7 +2,7 @@
 
 Open-source browser-based 3D product viewer prototype.
 
-The first included product is **B-CUBE FREEDOM 1 Module**, converted from the Excel macro workflow into a standalone JavaScript / Three.js application.
+The included Bioclimatic product groups are **B-Cube / Freedom** and **Bio-Rise**, implemented as separate geometry specifications on the same standalone JavaScript / Three.js viewer and product-placement workflow.
 
 ## Features
 
@@ -14,26 +14,31 @@ The first included product is **B-CUBE FREEDOM 1 Module**, converted from the Ex
 - Mobile responsive layout
 - Static hosting friendly: no backend, no database, no build step
 
-## Lamella Count Logic
+## Product and Panel Logic
 
-The Excel file calculates lamella count from projection/depth with a lookup table:
+### B-Cube / Freedom
 
-| Projection / Depth (mm) | Lamella Count |
-| ---: | ---: |
-| 796 | 1 |
-| 1012 | 2 |
-| 1228 | 3 |
-| ... | ... |
-| 5980 | 25 |
-| 7060 | 30 |
+- Width: maximum 4050 mm
+- Projection input: manual entry plus a suggestion list beginning at 2038 mm and increasing by 216 mm up to the 7060 mm limit
+- Panel relation: `Projection = Panel Count × 216 + 580`
+- Panel count: maximum 30
+- Existing four-sided gutter frame, inner rail frame, product placement, Zip overlay and toolbox behavior are preserved
 
-In JavaScript this is represented as:
+### Bio-Rise
 
-```js
-Math.floor((depth - 796) / 216) + 1
-```
+- Width: maximum 4000 mm
+- Projection: 2070–6070 mm
+- Height: maximum 3500 mm
+- Panel count: 8–28
+- Panel relation: `Projection = Panel Count × 200 + 470`
+- Front/rear posts: 150 × 100 mm
+- Front/rear blue beams: 218 × 100 mm
+- Side blue beams: 218 × 50 mm
+- No front or rear gutters; the two side gutters are `Projection − 100 mm` long
+- No inner four-sided box/rail frame
+- Lamella section is 16 mm narrower, closed and open spacing is 200 mm, and the first rear panel is positioned 216 mm inward from the rear system exterior
 
-The result is clamped between 1 and 30 for this first module.
+Both product groups use the same facade selection, profile editing, sliding, guillotine, Zip Perde, fixed-joinery, multi-selection, dimensions, camera and toolbox workflows.
 
 ## Run Locally
 
@@ -113,7 +118,19 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.6**
+Current package: **p3dv.v3.16**
+
+## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
+
+- Ürün seçimindeki ad **Kapı (Dış Bakış)** olarak güncellendi; ayrı Bakış Yönü hücresi kaldırıldı.
+- Kapı tipleri form açılır açılmaz toplu olarak gösterilmez. **Kapı Tipi** seçim hücresine tıklanınca ayrı seçim görünümü açılır.
+- Seçim görünümünde 13 kapı tipi masaüstünde dört sütunlu kart düzeninde listelenir; dar ekranlarda iki ve tek sütuna uyarlanır.
+- Kart adları ana tip ve kısa sabit-alan detayı olarak iki satıra ayrılır: örneğin **Tek Kanat / Sol–Üst Sabit**.
+- Hareketli kanatlar düz yön oku yerine yeşil kavisli açılım oku ile gösterilir.
+- Kapı açılma yönü state zinciri **OUTWARD / INWARD** değerlerini korur; formda Dışa ve İçe seçenekleri bulunur.
+- V3.15'te kapı builder'ının iframe dışındaki `DOOR_TOP_FIXED_TYPES` sabitine erişmesi nedeniyle oluşan çalışma zamanı hatası giderildi. Sabit artık Three.js iframe çalışma kapsamındadır.
+- Kapı builder'ının iframe kapsamında tek ve üst sabitli kapılar için gerçekten çağrıldığı regresyon kontrolü eklendi.
+- Freedom, Bio-Rise, Sürme, Giyotin, Zip Perde ve Sabit Doğrama geometri/state sözleşmeleri değiştirilmedi.
 
 
 ## V2.8 Notes
@@ -240,3 +257,49 @@ Sayfanın sol tarafındaki sabit panelden Genişlik, Açılım, Yükseklik ve Pa
 Panel sayısı girildiğinde açılım otomatik hesaplanır. Açılım elle girildiğinde en yakın panel sayısı önerilir; elle girilen açılım korunur.
 
 Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçüleri değişmeden yalnız ön montaj katmanına alınır. Dikmenin Önü seçimi ise dıştan dışa genişlik ve +150 mm yükseklik kuralını kullanır.
+
+
+## P3DV V3.10 Bio-Rise Roof Closure
+
+- Bio-Rise side gutters are fully inside the system. Their outer faces are tangent to the inner faces of the left and right 218×50 mm blue beams.
+- Moving lamella length is calculated between the true inner faces of those gutters.
+- Blue lamella-profile closure pieces fill the front and rear roof gaps.
+- Front and rear closures remain fixed when green lamellas open and keep 1 mm clearance from the moving lamella envelope.
+
+
+## P3DV V3.11 Bio-Rise Gutter Clearance
+
+- Bio-Rise side gutter section width is 98 mm.
+- Each gutter is separated 2 mm from the inner face of the adjacent 218×50 mm blue side beam.
+- The gutter inner faces remain at their V3.10 coordinates, so moving lamella length and roof closure geometry do not change.
+- The clearance removes coplanar surfaces and prevents z-fighting/flicker.
+
+
+## P3DV V3.12 Kapı
+
+Ürün listesine ana ürün katmanında **Kapı** eklendi.
+
+- Kasa ve kanat profilleri 50 mm yüz genişliği ve 55 mm derinlik kullanır.
+- Dış kasada alt eşik bulunmaz; yalnız sol, sağ ve üst kasa profilleri çizilir.
+- Kapı tipleri: Tek Açılır, Çift Açılır, Sol Sabit–Sağ Hareketli, Sağ Sabit–Sol Hareketli ve Üst Sabit Cam–Alt Hareketli Kanat.
+- Tek ve sabit/hareketli tiplerde menteşe yönü seçilebilir.
+- Çift açılır tipte aktif kanat seçilebilir; kol yalnız aktif kanatta gösterilir.
+- Kapı açılma yönü **Dışa** veya **İçe** seçilebilir. Açık 3D gösterim açısı 45 derecedir.
+- Normal Kapı Kolu ve Panik Kapı Kolu seçenekleri bulunur.
+- Bütün kol eksenleri ürün alt seviyesinden/zeminden 900 mm yüksektedir.
+- Cam kalınlığı ve cam rengi mevcut ürün seçimleriyle aynı mantıkta korunur.
+- Üst sabit cam yüksekliği 250–1200 mm arasında düzenlenebilir; alt hareketli kanat en az 1200 mm kalır.
+- Hareketli kanatlar çift tıklama ve Ürün Durumları kontrolüyle açılıp kapanır; sabit cam ve sabit kanatlar hareket etmez.
+- Kapı ana ürün katmanında çalışır; aynı alanda ön katman Zip Perde kullanılabilir.
+
+## P3DV V3.14 Kapı Varyasyonları ve Açılımı
+
+- Panik Kapı Kolu seçildiğinde panik bar genişliği, kolun bulunduğu hareketli/aktif kanadın tam dış genişliğine eşittir; önceki 520 mm sınırı kullanılmaz.
+- Ürün adı **Kapı (Dış Bakış)** olarak gösterilir. Ayrı Bakış Yönü hücresi kullanılmaz; placement verisindeki `OUTSIDE VIEW` sözleşmesi korunur.
+- **Üst Sabit Cam – Alt Hareketli Kanat** seçildiğinde formda iki canlı değer görünür:
+  - Sabit Cam Yüksekliği
+  - Kalan Kapı Kanadı Yüksekliği
+- Kalan kanat yüksekliği, formdaki alan yüksekliği ile gerçek 3D kapı profil/boşluk sözleşmesinden hesaplanır ve üst sabit cam girişi değiştiğinde otomatik güncellenir.
+- 3D modelde aynı iki yükseklik, **Ara Ölçüler** filtresine bağlı düşey ölçüler olarak `Sabit Cam ... mm` ve `Kapı Kanadı ... mm` etiketleriyle gösterilir.
+- Alt hareketli kanat için 1200 mm minimum doğrulaması artık gösterilen gerçek kanat yüksekliğini kullanır.
+
