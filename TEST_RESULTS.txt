@@ -1,29 +1,24 @@
-P3DV V3.16 TEST RESULTS
+P3DV V3.26 TEST RESULTS
 ======================
 
 PASS
 ----
 - `node --check app.js`
+- `node --check ral-colors.js`
+- `node --check zip-fabric-textures.js`
 - `node tests/p3dv-v3.13-regression-a.js`: 73 kontrol
 - `node tests/p3dv-v3.13-regression-b.js`: 78 kontrol
-- `node tests/p3dv-v3.13-door-tests.js`: 206 kontrol
-- Generated iframe script syntax kontrolü
-- Kapı builder iframe çalışma zamanı kapsam testi: SINGLE ve TOP_FIXED
-- Kapı tipi seçim görünümü aç/kapat ve 13 kart state bağlantısı
-- Üst sabit kapı tipinin silüet kartından seçimi
-- INWARD kapı açılma yönünün placement state'inde korunması
-- Kapı ürün adı: `Kapı (Dış Bakış)`
-- Ayrı Bakış Yönü form hücresinin kaldırılması
+- `node tests/p3dv-v3.13-door-tests.js`: 417 kontrol
+- Freedom 5000 mm genişlik / 8140 mm açılım / 35 panel çizim kontrolü
+- Bio-Rise 4500 mm genişlik / 6870 mm açılım / 32 panel çizim kontrolü
+- Önerilen maksimum uyarı tonu ve kalıcı maksimum bilgi metni kontrolü
+- Panel sayısı → açılım ve açılım → panel sayısı üst sınır clamping kaldırma kontrolü
 - HTML benzersiz ID kontrolü
 - UTF-8 ve bozuk karakter kontrolü
 - Secret taraması
 - ZIP bütünlük kontrolü
 
-ÇALIŞTIRILAMADI
----------------
-- Gerçek Three.js piksel/render testi
-- Güvenilir headless Chromium görsel doğrulaması
-
-NEDEN
------
-- Three.js dış CDN erişimi ve çalışma ortamındaki headless Chromium sürecinin güvenilir biçimde tamamlanmaması.
+GÖRSEL SINIR
+------------
+- Node regresyon testleri gerçek Three.js piksel/render doğrulaması değildir.
+- Güvenilir gerçek tarayıcı piksel testi bu çalışma ortamında yapılmadı.

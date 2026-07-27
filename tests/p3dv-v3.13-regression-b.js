@@ -5,11 +5,12 @@ const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appSource = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.16', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
-  'placeholder="Maks. 4050 mm"', 'placeholder="2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
+  'p3dv.v3.26', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
+  'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Önerilen 2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
   'Dikey Bölme Sayısı', 'Yatay Bölme Sayısı', 'Yatay Bölme Yükseklikleri (mm)',
   'Dikmenin Önü'
 ]) assert(indexSource.includes(token), `missing HTML token: ${token}`);
@@ -118,6 +119,7 @@ const window = {
 };
 const context = { document, window, alert(message) { alerts.push(message); }, console, JSON, Math, Number, String, Array, Object, Date, setTimeout, clearTimeout };
 context.global = context;
+vm.runInNewContext(colorSource, context, { filename: 'ral-colors.js' });
 vm.runInNewContext(appSource, context, { filename: 'app.js' });
 function message(data) { for (const fn of windowListeners.message || []) fn({ data }); }
 function viewerHtml() { return el('viewerFrame').srcdoc; }
@@ -146,7 +148,7 @@ el('freedomPanelCountInput').value = '25';
 el('freedomPanelCountInput').dispatch('input');
 assert(el('freedomDepthInput').value === '5980', '25 panels must calculate 5980 mm projection');
 
-// Manual maximum projection is preserved; panel suggestion is clamped to 30.
+// Recommended maximum projection remains available in the canonical suggestion list.
 el('freedomDepthInput').value = '7060';
 el('freedomDepthInput').dispatch('input');
 assert(el('freedomPanelCountInput').value === '30', '7060 mm projection must suggest maximum 30 panels');

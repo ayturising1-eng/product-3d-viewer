@@ -5,13 +5,14 @@ const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appSource = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.16', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
+  'p3dv.v3.26', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
   'Ürün Grubu', 'B-Cube', 'Bio-Rise', 'Ürün Alt Grup', 'Module', 'Modul 1',
   'productGroupInput', 'productSubgroupValue', 'projectionOptions',
-  'min="2038"', 'max="7060"', 'list="projectionOptions"',
+  'min="2038"', 'list="projectionOptions"', 'freedomWidthLimitNote', 'freedomDepthLimitNote',
   'Paneller Açık', 'Zip Perde', 'Sabit Doğrama'
 ]) assert(indexSource.includes(token), `missing HTML token: ${token}`);
 for (const forbidden of ['Freedom Giriş Bilgileri', '>Family<', '<span>Modül 1</span>']) {
@@ -147,6 +148,7 @@ const window = {
 };
 const context = { document, window, alert(message) { alerts.push(message); }, console, JSON, Math, Number, String, Array, Object, Date, setTimeout, clearTimeout };
 context.global = context;
+vm.runInNewContext(colorSource, context, { filename: 'ral-colors.js' });
 vm.runInNewContext(appSource, context, { filename: 'app.js' });
 function viewerHtml() { return el('viewerFrame').srcdoc; }
 function checkIframeScript(html) {
@@ -161,7 +163,10 @@ function checkIframeScript(html) {
 assert(el('productGroupInput').value === 'b-cube', 'initial product group must be B-Cube');
 assert(el('productSubgroupValue').textContent === 'Freedom', 'B-Cube subgroup must be Freedom');
 assert(el('positionTitle').textContent === 'B-Cube Freedom Poz1', 'Freedom title missing');
-assert(el('freedomDepthInput').min === '2038' && el('freedomDepthInput').max === '7060', 'Freedom projection limits wrong');
+assert(el('freedomDepthInput').min === '2038' && el('freedomDepthInput').max === '', 'Freedom projection maximum must be advisory only');
+assert(el('freedomWidthInput').max === '' && el('freedomPanelCountInput').max === '', 'Freedom width/panel maximums must be advisory only');
+assert(el('freedomWidthLimitNote').textContent.includes('4050'), 'Freedom width recommended maximum note missing');
+assert(el('freedomDepthLimitNote').textContent.includes('7060'), 'Freedom projection recommended maximum note missing');
 assert(el('productFormulaText').textContent === 'Açılım = Panel Sayısı × 216 + 580', 'Freedom formula wrong');
 assert(el('projectionOptions').children[0].value === '2038', 'Freedom projection list must start at 2038');
 assert(el('projectionOptions').children[1].value === '2254', 'Freedom projection list must increment by 216');
@@ -179,16 +184,32 @@ assert(html.includes('const PRODUCT_GROUP="b-cube";'), 'Freedom product group no
 assert(html.includes('const W=4000, D=5980, H=3200;'), 'Freedom dimensions not applied');
 checkIframeScript(html);
 
+// V3.26: recommended maximums warn but do not block or clamp drawing.
+el('freedomWidthInput').value = '5000';
+el('freedomPanelCountInput').value = '35';
+el('freedomPanelCountInput').dispatch('input');
+assert(el('freedomDepthInput').value === '8140', '35 Freedom panels must calculate an unclamped 8140 mm projection');
+el('freedomHeightInput').value = '3200';
+el('freedomInputForm').dispatch('submit');
+html = viewerHtml();
+assert(html.includes('const W=5000, D=8140, H=3200;'), 'Freedom dimensions above recommended maximum must still render');
+assert(html.includes('const LC=35;'), 'Freedom panel count above recommendation must not be clamped');
+assert(el('freedomInputValidation').textContent.includes('4050') && el('freedomInputValidation').textContent.includes('7060'), 'Freedom soft-limit warning missing');
+assert(el('freedomInputValidation').classList.contains('is-warning'), 'Freedom soft-limit message must use warning tone');
+checkIframeScript(html);
+
 // Switch to Bio-Rise: dynamic subgroup, limits, suggestions and canonical formula.
 el('productGroupInput').value = 'bio-rise';
 el('productGroupInput').dispatch('change');
 assert(el('productSubgroupValue').textContent === 'None', 'Bio-Rise subgroup must be None');
 assert(el('positionTitle').textContent === 'Bio-Rise Poz1', 'Bio-Rise title missing');
 assert(el('freedomDepthInput').value === '' && el('freedomPanelCountInput').value === '', 'group switch must clear dependent projection fields');
-assert(el('freedomWidthInput').max === '4000', 'Bio-Rise width max wrong');
-assert(el('freedomDepthInput').min === '2070' && el('freedomDepthInput').max === '6070', 'Bio-Rise projection limits wrong');
+assert(el('freedomWidthInput').max === '', 'Bio-Rise width maximum must be advisory only');
+assert(el('freedomWidthLimitNote').textContent.includes('4000'), 'Bio-Rise width recommended maximum note missing');
+assert(el('freedomDepthInput').min === '2070' && el('freedomDepthInput').max === '', 'Bio-Rise projection maximum must be advisory only');
+assert(el('freedomDepthLimitNote').textContent.includes('6070'), 'Bio-Rise projection recommended maximum note missing');
 assert(el('freedomHeightInput').max === '3500', 'Bio-Rise height max wrong');
-assert(el('freedomPanelCountInput').min === '8' && el('freedomPanelCountInput').max === '28', 'Bio-Rise panel limits wrong');
+assert(el('freedomPanelCountInput').min === '8' && el('freedomPanelCountInput').max === '', 'Bio-Rise panel maximum must be advisory only');
 assert(el('productFormulaText').textContent === 'Açılım = Panel Sayısı × 200 + 470', 'Bio-Rise formula wrong');
 assert(el('projectionOptions').children.length === 21, 'Bio-Rise must list all 8–28 canonical projections');
 assert(el('projectionOptions').children[0].value === '2070', 'Bio-Rise list start wrong');
@@ -209,6 +230,17 @@ html = viewerHtml();
 assert(html.includes('const PRODUCT_GROUP="bio-rise";'), 'Bio-Rise group not passed to viewer');
 assert(html.includes('const W=4000, D=2470, H=3500;'), 'Bio-Rise dimensions not applied');
 assert(html.includes('let postSections=[{"x":150,"z":100}'), 'Bio-Rise post section missing');
+
+el('freedomWidthInput').value = '4500';
+el('freedomPanelCountInput').value = '32';
+el('freedomPanelCountInput').dispatch('input');
+assert(el('freedomDepthInput').value === '6870', '32 Bio-Rise panels must calculate an unclamped 6870 mm projection');
+el('freedomHeightInput').value = '3500';
+el('freedomInputForm').dispatch('submit');
+html = viewerHtml();
+assert(html.includes('const W=4500, D=6870, H=3500;'), 'Bio-Rise dimensions above recommended maximum must still render');
+assert(html.includes('const LC=32;'), 'Bio-Rise panel count above recommendation must not be clamped');
+assert(el('freedomInputValidation').classList.contains('is-warning'), 'Bio-Rise soft-limit message must use warning tone');
 assert(html.includes('let beamSection={"vertical":218,"thickness":100};'), 'Bio-Rise front/back beam section missing');
 checkIframeScript(html);
 

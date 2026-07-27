@@ -16,10 +16,14 @@
     placements: {},
     zipPlacements: {},
     facadeProfiles: {},
-    productsOpen: false,
+    productsOpen: true,
     productOpenStates: {},
     panelStates: {},
-    panelMasterOpen: false
+    panelMasterOpen: true,
+    glassPreferences: { color: 'TRANSPARENT', customColor: '', thickness: '10 MM' },
+    colorMode: 'default',
+    systemColor: { code: 'RAL 9006', hex: '#7C7D7F', finish: 'MATTE' },
+    panelColor: { code: 'RAL 6018', hex: '#397A36', finish: 'MATTE' }
   };
 
   const ids = {
@@ -40,7 +44,9 @@
     projectionOptions: 'projectionOptions',
     freedomForm: 'freedomInputForm',
     freedomWidth: 'freedomWidthInput',
+    freedomWidthLimitNote: 'freedomWidthLimitNote',
     freedomDepth: 'freedomDepthInput',
+    freedomDepthLimitNote: 'freedomDepthLimitNote',
     freedomHeight: 'freedomHeightInput',
     freedomPanelCount: 'freedomPanelCountInput',
     freedomValidation: 'freedomInputValidation',
@@ -188,7 +194,37 @@
     zoneDimensionCancel: 'cancelZoneDimensionBtn',
     productValidation: 'productValidation',
     productCancel: 'cancelProductBtn',
-    productRemove: 'removeProductBtn'
+    productRemove: 'removeProductBtn',
+    systemColorTrigger: 'systemColorTrigger',
+    systemColorSwatch: 'systemColorSwatch',
+    systemColorValue: 'systemColorValue',
+    panelColorTrigger: 'panelColorTrigger',
+    panelColorSwatch: 'panelColorSwatch',
+    panelColorValue: 'panelColorValue',
+    defaultColorMode: 'defaultColorModeBtn',
+    ralColorMode: 'ralColorModeBtn',
+    colorPickerDialog: 'colorPickerDialog',
+    colorPickerTitle: 'colorPickerTitle',
+    colorPickerDescription: 'colorPickerDescription',
+    colorPickerClose: 'colorPickerCloseBtn',
+    colorCatalogRising: 'colorCatalogRisingBtn',
+    colorCatalogAll: 'colorCatalogAllBtn',
+    colorSearch: 'colorSearchInput',
+    colorResultCount: 'colorResultCount',
+    colorOptionGrid: 'colorOptionGrid',
+    colorFinishDialog: 'colorFinishDialog',
+    colorFinishTitle: 'colorFinishTitle',
+    colorFinishDescription: 'colorFinishDescription',
+    colorFinishClose: 'colorFinishCloseBtn',
+    colorFinishSummary: 'colorFinishSummary',
+    colorFinishOptions: 'colorFinishOptions',
+    productFabricWrap: 'productFabricWrap',
+    productFabric: 'productFabricInput',
+    productFabricTrigger: 'productFabricTrigger',
+    productFabricValue: 'productFabricValue',
+    productFabricPicker: 'productFabricPicker',
+    productFabricPickerClose: 'productFabricPickerClose',
+    productFabricCards: 'productFabricCards'
   };
 
   const $ = (id) => document.getElementById(id);
@@ -196,7 +232,7 @@
   let viewerCameraState = null;
   let selectedZone = null;
   let selectedZoneId = null;
-  let dimensionVisibility = { intermediate: true, main: true };
+  let dimensionVisibility = { intermediate: false, main: true };
   let profileSequence = 1;
   let selectedDividerProfile = null;
   let selectedPostIndex = null;
@@ -205,6 +241,9 @@
   let bulkProductZones = null;
   let bulkProfileZones = null;
   let activeProductSlot = 'primary';
+  let activeColorTarget = 'system';
+  let activeColorCatalog = 'rising';
+  let pendingColorSelection = null;
 
   const PRODUCT_SPECS = {
     'b-cube': {
@@ -231,7 +270,7 @@
 
   function projectionFromPanelCount(panelCount, group = modelState.productGroup) {
     const spec = activeProductSpec(group);
-    const count = Math.max(0, Math.min(spec.panelMax, Math.round(Number(panelCount) || 0)));
+    const count = Math.max(0, Math.round(Number(panelCount) || 0));
     return count > 0 ? count * spec.panelPitch + spec.projectionOffset : 0;
   }
 
@@ -239,7 +278,7 @@
     const spec = activeProductSpec(group);
     const projection = Number(depth) || 0;
     if (projection <= 0) return 0;
-    return Math.max(spec.panelMin, Math.min(spec.panelMax, Math.round((projection - spec.projectionOffset) / spec.panelPitch)));
+    return Math.max(spec.panelMin, Math.round((projection - spec.projectionOffset) / spec.panelPitch));
   }
 
   function lamellaCountFromProjection(depth, group = modelState.productGroup) {
@@ -249,10 +288,10 @@
   function modelReady(model = modelState) {
     const spec = activeProductSpec(model.productGroup);
     const height = Number(model.height);
-    return Number(model.width) >= spec.widthMin && Number(model.width) <= spec.widthMax &&
-      Number(model.depth) >= spec.depthMin && Number(model.depth) <= spec.depthMax &&
+    return Number(model.width) >= spec.widthMin &&
+      Number(model.depth) >= spec.depthMin &&
       height >= spec.heightMin && (!spec.heightMax || height <= spec.heightMax) &&
-      Number(model.panelCount) >= spec.panelMin && Number(model.panelCount) <= spec.panelMax;
+      Number(model.panelCount) >= spec.panelMin;
   }
 
   function readModel() {
@@ -261,8 +300,8 @@
       width: modelState.width,
       depth: modelState.depth,
       height: modelState.height,
-      lamellaCount: Math.max(0, Math.min(activeProductSpec().panelMax, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth)))),
-      panelCount: Math.max(0, Math.min(activeProductSpec().panelMax, Math.round(Number(modelState.panelCount) || 0))),
+      lamellaCount: Math.max(0, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth))),
+      panelCount: Math.max(0, Math.round(Number(modelState.panelCount) || 0)),
       orientations: [...modelState.orientations],
       postSections: modelState.postSections.map((section) => ({ ...section })),
       beamSection: { ...modelState.beamSection },
@@ -272,13 +311,200 @@
       productsOpen: Boolean(modelState.productsOpen),
       productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})),
       panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {})),
-      panelMasterOpen: Boolean(modelState.panelMasterOpen)
+      panelMasterOpen: Boolean(modelState.panelMasterOpen),
+      glassPreferences: { ...glassPreferenceState() },
+      colorMode: modelState.colorMode === 'ral' ? 'ral' : 'default',
+      systemColor: { ...(modelState.systemColor || defaults.systemColor) },
+      panelColor: { ...(modelState.panelColor || defaults.panelColor) }
     };
   }
 
   function setText(id, text) {
     $(id).textContent = text;
   }
+
+  function ralCatalogData() {
+    const source = window.P3DV_RAL_CATALOG;
+    if (source && Array.isArray(source.all) && source.all.length) return source;
+    return {
+      risingStandardCodes: ['RAL 9006', 'RAL 9016'],
+      all: [
+        { code: 'RAL 9006', hex: '#7C7D7F', image: '' },
+        { code: 'RAL 9016', hex: '#E7E8E2', image: '' },
+        { code: 'RAL 6018', hex: '#397A36', image: '' }
+      ]
+    };
+  }
+
+  function normalizeHexColor(value, fallback) {
+    const text = String(value || '').trim();
+    return /^#[0-9a-f]{6}$/i.test(text) ? text.toUpperCase() : fallback;
+  }
+
+  function ralColorOption(code, fallback) {
+    const catalog = ralCatalogData();
+    const found = catalog.all.find((option) => option.code === code);
+    const base = found ? { code: found.code, hex: normalizeHexColor(found.hex, fallback.hex), image: found.image || '' } : { ...fallback };
+    return { ...base, finish: normalizeColorFinish((fallback && fallback.finish) || 'MATTE') };
+  }
+
+  function normalizeModelColors() {
+    const systemFinish = normalizeColorFinish(modelState.systemColor && modelState.systemColor.finish, defaults.systemColor.finish);
+    const panelFinish = normalizeColorFinish(modelState.panelColor && modelState.panelColor.finish, defaults.panelColor.finish);
+    modelState.systemColor = { ...ralColorOption(modelState.systemColor && modelState.systemColor.code, defaults.systemColor), finish: systemFinish };
+    modelState.panelColor = { ...ralColorOption(modelState.panelColor && modelState.panelColor.code, defaults.panelColor), finish: panelFinish };
+    glassPreferenceState();
+  }
+
+  function setColorSwatch(id, hex) {
+    const swatch = $(id);
+    if (swatch) swatch.setAttribute('style', `background:${normalizeHexColor(hex, '#94A3B8')}`);
+  }
+
+  function normalizeColorMode(value = modelState.colorMode) {
+    return value === 'ral' ? 'ral' : 'default';
+  }
+
+  function updateColorControls() {
+    normalizeModelColors();
+    modelState.colorMode = normalizeColorMode();
+    const defaultMode = modelState.colorMode === 'default';
+    setText(ids.systemColorValue, defaultMode ? 'Klasik Sistem Paleti' : `${modelState.systemColor.code} · ${finishLabel(modelState.systemColor.finish)}`);
+    setText(ids.panelColorValue, defaultMode ? 'Klasik Panel Yeşili' : `${modelState.panelColor.code} · ${finishLabel(modelState.panelColor.finish)}`);
+    setColorSwatch(ids.systemColorSwatch, defaultMode ? '#FF00FF' : modelState.systemColor.hex);
+    setColorSwatch(ids.panelColorSwatch, defaultMode ? '#7CFC00' : modelState.panelColor.hex);
+    const defaultButton = $(ids.defaultColorMode);
+    const ralButton = $(ids.ralColorMode);
+    if (defaultButton) {
+      defaultButton.classList.toggle('is-active', defaultMode);
+      defaultButton.setAttribute('aria-pressed', String(defaultMode));
+    }
+    if (ralButton) {
+      ralButton.classList.toggle('is-active', !defaultMode);
+      ralButton.setAttribute('aria-pressed', String(!defaultMode));
+    }
+  }
+
+  function setColorMode(mode) {
+    modelState.colorMode = normalizeColorMode(mode);
+    updateColorControls();
+    renderViewer();
+  }
+
+  function colorTargetLabel(target = activeColorTarget) {
+    return target === 'panel' ? 'Panel Rengi' : 'Sistem Rengi';
+  }
+
+  function selectedColorForTarget(target = activeColorTarget) {
+    return target === 'panel' ? modelState.panelColor : modelState.systemColor;
+  }
+
+  function setActiveColorCatalog(catalog) {
+    activeColorCatalog = catalog === 'all' ? 'all' : 'rising';
+    $(ids.colorCatalogRising).classList.toggle('is-active', activeColorCatalog === 'rising');
+    $(ids.colorCatalogAll).classList.toggle('is-active', activeColorCatalog === 'all');
+    $(ids.colorCatalogRising).setAttribute('aria-selected', String(activeColorCatalog === 'rising'));
+    $(ids.colorCatalogAll).setAttribute('aria-selected', String(activeColorCatalog === 'all'));
+    renderRalColorOptions();
+  }
+
+  function renderColorFinishOptions() {
+    const container = $(ids.colorFinishOptions);
+    if (!container) return;
+    container.innerHTML = '';
+    const current = pendingColorSelection ? normalizeColorFinish(pendingColorSelection.finish) : normalizeColorFinish(selectedColorForTarget().finish);
+    COLOR_FINISHES.forEach((finish) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'finish-option-card' + (current === finish.value ? ' is-selected' : '');
+      const sampleStyle = finish.value === 'GLOSS'
+        ? 'background:linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.18) 35%, rgba(15,23,42,.08) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.65);'
+        : (finish.value === 'TEXTURE'
+          ? 'background-image: radial-gradient(circle at 3px 3px, rgba(15,23,42,.14) 1px, transparent 1.2px), linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,.12)); background-size: 9px 9px, cover;'
+          : 'background:linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.12));');
+      button.innerHTML = `<span class="finish-option-sample" style="${sampleStyle}"></span><span class="finish-option-copy"><strong>${finish.label}</strong><span>${finish.detail}</span></span>`;
+      button.addEventListener('click', () => applyColorFinish(finish.value));
+      container.appendChild(button);
+    });
+  }
+
+  function openColorFinishDialog(selectedCode, selectedHex, selectedImage) {
+    const current = selectedColorForTarget();
+    pendingColorSelection = {
+      code: selectedCode,
+      hex: normalizeHexColor(selectedHex, current.hex),
+      image: selectedImage || '',
+      finish: normalizeColorFinish(current.finish)
+    };
+    setText(ids.colorFinishTitle, `${colorTargetLabel()} · Yüzey Tipi`);
+    setText(ids.colorFinishDescription, `${selectedCode} için parlak, mat veya texture yüzey tipini seçin.`);
+    setText(ids.colorFinishSummary, `${selectedCode} · ${finishLabel(pendingColorSelection.finish)}`);
+    renderColorFinishOptions();
+    $(ids.colorFinishDialog).hidden = false;
+  }
+
+  function closeColorFinishDialog() {
+    $(ids.colorFinishDialog).hidden = true;
+    pendingColorSelection = null;
+  }
+
+  function applyColorFinish(finishValue) {
+    if (!pendingColorSelection) return;
+    const next = { ...pendingColorSelection, finish: normalizeColorFinish(finishValue, pendingColorSelection.finish) };
+    modelState.colorMode = 'ral';
+    if (activeColorTarget === 'panel') modelState.panelColor = next; else modelState.systemColor = next;
+    closeColorFinishDialog();
+    closeColorPicker();
+    updateColorControls();
+    renderViewer();
+  }
+
+  function renderRalColorOptions() {
+    const grid = $(ids.colorOptionGrid);
+    if (!grid) return;
+    const catalog = ralCatalogData();
+    const risingCodes = new Set(catalog.risingStandardCodes || []);
+    const query = String($(ids.colorSearch).value || '').trim().toUpperCase().replace(/\s+/g, ' ');
+    const options = catalog.all.filter((option) => {
+      if (activeColorCatalog === 'rising' && !risingCodes.has(option.code)) return false;
+      if (!query) return true;
+      const compact = option.code.toUpperCase().replace(/\s+/g, '');
+      return option.code.toUpperCase().includes(query) || compact.includes(query.replace(/\s+/g, ''));
+    });
+    grid.innerHTML = '';
+    const selected = selectedColorForTarget();
+    options.forEach((option) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ral-color-option' + (selected && selected.code === option.code ? ' is-selected' : '');
+      button.setAttribute('role', 'option');
+      button.setAttribute('aria-selected', String(Boolean(selected && selected.code === option.code)));
+      button.setAttribute('aria-label', option.code);
+      const image = option.image ? `<img src="${option.image}" alt="" loading="lazy" />` : `<span style="display:block;width:100%;height:100%;background:${option.hex}"></span>`;
+      button.innerHTML = `<span class="ral-color-option-image">${image}</span><span class="ral-color-option-copy"><strong>${option.code}</strong><small>Yüzey tipi sonraki adımda seçilir</small></span>`;
+      button.value = option.code;
+      button.addEventListener('click', () => openColorFinishDialog(option.code, option.hex, option.image || ''));
+      grid.appendChild(button);
+    });
+    setText(ids.colorResultCount, `${options.length} renk`);
+  }
+
+  function openColorPicker(target) {
+    activeColorTarget = target === 'panel' ? 'panel' : 'system';
+    setText(ids.colorPickerTitle, `${colorTargetLabel()} Seçin`);
+    setText(ids.colorPickerDescription, activeColorTarget === 'panel'
+      ? 'Seçilen RAL kodu yalnız hareketli çatı panellerine uygulanır. Ardından yüzey tipi seçilir.'
+      : 'Seçilen RAL kodu cam ve perde kumaşı hariç tüm sistem ve cephe profillerine uygulanır. Ardından yüzey tipi seçilir.');
+    $(ids.colorSearch).value = '';
+    $(ids.colorPickerDialog).hidden = false;
+    setActiveColorCatalog(activeColorCatalog);
+    $(ids.colorSearch).focus();
+  }
+
+  function closeColorPicker() {
+    $(ids.colorPickerDialog).hidden = true;
+  }
+
 
   function productModelLabel(group = modelState.productGroup) {
     return activeProductSpec(group).modelLabel;
@@ -314,11 +540,13 @@
     $(ids.frame).title = `${spec.modelLabel} 3D viewer`;
 
     $(ids.freedomWidth).min = String(spec.widthMin);
-    $(ids.freedomWidth).max = String(spec.widthMax);
-    $(ids.freedomWidth).placeholder = `Maks. ${spec.widthMax} mm`;
+    $(ids.freedomWidth).removeAttribute('max');
+    $(ids.freedomWidth).placeholder = `Önerilen maks. ${spec.widthMax} mm`;
+    setText(ids.freedomWidthLimitNote, `Önerilen maksimum: ${spec.widthMax} mm · Üzeri uyarıyla çizilir.`);
     $(ids.freedomDepth).min = String(spec.depthMin);
-    $(ids.freedomDepth).max = String(spec.depthMax);
-    $(ids.freedomDepth).placeholder = `${spec.depthMin}–${spec.depthMax} mm`;
+    $(ids.freedomDepth).removeAttribute('max');
+    $(ids.freedomDepth).placeholder = `Önerilen ${spec.depthMin}–${spec.depthMax} mm`;
+    setText(ids.freedomDepthLimitNote, `Önerilen maksimum: ${spec.depthMax} mm · Üzeri uyarıyla çizilir.`);
     $(ids.freedomHeight).min = String(spec.heightMin);
     if (spec.heightMax) {
       $(ids.freedomHeight).max = String(spec.heightMax);
@@ -328,14 +556,14 @@
       $(ids.freedomHeight).placeholder = 'Yükseklik (mm)';
     }
     $(ids.freedomPanelCount).min = String(spec.panelMin);
-    $(ids.freedomPanelCount).max = String(spec.panelMax);
-    $(ids.freedomPanelCount).placeholder = `${spec.panelMin}–${spec.panelMax} adet`;
+    $(ids.freedomPanelCount).removeAttribute('max');
+    $(ids.freedomPanelCount).placeholder = `Önerilen ${spec.panelMin}–${spec.panelMax} adet`;
     setText(ids.productFormula, `Açılım = Panel Sayısı × ${spec.panelPitch} + ${spec.projectionOffset}`);
 
     $(ids.width).min = String(spec.widthMin);
-    $(ids.width).max = String(spec.widthMax);
+    $(ids.width).removeAttribute('max');
     $(ids.depth).min = String(spec.depthMin);
-    $(ids.depth).max = String(spec.depthMax);
+    $(ids.depth).removeAttribute('max');
     $(ids.height).min = String(spec.heightMin);
     if (spec.heightMax) $(ids.height).max = String(spec.heightMax); else $(ids.height).removeAttribute('max');
     populateProjectionOptions();
@@ -357,10 +585,6 @@
       $(ids.freedomDepth).value = '';
       $(ids.freedomPanelCount).value = '';
       const spec = activeProductSpec();
-      if (Number(modelState.width) > spec.widthMax) {
-        modelState.width = 0;
-        $(ids.freedomWidth).value = '';
-      }
       if (spec.heightMax && Number(modelState.height) > spec.heightMax) {
         modelState.height = 0;
         $(ids.freedomHeight).value = '';
@@ -371,6 +595,11 @@
     }
     setFreedomValidation('');
     updateProductInputUi();
+    showRecommendedLimitWarnings({
+      width: readFreedomNumber(ids.freedomWidth),
+      depth: readFreedomNumber(ids.freedomDepth),
+      panelCount: readFreedomNumber(ids.freedomPanelCount)
+    });
     renderViewer();
   }
 
@@ -542,7 +771,7 @@
     const nextWidth = readDialogNumber(ids.width, spec.widthMin);
     const nextDepth = readDialogNumber(ids.depth, spec.depthMin);
     const nextHeight = readDialogNumber(ids.height, spec.heightMin);
-    if (nextWidth === null || nextDepth === null || nextHeight === null || nextWidth > spec.widthMax || nextDepth > spec.depthMax || (spec.heightMax && nextHeight > spec.heightMax)) {
+    if (nextWidth === null || nextDepth === null || nextHeight === null || (spec.heightMax && nextHeight > spec.heightMax)) {
       alert('Please enter valid Width, Projection and Height values.');
       return;
     }
@@ -560,8 +789,13 @@
       alert('This dimension is too small for the current post/profile sections.');
       return;
     }
+    $(ids.freedomWidth).value = String(nextWidth);
+    $(ids.freedomDepth).value = String(nextDepth);
+    $(ids.freedomHeight).value = String(nextHeight);
+    $(ids.freedomPanelCount).value = String(modelState.panelCount);
     closePositionDialog();
     renderViewer();
+    showRecommendedLimitWarnings({ width: nextWidth, depth: nextDepth, panelCount: modelState.panelCount });
   }
 
   function readFreedomNumber(id) {
@@ -571,8 +805,35 @@
     return Number.isFinite(value) ? value : null;
   }
 
-  function setFreedomValidation(message) {
-    $(ids.freedomValidation).textContent = message || '';
+  function setFreedomValidation(message, tone = 'error') {
+    const element = $(ids.freedomValidation);
+    element.textContent = message || '';
+    element.classList.toggle('is-warning', Boolean(message) && tone === 'warning');
+    element.classList.toggle('is-error', Boolean(message) && tone !== 'warning');
+  }
+
+  function recommendedLimitWarnings(values, group = modelState.productGroup) {
+    const spec = activeProductSpec(group);
+    const warnings = [];
+    const width = Number(values && values.width);
+    const depth = Number(values && values.depth);
+    const panelCount = Number(values && values.panelCount);
+    if (Number.isFinite(width) && width > spec.widthMax) {
+      warnings.push(`Önerilen maksimum genişlik ${spec.widthMax} mm'dir; ${Math.round(width)} mm standart sınır dışıdır; çizime engel olmaz.`);
+    }
+    if (Number.isFinite(depth) && depth > spec.depthMax) {
+      warnings.push(`Önerilen maksimum açılım ${spec.depthMax} mm'dir; ${Math.round(depth)} mm standart sınır dışıdır; çizime engel olmaz.`);
+    }
+    if (Number.isFinite(panelCount) && panelCount > spec.panelMax && !(Number.isFinite(depth) && depth > spec.depthMax)) {
+      warnings.push(`Önerilen maksimum panel sayısı ${spec.panelMax}'tir; ${Math.round(panelCount)} panel standart önerinin üzerindedir; çizime engel olmaz.`);
+    }
+    return warnings;
+  }
+
+  function showRecommendedLimitWarnings(values, group = modelState.productGroup) {
+    const warnings = recommendedLimitWarnings(values, group);
+    setFreedomValidation(warnings.join(' '), warnings.length ? 'warning' : 'error');
+    return warnings;
   }
 
   function syncProjectionFromPanelCount() {
@@ -580,11 +841,13 @@
     const spec = activeProductSpec();
     setFreedomValidation('');
     if (count === null) return;
-    if (count < spec.panelMin || count > spec.panelMax) {
-      setFreedomValidation(`Panel sayısı ${spec.panelMin}–${spec.panelMax} arasında olmalıdır.`);
+    if (count < spec.panelMin) {
+      setFreedomValidation(`Panel sayısı en az ${spec.panelMin} olmalıdır.`);
       return;
     }
-    $(ids.freedomDepth).value = String(projectionFromPanelCount(count));
+    const depth = projectionFromPanelCount(count);
+    $(ids.freedomDepth).value = String(depth);
+    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, panelCount: count });
   }
 
   function syncPanelCountFromProjection() {
@@ -592,11 +855,13 @@
     const spec = activeProductSpec();
     setFreedomValidation('');
     if (depth === null) return;
-    if (depth < spec.depthMin || depth > spec.depthMax) {
-      setFreedomValidation(`Açılım ${spec.depthMin}–${spec.depthMax} mm arasında olmalıdır.`);
+    if (depth < spec.depthMin) {
+      setFreedomValidation(`Açılım en az ${spec.depthMin} mm olmalıdır.`);
       return;
     }
-    $(ids.freedomPanelCount).value = String(panelCountFromProjection(depth));
+    const panelCount = panelCountFromProjection(depth);
+    $(ids.freedomPanelCount).value = String(panelCount);
+    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, panelCount });
   }
 
   function applyFreedomInputs() {
@@ -609,20 +874,20 @@
       setFreedomValidation('Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
       return false;
     }
-    if (width < spec.widthMin || width > spec.widthMax) {
-      setFreedomValidation(`Genişlik ${spec.widthMin}–${spec.widthMax} mm arasında olmalıdır.`);
+    if (width < spec.widthMin) {
+      setFreedomValidation(`Genişlik en az ${spec.widthMin} mm olmalıdır.`);
       return false;
     }
-    if (depth < spec.depthMin || depth > spec.depthMax) {
-      setFreedomValidation(`Açılım ${spec.depthMin}–${spec.depthMax} mm arasında olmalıdır.`);
+    if (depth < spec.depthMin) {
+      setFreedomValidation(`Açılım en az ${spec.depthMin} mm olmalıdır.`);
       return false;
     }
     if (height < spec.heightMin || (spec.heightMax && height > spec.heightMax)) {
       setFreedomValidation(spec.heightMax ? `Yükseklik ${spec.heightMin}–${spec.heightMax} mm arasında olmalıdır.` : `Yükseklik en az ${spec.heightMin} mm olmalıdır.`);
       return false;
     }
-    if (panelCount < spec.panelMin || panelCount > spec.panelMax) {
-      setFreedomValidation(`Panel sayısı ${spec.panelMin}–${spec.panelMax} arasında olmalıdır.`);
+    if (panelCount < spec.panelMin) {
+      setFreedomValidation(`Panel sayısı en az ${spec.panelMin} olmalıdır.`);
       return false;
     }
     const previous = { width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: modelState.panelCount };
@@ -635,8 +900,8 @@
       setFreedomValidation('Bu ölçüler mevcut profil kesitleri için yetersiz.');
       return false;
     }
-    setFreedomValidation('');
     renderViewer();
+    showRecommendedLimitWarnings({ width, depth, panelCount });
     return true;
   }
 
@@ -1340,10 +1605,7 @@
         ['BETWEEN POSTS', 'Dikme Arası'],
         ['FRONT OF POSTS', 'Dikmenin Önü']
       ],
-      fabricColors: [
-        ['SOLTIS', 'Soltis'],
-        ['OTHER', 'Diğer']
-      ],
+      fabricColors: [['7635-52101', '7635-52101']],
       cableDirections: [
         ['BACK', 'Arkadan'],
         ['TOP', 'Üstten'],
@@ -1359,14 +1621,240 @@
     }
   };
 
+  const COLOR_FINISHES = [
+    { value: 'GLOSS', label: 'Parlak', detail: 'Daha belirgin yansıma', roughness: 0.16, metalness: 0.28 },
+    { value: 'MATTE', label: 'Mat', detail: 'Daha yumuşak yansıma', roughness: 0.48, metalness: 0.16 },
+    { value: 'TEXTURE', label: 'Texture', detail: 'Daha pütürlü yüzey görünümü', roughness: 0.84, metalness: 0.08 }
+  ];
+
+  const GLASS_COLOR_OPTIONS = [
+    ['TRANSPARENT', 'Şeffaf'],
+    ['FUME', 'Füme'],
+    ['BRONZE', 'Bronz'],
+    ['LOW-E GLASS', 'Low-e Cam'],
+    ['OTHER', 'Diğer']
+  ];
+
+  const ZIP_FABRIC_CATALOG = [
+    {
+      title: 'Sun-Store',
+      pages: [
+        {
+          image: 'assets/fabric-pages/sun-store/sun-store-page-1.jpg',
+          items: [
+            { value: '7635-52101', left: '52.0362%', top: '2.2805%', width: '39.7059%', height: '14.1961%', tone: '#f7f8f1', texture: 'assets/fabric-pages/sun-store/textures/7635-52101.png', tileMm: 520 },
+            { value: '7635-52102', left: '8.2579%', top: '16.5336%', width: '39.5928%', height: '13.9681%', tone: '#cfd1cc', texture: 'assets/fabric-pages/sun-store/textures/7635-52102.png', tileMm: 520 },
+            { value: '7635-52103', left: '52.4887%', top: '16.5336%', width: '39.5928%', height: '14.1391%', tone: '#a1a39e', texture: 'assets/fabric-pages/sun-store/textures/7635-52103.png', tileMm: 520 },
+            { value: '7635-52105', left: '8.2579%', top: '30.7868%', width: '39.5928%', height: '14.1961%', tone: '#5d6568', texture: 'assets/fabric-pages/sun-store/textures/7635-52105.png', tileMm: 520 },
+            { value: '7635-52106', left: '52.2624%', top: '30.7868%', width: '39.5928%', height: '14.1961%', tone: '#4f575a', texture: 'assets/fabric-pages/sun-store/textures/7635-52106.png', tileMm: 520 },
+            { value: '7635-52107', left: '8.1448%', top: '45.2680%', width: '39.5928%', height: '14.1391%', tone: '#33373a', texture: 'assets/fabric-pages/sun-store/textures/7635-52107.png', tileMm: 520 },
+            { value: '7635-52173', left: '52.0362%', top: '45.2109%', width: '39.5928%', height: '14.0251%', tone: '#f7f7d7', texture: 'assets/fabric-pages/sun-store/textures/7635-52173.png', tileMm: 520 },
+            { value: '7635-52174', left: '8.3710%', top: '60.0342%', width: '39.5928%', height: '14.0251%', tone: '#f9f9e8', texture: 'assets/fabric-pages/sun-store/textures/7635-52174.png', tileMm: 520 },
+            { value: '7635-52176', left: '51.6968%', top: '60.0342%', width: '39.7059%', height: '14.0251%', tone: '#b9ac8a', texture: 'assets/fabric-pages/sun-store/textures/7635-52176.png', tileMm: 520 },
+            { value: '7635-52142', left: '8.3710%', top: '76.6819%', width: '38.6878%', height: '14.8233%', tone: '#696f72', texture: 'assets/fabric-pages/sun-store/textures/7635-52142.png', tileMm: 520 },
+            { value: '7635-52144', left: '51.6968%', top: '76.6819%', width: '39.5928%', height: '14.1391%', tone: '#323639', texture: 'assets/fabric-pages/sun-store/textures/7635-52144.png', tileMm: 520 }
+          ]
+        },
+        {
+          image: 'assets/fabric-pages/sun-store/sun-store-page-2.jpg',
+          items: [
+            { value: '92-2044', left: '53.6830%', top: '0.7412%', width: '39.2857%', height: '12.5428%', tone: '#f7f6f1', texture: 'assets/fabric-pages/sun-store/textures/92-2044.png', tileMm: 460 },
+            { value: '92-2135', left: '7.2545%', top: '13.0559%', width: '39.0625%', height: '12.8848%', tone: '#9e988d', texture: 'assets/fabric-pages/sun-store/textures/92-2135.png', tileMm: 460 },
+            { value: '92-2171', left: '53.7946%', top: '13.0559%', width: '39.0625%', height: '12.8278%', tone: '#909899', texture: 'assets/fabric-pages/sun-store/textures/92-2171.png', tileMm: 460 },
+            { value: '92-2043', left: '7.0312%', top: '25.7127%', width: '38.9509%', height: '12.8848%', tone: '#343635', texture: 'assets/fabric-pages/sun-store/textures/92-2043.png', tileMm: 460 },
+            { value: '92-2047', left: '53.3482%', top: '25.6556%', width: '38.9509%', height: '12.8848%', tone: '#2c3135', texture: 'assets/fabric-pages/sun-store/textures/92-2047.png', tileMm: 460 },
+            { value: '86-2044', left: '53.5714%', top: '38.3694%', width: '39.0625%', height: '12.9418%', tone: '#f5f4e9', texture: 'assets/fabric-pages/sun-store/textures/86-2044.png', tileMm: 420 },
+            { value: '86-2135', left: '7.1429%', top: '51.0832%', width: '39.0625%', height: '12.8278%', tone: '#9a958a', texture: 'assets/fabric-pages/sun-store/textures/86-2135.png', tileMm: 420 },
+            { value: '86-2171', left: '53.5714%', top: '51.0262%', width: '38.9509%', height: '12.8848%', tone: '#8f9899', texture: 'assets/fabric-pages/sun-store/textures/86-2171.png', tileMm: 420 },
+            { value: '86-2043', left: '7.1429%', top: '64.2531%', width: '39.0625%', height: '12.8848%', tone: '#393c3b', texture: 'assets/fabric-pages/sun-store/textures/86-2043.png', tileMm: 420 },
+            { value: '86-2047', left: '53.3482%', top: '64.2531%', width: '39.0625%', height: '12.8848%', tone: '#31363a', texture: 'assets/fabric-pages/sun-store/textures/86-2047.png', tileMm: 420 },
+            { value: 'W88-8102', left: '7.1429%', top: '78.1072%', width: '39.0625%', height: '16.1345%', tone: '#f7f6e2', texture: 'assets/fabric-pages/sun-store/textures/W88-8102.png', tileMm: 420 },
+            { value: 'W88-2047', left: '53.3482%', top: '78.1072%', width: '39.0625%', height: '16.2486%', tone: '#262b33', texture: 'assets/fabric-pages/sun-store/textures/W88-2047.png', tileMm: 420 }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const ZIP_FABRIC_OPTIONS = ZIP_FABRIC_CATALOG.flatMap((section) => section.pages.flatMap((page) => page.items.map((item) => ({
+    value: item.value,
+    label: item.value,
+    line: section.title,
+    hex: item.tone || '#8b9096'
+  }))));
+
+  function normalizeColorFinish(value, fallback = 'MATTE') {
+    return COLOR_FINISHES.some((item) => item.value === value) ? value : fallback;
+  }
+
+  function finishMeta(value) {
+    return COLOR_FINISHES.find((item) => item.value === normalizeColorFinish(value)) || COLOR_FINISHES[1];
+  }
+
+  function finishLabel(value) {
+    return finishMeta(value).label;
+  }
+
+  function normalizeGlassColor(value) {
+    const raw = String(value || '').toUpperCase();
+    if (raw === 'GREY') return 'FUME';
+    if (['TRANSPARENT', 'FUME', 'BRONZE', 'LOW-E GLASS', 'OTHER'].includes(raw)) return raw;
+    return 'TRANSPARENT';
+  }
+
+  function normalizeGlassThickness(value) {
+    const raw = String(value || '').toUpperCase();
+    return ['8 MM', '10 MM', 'INSULATED GLASS'].includes(raw) ? raw : '10 MM';
+  }
+
+  function glassPreferenceState() {
+    const current = modelState.glassPreferences || defaults.glassPreferences;
+    const normalized = {
+      color: normalizeGlassColor(current && current.color),
+      customColor: String(current && current.customColor || ''),
+      thickness: normalizeGlassThickness(current && current.thickness)
+    };
+    if (normalized.color !== 'OTHER') normalized.customColor = '';
+    modelState.glassPreferences = normalized;
+    return normalized;
+  }
+
+  function glassThicknessValues(type, series) {
+    if (type === 'guillotine') {
+      return (series === 'K SERIES' ? PRODUCT_OPTIONS.guillotine.thicknessK : PRODUCT_OPTIONS.guillotine.thicknessA).map((item) => item[0]);
+    }
+    if (type === 'sliding') {
+      return (series === 'K SERIES' ? PRODUCT_OPTIONS.sliding.thicknessK : PRODUCT_OPTIONS.sliding.thicknessA).map((item) => item[0]);
+    }
+    if (type === 'door' || type === 'fixed') return PRODUCT_OPTIONS.sliding.thicknessA.map((item) => item[0]);
+    return [];
+  }
+
+  function compatibleGlassThickness(type, series, preferredThickness, glassColor) {
+    const values = glassThicknessValues(type, series);
+    if (!values.length) return '';
+    const preferred = normalizeGlassThickness(preferredThickness);
+    if (normalizeGlassColor(glassColor) === 'LOW-E GLASS' && values.includes('INSULATED GLASS')) return 'INSULATED GLASS';
+    if (values.includes(preferred)) return preferred;
+    if (preferred === '10 MM' && values.includes('8 MM')) return '8 MM';
+    if (preferred === '8 MM' && values.includes('INSULATED GLASS')) return 'INSULATED GLASS';
+    if (values.includes('INSULATED GLASS')) return 'INSULATED GLASS';
+    return values[0];
+  }
+
+  function glassSeriesForDraft(draft) {
+    if (draft && (draft.type === 'sliding' || draft.type === 'guillotine')) return draft.series === 'K SERIES' ? 'K SERIES' : 'A SERIES';
+    return 'A SERIES';
+  }
+
+  function rememberGlassColorFromForm() {
+    const preference = glassPreferenceState();
+    const color = normalizeGlassColor($(ids.productGlassColor).value);
+    preference.color = color;
+    preference.customColor = color === 'OTHER' ? String($(ids.productCustomGlass).value || '') : '';
+    if (color === 'LOW-E GLASS') {
+      const type = $(ids.productType).value;
+      const series = glassSeriesForDraft({ type, series: $(ids.productSeries).value });
+      const compatible = compatibleGlassThickness(type, series, 'INSULATED GLASS', color);
+      if (compatible) {
+        preference.thickness = compatible;
+        $(ids.productGlassThickness).value = compatible;
+      }
+    }
+    modelState.glassPreferences = preference;
+  }
+
+  function rememberGlassThicknessFromForm() {
+    const preference = glassPreferenceState();
+    preference.thickness = normalizeGlassThickness($(ids.productGlassThickness).value);
+    modelState.glassPreferences = preference;
+  }
+
+  function rememberGlassPreferencesFromDraft(draft) {
+    if (!draft || draft.type === 'zip') return;
+    const preference = glassPreferenceState();
+    preference.color = normalizeGlassColor(draft.glassColor);
+    preference.customColor = preference.color === 'OTHER' ? String(draft.customGlassColor || '') : '';
+    const series = glassSeriesForDraft(draft);
+    const automaticFallback = compatibleGlassThickness(draft.type, series, preference.thickness, preference.color);
+    const supported = glassThicknessValues(draft.type, series);
+    if (supported.includes(preference.thickness) || draft.glassThickness !== automaticFallback) {
+      preference.thickness = normalizeGlassThickness(draft.glassThickness);
+    }
+    modelState.glassPreferences = preference;
+  }
+
+  function zipFabricByCode(value) {
+    return ZIP_FABRIC_OPTIONS.find((item) => item.value === value) || ZIP_FABRIC_OPTIONS[0];
+  }
+
+  function setProductFabricValue(value) {
+    const option = zipFabricByCode(value);
+    if ($(ids.productFabric)) $(ids.productFabric).value = option.value;
+    setText(ids.productFabricValue, option.label);
+  }
+
+  function createFabricHotspotButton(item, selectedValue) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'fabric-page-hotspot' + (selectedValue === item.value ? ' is-selected' : '');
+    button.setAttribute('style', `left:${item.left};top:${item.top};width:${item.width};height:${item.height};`);
+    button.setAttribute('data-value', item.value);
+    button.title = item.value;
+    button.setAttribute('aria-label', item.value);
+    button.innerHTML = `<span>${item.value}</span>`;
+    button.addEventListener('click', () => {
+      setProductFabricValue(item.value);
+      closeProductFabricCatalog();
+      $(ids.productValidation).textContent = '';
+    });
+    return button;
+  }
+
+  function renderFabricCards(selectedValue) {
+    const container = $(ids.productFabricCards);
+    if (!container) return;
+    container.innerHTML = '';
+    const selected = zipFabricByCode(selectedValue).value;
+    ZIP_FABRIC_CATALOG.forEach((section) => {
+      const sectionEl = document.createElement('section');
+      sectionEl.className = 'fabric-page-section';
+      const heading = document.createElement('div');
+      heading.className = 'fabric-page-section-head';
+      heading.innerHTML = `<strong>${section.title}</strong><span>Gerçek katalog sayfası üzerinden seçim yapın</span>`;
+      sectionEl.appendChild(heading);
+      const stack = document.createElement('div');
+      stack.className = 'fabric-page-stack-inner';
+      section.pages.forEach((page, index) => {
+        const card = document.createElement('article');
+        card.className = 'fabric-page-card';
+        const overlay = document.createElement('div');
+        overlay.className = 'fabric-page-overlay';
+        const img = document.createElement('img');
+        img.src = page.image;
+        img.alt = `${section.title} sayfa ${index + 1}`;
+        img.loading = 'lazy';
+        overlay.appendChild(img);
+        page.items.forEach((item) => overlay.appendChild(createFabricHotspotButton(item, selected)));
+        card.appendChild(overlay);
+        stack.appendChild(card);
+      });
+      sectionEl.appendChild(stack);
+      container.appendChild(sectionEl);
+    });
+  }
+
   function productDefaults(type) {
+    const preference = glassPreferenceState();
+    const defaultGlass = preference.color;
+    const customGlass = preference.color === 'OTHER' ? preference.customColor : '';
     if (type === 'zip') {
       return {
         type: 'zip',
         series: 'G SERIES',
         subtype: '100x100 BOX',
         placementLocation: 'BETWEEN POSTS',
-        fabricColor: 'SOLTIS',
+        fabricColor: ZIP_FABRIC_OPTIONS[0].value,
         customFabricColor: '',
         cableDirection: 'BACK',
         motorDirection: 'RIGHT',
@@ -1383,19 +1871,20 @@
         activeLeaf: 'RIGHT',
         doorOpenDirection: 'OUTWARD',
         handleType: 'NORMAL',
+        movingLeafHeight: 2200,
         topFixedHeight: 500,
         view: 'OUTSIDE VIEW',
-        glassThickness: '10 MM',
-        glassColor: 'TRANSPARENT',
-        customGlassColor: ''
+        glassThickness: compatibleGlassThickness('door', 'A SERIES', preference.thickness, defaultGlass),
+        glassColor: defaultGlass,
+        customGlassColor: customGlass
       };
     }
     if (type === 'fixed') {
       return {
         type: 'fixed',
-        glassThickness: '10 MM',
-        glassColor: 'TRANSPARENT',
-        customGlassColor: '',
+        glassThickness: compatibleGlassThickness('fixed', 'A SERIES', preference.thickness, defaultGlass),
+        glassColor: defaultGlass,
+        customGlassColor: customGlass,
         verticalDivisions: 0,
         horizontalDivisions: 1,
         horizontalHeights: ''
@@ -1407,9 +1896,9 @@
         series: 'A SERIES',
         subtype: 'CLEANABLE',
         mechanism: 'CHAIN',
-        glassThickness: '8 MM',
-        glassColor: 'TRANSPARENT',
-        customGlassColor: '',
+        glassThickness: compatibleGlassThickness('guillotine', 'A SERIES', preference.thickness, defaultGlass),
+        glassColor: defaultGlass,
+        customGlassColor: customGlass,
         panels: 3,
         panelType: '1+2',
         motorDirection: 'RIGHT',
@@ -1428,9 +1917,9 @@
       subtype: 'WITH THRESHOLD',
       openingType: 'SIDE OPENING',
       openingDirection: 'RIGHT',
-      glassThickness: '10 MM',
-      glassColor: 'TRANSPARENT',
-      customGlassColor: '',
+      glassThickness: compatibleGlassThickness('sliding', 'A SERIES', preference.thickness, defaultGlass),
+      glassColor: defaultGlass,
+      customGlassColor: customGlass,
       panels: 4,
       collectionState: 'NORMAL'
     };
@@ -1455,7 +1944,7 @@
         : PRODUCT_OPTIONS.zip.subtypesG.map((item) => item[0]);
       if (!validTypes.includes(normalized.subtype)) normalized.subtype = validTypes[0];
       normalized.placementLocation = ['FRONT OF POSTS','OUTSIDE POSTS'].includes(normalized.placementLocation) ? 'FRONT OF POSTS' : 'BETWEEN POSTS';
-      normalized.fabricColor = normalized.fabricColor === 'OTHER' ? 'OTHER' : 'SOLTIS';
+      normalized.fabricColor = zipFabricByCode(normalized.fabricColor).value;
       normalized.customFabricColor = String(normalized.customFabricColor || '');
       normalized.cableDirection = ['BACK', 'TOP', 'SIDE'].includes(normalized.cableDirection) ? normalized.cableDirection : 'BACK';
       normalized.motorDirection = normalized.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
@@ -1466,6 +1955,7 @@
     if (type === 'guillotine' && normalized.subtype === 'STANDARD') normalized.subtype = 'CLEANABLE';
     if (type === 'guillotine' && normalized.bottomPanelMode === 'WINDOW') normalized.bottomPanelMode = 'VASISTAS';
     if (type === 'guillotine') {
+      normalized.motorDirection = normalized.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
       normalized.bottomPanelHinge = 'BOTTOM';
       normalized.view = 'OUTSIDE VIEW';
       if (normalized.subtype === 'CLEANABLE') {
@@ -1488,18 +1978,20 @@
       normalized.activeLeaf = normalized.activeLeaf === 'LEFT' ? 'LEFT' : 'RIGHT';
       normalized.doorOpenDirection = normalized.doorOpenDirection === 'INWARD' ? 'INWARD' : 'OUTWARD';
       normalized.handleType = normalized.handleType === 'PANIC' ? 'PANIC' : 'NORMAL';
+      const hasStoredMovingHeight = placement && Number.isFinite(Number(placement.movingLeafHeight));
+      normalized.movingLeafHeight = hasStoredMovingHeight ? Math.max(1200, Math.round(Number(placement.movingLeafHeight))) : null;
       normalized.topFixedHeight = Math.max(250, Math.min(1200, Math.round(Number(normalized.topFixedHeight) || 500)));
       normalized.view = 'OUTSIDE VIEW';
-      normalized.glassThickness = ['8 MM','10 MM','INSULATED GLASS'].includes(String(normalized.glassThickness).toUpperCase()) ? String(normalized.glassThickness).toUpperCase() : '10 MM';
-      normalized.glassColor = normalized.glassColor || 'TRANSPARENT';
+      normalized.glassThickness = compatibleGlassThickness('door', 'A SERIES', normalized.glassThickness, normalized.glassColor);
+      normalized.glassColor = normalizeGlassColor(normalized.glassColor || glassPreferenceState().color);
       normalized.customGlassColor = String(normalized.customGlassColor || '');
       normalized.panels = 0;
       delete normalized.series;
       delete normalized.subtype;
     }
     if (type === 'fixed') {
-      normalized.glassThickness = ['8 MM','10 MM','INSULATED GLASS'].includes(String(normalized.glassThickness).toUpperCase()) ? String(normalized.glassThickness).toUpperCase() : '10 MM';
-      normalized.glassColor = normalized.glassColor || 'TRANSPARENT';
+      normalized.glassThickness = compatibleGlassThickness('fixed', 'A SERIES', normalized.glassThickness, normalized.glassColor);
+      normalized.glassColor = normalizeGlassColor(normalized.glassColor || glassPreferenceState().color);
       normalized.customGlassColor = String(normalized.customGlassColor || '');
       normalized.verticalDivisions = Math.max(0, Math.min(20, Math.round(Number(normalized.verticalDivisions || (Number(normalized.verticalCount) ? Number(normalized.verticalCount) + 1 : 0)) || 0)));
       normalized.horizontalDivisions = Math.max(1, Math.min(10, Math.round(Number(normalized.horizontalDivisions || (Number.isFinite(Number(normalized.horizontalCount)) ? Number(normalized.horizontalCount) + 1 : 1)) || 1)));
@@ -1543,49 +2035,77 @@
     const fixed = '#cbd5e1';
     const moving = '#93c5fd';
     const accent = '#22c55e';
-    const topFixedTypes = DOOR_TOP_FIXED_TYPES.has(type);
-    const topBand = topFixedTypes ? '<rect x="12" y="10" width="136" height="14" rx="2" fill="'+fixed+'" stroke="'+stroke+'" stroke-width="1.5" />' : '';
-    const usableY = topFixedTypes ? 28 : 10;
-    const usableH = topFixedTypes ? 48 : 66;
-    const swingArrow = (x,w,hinge) => {
-      const startY = usableY + usableH - 8;
-      const endY = usableY + 10;
-      const radius = Math.max(18, Math.min(w * .62, usableH * .78));
-      if (hinge === 'RIGHT') {
-        const startX = x + w - 8;
-        const endX = x + 10;
-        return '<circle cx="'+startX+'" cy="'+startY+'" r="2.5" fill="'+accent+'" />'
-          + '<path d="M '+startX+' '+startY+' A '+radius+' '+radius+' 0 0 0 '+endX+' '+endY+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round" fill="none" />'
-          + '<path d="M '+endX+' '+endY+' L '+(endX+9)+' '+(endY-1)+' M '+endX+' '+endY+' L '+(endX+3)+' '+(endY+8)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />';
-      }
-      const startX = x + 8;
-      const endX = x + w - 10;
-      return '<circle cx="'+startX+'" cy="'+startY+'" r="2.5" fill="'+accent+'" />'
-        + '<path d="M '+startX+' '+startY+' A '+radius+' '+radius+' 0 0 1 '+endX+' '+endY+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round" fill="none" />'
-        + '<path d="M '+endX+' '+endY+' L '+(endX-9)+' '+(endY-1)+' M '+endX+' '+endY+' L '+(endX-3)+' '+(endY+8)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />';
-    };
-    const pane = (x,w,color,hinge='') => '<rect x="'+x+'" y="'+usableY+'" width="'+w+'" height="'+usableH+'" rx="2" fill="'+color+'" stroke="'+stroke+'" stroke-width="1.5" />'+(hinge ? swingArrow(x,w,hinge) : '');
-    let panes = '';
+    const leafWidth = 1000;
+    const sideFixedWidth = 1000;
+    const leafHeight = 2500;
+    const topFixedHeight = 500;
+    const maxWidth = 4000;
+    const maxHeight = leafHeight + topFixedHeight;
+    const margin = 140;
+    const hasTopFixed = DOOR_TOP_FIXED_TYPES.has(type);
+    const segments = [];
+    const addMoving = (hinge) => segments.push({ width: leafWidth, kind: 'moving', hinge });
+    const addFixed = () => segments.push({ width: sideFixedWidth, kind: 'fixed' });
+
     if (type === 'SINGLE' || type === 'TOP_FIXED') {
-      panes = pane(12, 136, moving, 'LEFT');
+      addMoving('LEFT');
     } else if (type === 'DOUBLE' || type === 'DOUBLE_TOP') {
-      panes = pane(12, 67, moving, 'LEFT') + pane(81, 67, moving, 'RIGHT');
+      addMoving('LEFT'); addMoving('RIGHT');
     } else if (type === 'LEFT_FIXED_RIGHT_MOVING' || type === 'LEFT_FIXED_TOP') {
-      panes = pane(12, 48, fixed) + pane(62, 86, moving, 'RIGHT');
+      addFixed(); addMoving('RIGHT');
     } else if (type === 'RIGHT_FIXED_LEFT_MOVING' || type === 'RIGHT_FIXED_TOP') {
-      panes = pane(12, 86, moving, 'LEFT') + pane(100, 48, fixed);
+      addMoving('LEFT'); addFixed();
     } else if (type === 'BOTH_FIXED_TOP') {
-      panes = pane(12, 34, fixed) + pane(48, 64, moving, 'LEFT') + pane(114, 34, fixed);
+      addFixed(); addMoving('LEFT'); addFixed();
     } else if (type === 'DOUBLE_LEFT_FIXED' || type === 'DOUBLE_LEFT_FIXED_TOP') {
-      panes = pane(12, 36, fixed) + pane(50, 47, moving, 'LEFT') + pane(99, 49, moving, 'RIGHT');
+      addFixed(); addMoving('LEFT'); addMoving('RIGHT');
     } else if (type === 'DOUBLE_RIGHT_FIXED_TOP') {
-      panes = pane(12, 49, moving, 'LEFT') + pane(63, 47, moving, 'RIGHT') + pane(112, 36, fixed);
+      addMoving('LEFT'); addMoving('RIGHT'); addFixed();
     } else if (type === 'DOUBLE_BOTH_FIXED_TOP') {
-      panes = pane(12, 28, fixed) + pane(42, 41, moving, 'LEFT') + pane(85, 41, moving, 'RIGHT') + pane(128, 20, fixed);
+      addFixed(); addMoving('LEFT'); addMoving('RIGHT'); addFixed();
     } else {
-      panes = pane(12, 136, moving, 'LEFT');
+      addMoving('LEFT');
     }
-    return '<svg viewBox="0 0 160 90" aria-hidden="true" focusable="false"><rect x="8" y="8" width="144" height="74" rx="4" fill="none" stroke="'+frame+'" stroke-width="3" />'+topBand+panes+'</svg>';
+
+    const totalWidth = segments.reduce((sum, segment) => sum + segment.width, 0);
+    const totalHeight = leafHeight + (hasTopFixed ? topFixedHeight : 0);
+    const originX = margin + (maxWidth - totalWidth) / 2;
+    const originY = margin + (maxHeight - totalHeight);
+    const leafY = originY + (hasTopFixed ? topFixedHeight : 0);
+    const inset = 45;
+    const strokeWidth = 58;
+
+    const swingArrow = (x, width, hinge) => {
+      const insetX = Math.max(120, width * 0.18);
+      const startX = hinge === 'RIGHT' ? x + width - insetX : x + insetX;
+      const endX = hinge === 'RIGHT' ? x + insetX + 40 : x + width - insetX - 40;
+      const startY = leafY + leafHeight - 300;
+      const endY = leafY + 520;
+      const radius = Math.max(320, Math.min(560, width * .46));
+      const sweep = hinge === 'RIGHT' ? 0 : 1;
+      const head = hinge === 'RIGHT'
+        ? `<path d="M ${endX} ${endY} l 92 -14 M ${endX} ${endY} l 34 84" stroke="${accent}" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />`
+        : `<path d="M ${endX} ${endY} l -92 -14 M ${endX} ${endY} l -34 84" stroke="${accent}" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />`;
+      return `<circle cx="${startX}" cy="${startY}" r="34" fill="${accent}" />`
+        + `<path d="M ${startX} ${startY} A ${radius} ${radius} 0 0 ${sweep} ${endX} ${endY}" stroke="${accent}" stroke-width="40" stroke-linecap="round" fill="none" />`
+        + head;
+    };
+
+    let panes = '';
+    let cursor = originX;
+    segments.forEach((segment) => {
+      const fill = segment.kind === 'moving' ? moving : fixed;
+      panes += `<rect x="${cursor + inset}" y="${leafY + inset}" width="${segment.width - inset * 2}" height="${leafHeight - inset * 2}" rx="42" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
+      if (segment.kind === 'moving') panes += swingArrow(cursor, segment.width, segment.hinge);
+      cursor += segment.width;
+    });
+
+    const topBand = hasTopFixed
+      ? `<rect x="${originX + inset}" y="${originY + inset}" width="${totalWidth - inset * 2}" height="${topFixedHeight - inset * 2}" rx="42" fill="${fixed}" stroke="${stroke}" stroke-width="${strokeWidth}" />`
+      : '';
+    return `<svg viewBox="0 0 ${maxWidth + margin * 2} ${maxHeight + margin * 2}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">`
+      + `<rect x="${originX}" y="${originY}" width="${totalWidth}" height="${totalHeight}" rx="55" fill="none" stroke="${frame}" stroke-width="82" />`
+      + topBand + panes + '</svg>';
   }
 
   function closeDoorTypePicker() {
@@ -1604,6 +2124,24 @@
     if (trigger) trigger.setAttribute('aria-expanded', 'true');
     const selected = $(ids.productDoorTypeCards).querySelector('.door-type-card.is-selected');
     if (selected && selected.focus) selected.focus();
+  }
+
+  function openProductFabricCatalog() {
+    const picker = $(ids.productFabricPicker);
+    const trigger = $(ids.productFabricTrigger);
+    if (!picker || $(ids.productType).value !== 'zip') return;
+    renderFabricCards($(ids.productFabric).value);
+    picker.hidden = false;
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    const first = $(ids.productFabricCards).querySelector('.fabric-page-hotspot.is-selected') || $(ids.productFabricCards).querySelector('.fabric-page-hotspot');
+    if (first && first.focus) first.focus();
+  }
+
+  function closeProductFabricCatalog() {
+    const picker = $(ids.productFabricPicker);
+    const trigger = $(ids.productFabricTrigger);
+    if (picker) picker.hidden = true;
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
   }
 
   function renderDoorTypeCards(selected) {
@@ -1645,12 +2183,31 @@
     setHidden(ids.productDoorHeightSummaryWrap, hidden);
   }
 
-  function doorTopFixedMetrics(zone, topFixedHeight) {
-    const fixedHeight = Math.max(250, Math.min(1200, Math.round(Number(topFixedHeight) || 500)));
-    if (!zone) return { fixedHeight, movingHeight: null };
+  function doorTopFixedAvailableHeight(zone) {
+    if (!zone) return null;
     const fittedHeight = Math.max(120, Number(zone.height || 0) - 5);
-    const movingHeight = Math.max(600, Math.round(fittedHeight - 87 - fixedHeight));
-    return { fixedHeight, movingHeight };
+    return Math.max(0, Math.round(fittedHeight - 87));
+  }
+
+  function doorTopFixedMetrics(zone, movingLeafHeight, fallbackTopFixedHeight = 500) {
+    const availableHeight = doorTopFixedAvailableHeight(zone);
+    const fallbackFixed = Math.max(250, Math.min(1200, Math.round(Number(fallbackTopFixedHeight) || 500)));
+    const fallbackMoving = availableHeight === null ? 2200 : Math.max(600, availableHeight - fallbackFixed);
+    const requestedMoving = Number.isFinite(Number(movingLeafHeight)) ? Math.round(Number(movingLeafHeight)) : fallbackMoving;
+    if (availableHeight === null) {
+      return {
+        fixedHeight: fallbackFixed,
+        movingHeight: Math.max(1200, requestedMoving),
+        minMovingHeight: 1200,
+        maxMovingHeight: null,
+        availableHeight: null
+      };
+    }
+    const minMovingHeight = Math.max(1200, availableHeight - 1200);
+    const maxMovingHeight = Math.max(minMovingHeight, availableHeight - 250);
+    const movingHeight = Math.max(minMovingHeight, Math.min(maxMovingHeight, requestedMoving));
+    const fixedHeight = Math.max(250, availableHeight - movingHeight);
+    return { fixedHeight, movingHeight, minMovingHeight, maxMovingHeight, availableHeight };
   }
 
   function updateDoorTopFixedSummary() {
@@ -1658,14 +2215,19 @@
     setHidden(ids.productDoorHeightSummaryWrap, !isTopFixed);
     if (!isTopFixed) return;
     const zone = activeZone || (bulkProductZones && bulkProductZones[0]) || null;
-    const metrics = doorTopFixedMetrics(zone, $(ids.productDoorTopFixedHeight).value);
+    const seed = currentProductDraft();
+    const metrics = doorTopFixedMetrics(zone, $(ids.productDoorTopFixedHeight).value, seed.topFixedHeight);
+    $(ids.productDoorTopFixedHeight).min = String(metrics.minMovingHeight);
+    if (metrics.maxMovingHeight === null) $(ids.productDoorTopFixedHeight).removeAttribute('max');
+    else $(ids.productDoorTopFixedHeight).max = String(metrics.maxMovingHeight);
+    $(ids.productDoorTopFixedHeight).value = String(metrics.movingHeight);
     $(ids.productDoorFixedHeightValue).textContent = `${metrics.fixedHeight} mm`;
-    $(ids.productDoorMovingHeightValue).textContent = metrics.movingHeight === null ? '—' : `${metrics.movingHeight} mm`;
+    $(ids.productDoorMovingHeightValue).textContent = `${metrics.movingHeight} mm`;
   }
 
   function currentProductDraft() {
     const type = $(ids.productType).value;
-    const colorValue = $(ids.productGlassColor).value;
+    const colorValue = normalizeGlassColor($(ids.productGlassColor).value);
     return {
       type,
       series: $(ids.productSeries).value,
@@ -1677,8 +2239,8 @@
       glassThickness: $(ids.productGlassThickness).value,
       glassColor: colorValue,
       customGlassColor: $(ids.productCustomGlass).value,
-      fabricColor: colorValue,
-      customFabricColor: $(ids.productCustomGlass).value,
+      fabricColor: $(ids.productFabric).value,
+      customFabricColor: '',
       panels: Number($(ids.productPanels).value),
       verticalDivisions: Number($(ids.productFixedVerticalCount).value),
       horizontalDivisions: Number($(ids.productFixedHorizontalCount).value),
@@ -1688,7 +2250,8 @@
       activeLeaf: $(ids.productDoorActiveLeaf).value,
       doorOpenDirection: $(ids.productDoorOpenDirection).value,
       handleType: $(ids.productDoorHandleType).value,
-      topFixedHeight: Number($(ids.productDoorTopFixedHeight).value),
+      movingLeafHeight: Number($(ids.productDoorTopFixedHeight).value),
+      topFixedHeight: null,
       panelType: $(ids.productPanelType).value,
       cableDirection: $(ids.productPanelType).value,
       motorDirection: $(ids.productMotorDirection).value,
@@ -1713,13 +2276,7 @@
       ['A SERIES', 'A Serisi'],
       ['K SERIES', 'K Serisi']
     ];
-    const glassColors = [
-      ['TRANSPARENT', 'Şeffaf'],
-      ['GREY', 'Gri'],
-      ['BRONZE', 'Bronz'],
-      ['LOW-E GLASS', 'Low-e Cam'],
-      ['OTHER', 'Diğer']
-    ];
+    const glassColors = GLASS_COLOR_OPTIONS;
 
     setDoorFieldsHidden(true);
     if ($(ids.productDoorTypeCards)) $(ids.productDoorTypeCards).innerHTML = '';
@@ -1732,10 +2289,15 @@
       fillSelect($(ids.productDoorActiveLeaf), PRODUCT_OPTIONS.door.activeLeaves, draft.activeLeaf);
       fillSelect($(ids.productDoorOpenDirection), PRODUCT_OPTIONS.door.openDirections, draft.doorOpenDirection);
       fillSelect($(ids.productDoorHandleType), PRODUCT_OPTIONS.door.handles, draft.handleType);
-      fillSelect($(ids.productGlassThickness), PRODUCT_OPTIONS.sliding.thicknessA, draft.glassThickness);
+      fillSelect($(ids.productGlassThickness), PRODUCT_OPTIONS.sliding.thicknessA, compatibleGlassThickness('door', 'A SERIES', draft.glassThickness, draft.glassColor));
       fillSelect($(ids.productGlassColor), glassColors, draft.glassColor);
       const doorType = $(ids.productDoorType).value;
-      $(ids.productDoorTopFixedHeight).value = String(Math.max(250, Math.min(1200, Math.round(Number(draft.topFixedHeight) || 500))));
+      const doorZone = activeZone || (bulkProductZones && bulkProductZones[0]) || null;
+      const doorMetrics = doorTopFixedMetrics(doorZone, draft.movingLeafHeight, draft.topFixedHeight);
+      $(ids.productDoorTopFixedHeight).value = String(doorMetrics.movingHeight);
+      $(ids.productDoorTopFixedHeight).min = String(doorMetrics.minMovingHeight);
+      if (doorMetrics.maxMovingHeight === null) $(ids.productDoorTopFixedHeight).removeAttribute('max');
+      else $(ids.productDoorTopFixedHeight).max = String(doorMetrics.maxMovingHeight);
       setHidden(ids.productSeriesWrap, true);
       setHidden(ids.productSubtypeWrap, true);
       setHidden(ids.productPlacementWrap, true);
@@ -1778,7 +2340,7 @@
     }
 
     if (isFixed) {
-      fillSelect($(ids.productGlassThickness), PRODUCT_OPTIONS.sliding.thicknessA, draft.glassThickness);
+      fillSelect($(ids.productGlassThickness), PRODUCT_OPTIONS.sliding.thicknessA, compatibleGlassThickness('fixed', 'A SERIES', draft.glassThickness, draft.glassColor));
       fillSelect($(ids.productGlassColor), glassColors, draft.glassColor);
       const fixedZone = activeZone || (bulkProductZones && bulkProductZones[0]) || null;
       const frame = 55;
@@ -1850,7 +2412,6 @@
         draft.subtype
       );
       fillSelect($(ids.productPlacement), PRODUCT_OPTIONS.zip.placements, draft.placementLocation);
-      fillSelect($(ids.productGlassColor), PRODUCT_OPTIONS.zip.fabricColors, draft.fabricColor);
       fillSelect($(ids.productPanelType), PRODUCT_OPTIONS.zip.cableDirections, draft.cableDirection);
 
       setHidden(ids.productPlacementWrap, false);
@@ -1858,7 +2419,8 @@
       setHidden(ids.productOpeningWrap, true);
       setHidden(ids.productDirectionWrap, true);
       setHidden(ids.productGlassThicknessWrap, true);
-      setHidden(ids.productGlassColorWrap, false);
+      setHidden(ids.productGlassColorWrap, true);
+      setHidden(ids.productFabricWrap, false);
       setHidden(ids.productPanelsWrap, true);
       setHidden(ids.productPanelTypeWrap, false);
       setHidden(ids.productMotorDirectionWrap, false);
@@ -1868,18 +2430,17 @@
       setHidden(ids.cleanableWindowSection, true);
       setHidden(ids.collectingDisplaySection, true);
       setHidden(ids.slidingCollectionSection, true);
+      setHidden(ids.productCustomGlassWrap, true);
 
-      $(ids.productGlassColorLabel).textContent = 'Kumaş Rengi';
-      $(ids.productCustomGlassLabel).textContent = 'Özel Kumaş Rengi';
       $(ids.productPanelTypeLabel).textContent = 'Kablo Çıkış Yönü';
-      $(ids.productCustomGlass).value = draft.customFabricColor || '';
+      setProductFabricValue(draft.fabricColor);
+      renderFabricCards(draft.fabricColor);
       $(ids.productMotorDirection).value = draft.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
       $(ids.productView).value = 'OUTSIDE VIEW';
       $(ids.productPanels).min = '1';
       $(ids.productPanels).max = '1';
       $(ids.productPanels).value = '1';
       $(ids.productPanels).disabled = true;
-      setHidden(ids.productCustomGlassWrap, $(ids.productGlassColor).value !== 'OTHER');
       $(ids.productValidation).textContent = '';
       return;
     }
@@ -1892,13 +2453,14 @@
     setHidden(ids.productPlacementWrap, true);
     setHidden(ids.productGlassThicknessWrap, false);
     setHidden(ids.productGlassColorWrap, false);
+    setHidden(ids.productFabricWrap, true);
     $(ids.productGlassColorLabel).textContent = 'Cam Rengi';
     $(ids.productCustomGlassLabel).textContent = 'Özel Cam Rengi';
 
     if (isGuillotine) {
       fillSelect($(ids.productSubtype), series === 'K SERIES' ? PRODUCT_OPTIONS.guillotine.subtypesK : PRODUCT_OPTIONS.guillotine.subtypesA, draft.subtype);
       fillSelect($(ids.productMechanism), series === 'K SERIES' ? PRODUCT_OPTIONS.guillotine.mechanismsK : PRODUCT_OPTIONS.guillotine.mechanismsA, draft.mechanism);
-      fillSelect($(ids.productGlassThickness), series === 'K SERIES' ? PRODUCT_OPTIONS.guillotine.thicknessK : PRODUCT_OPTIONS.guillotine.thicknessA, draft.glassThickness);
+      fillSelect($(ids.productGlassThickness), series === 'K SERIES' ? PRODUCT_OPTIONS.guillotine.thicknessK : PRODUCT_OPTIONS.guillotine.thicknessA, compatibleGlassThickness('guillotine', series, draft.glassThickness, draft.glassColor));
       fillSelect($(ids.productPanelType), [['1+1', '1+1'], ['1+2', '1+2']], draft.panelType);
       setHidden(ids.productMechanismWrap, false);
       setHidden(ids.productOpeningWrap, true);
@@ -1912,7 +2474,7 @@
       $(ids.productPanelTypeLabel).textContent = 'Giyotin Panel Tipi';
       $(ids.productPanelType).value = ['1+1', '1+2'].includes(draft.panelType) ? draft.panelType : (Number(draft.panels) === 2 ? '1+1' : '1+2');
       $(ids.productPanels).value = $(ids.productPanelType).value === '1+1' ? '2' : '3';
-      $(ids.productMotorDirection).value = draft.motorDirection || 'RIGHT';
+      $(ids.productMotorDirection).value = draft.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
       $(ids.productView).value = 'OUTSIDE VIEW';
       $(ids.productMotorType).value = draft.motorType || 'SOMFY RTS';
       $(ids.productRemote).value = draft.remoteControl || '1 CHANNEL';
@@ -1940,7 +2502,7 @@
         centerOpening ? PRODUCT_OPTIONS.sliding.centerLayers : PRODUCT_OPTIONS.sliding.sideDirections,
         centerOpening ? (draft.openingDirection === 'INSIDE' ? 'INSIDE' : 'OUTSIDE') : (draft.openingDirection === 'LEFT' ? 'LEFT' : 'RIGHT')
       );
-      fillSelect($(ids.productGlassThickness), series === 'K SERIES' ? PRODUCT_OPTIONS.sliding.thicknessK : PRODUCT_OPTIONS.sliding.thicknessA, draft.glassThickness);
+      fillSelect($(ids.productGlassThickness), series === 'K SERIES' ? PRODUCT_OPTIONS.sliding.thicknessK : PRODUCT_OPTIONS.sliding.thicknessA, compatibleGlassThickness('sliding', series, draft.glassThickness, draft.glassColor));
       setHidden(ids.productMechanismWrap, true);
       setHidden(ids.productOpeningWrap, false);
       setHidden(ids.productDirectionWrap, false);
@@ -1978,7 +2540,8 @@
     const normalized = normalizePlacement(placement, placement && placement.type);
     $(ids.productType).value = normalized.type;
     $(ids.productSeries).value = normalized.series;
-    $(ids.productGlassColor).value = normalized.type === 'zip' ? normalized.fabricColor : normalized.glassColor;
+    $(ids.productGlassColor).value = normalized.glassColor;
+    setProductFabricValue(normalized.fabricColor);
     applyProductRules(normalized);
   }
 
@@ -2003,6 +2566,7 @@
   function switchProductType(type) {
     if (!activeZone) return;
     closeDoorTypePicker();
+    closeProductFabricCatalog();
     activeProductSlot = type === 'zip' ? 'zip' : 'primary';
     const candidate = activeProductSlot === 'zip' ? zipPlacement(activeZone.id) : primaryPlacement(activeZone.id);
     const existing = candidate && candidate.type === type ? candidate : null;
@@ -2012,6 +2576,7 @@
 
   function openProductDialog(zone, zones) {
     closeDoorTypePicker();
+    closeProductFabricCatalog();
     activeZone = zone;
     bulkProductZones = Array.isArray(zones) && zones.length > 1 ? zones.map((item) => ({ ...item })) : null;
     const primary = primaryPlacement(zone.id);
@@ -2036,6 +2601,7 @@
 
   function closeProductDialog() {
     closeDoorTypePicker();
+    closeProductFabricCatalog();
     activeZone = null;
     bulkProductZones = null;
     $(ids.productDialog).hidden = true;
@@ -2075,9 +2641,7 @@
         return 'Low-e Cam yalnızca Yalıtımlı Cam ile kullanılabilir.';
       }
     } else {
-      if (draft.fabricColor === 'OTHER' && !String(draft.customFabricColor || '').trim()) {
-        return 'Diğer kumaş rengi seçildiğinde özel kumaş rengini yazın.';
-      }
+      if (!zipFabricByCode(draft.fabricColor)) return 'Zip Perde kumaşı seçin.';
       if (!['BETWEEN POSTS', 'FRONT OF POSTS'].includes(draft.placementLocation)) {
         return 'Zip Perde yerleşim yerini seçin.';
       }
@@ -2094,9 +2658,14 @@
         const minWidth = DOOR_DOUBLE_TYPES.has(draft.doorType) ? 1200 : (wideDoor ? 1000 : 650);
         if (zone.width < minWidth || zone.height < 1800) return `${zone.label}: Seçilen Kapı tipi için alan ölçüsü yetersiz.`;
         if (DOOR_TOP_FIXED_TYPES.has(draft.doorType)) {
-          const fixedHeight = Math.round(Number(draft.topFixedHeight) || 500);
-          const movingHeight = Math.round(Math.max(120, Number(zone.height || 0) - 5) - 87 - fixedHeight);
-          if (fixedHeight < 250 || fixedHeight > 1200 || movingHeight < 1200) return `${zone.label}: Üst sabit cam yüksekliği 250–1200 mm arasında olmalı ve kalan kapı kanadı en az 1200 mm olmalıdır.`;
+          const availableHeight = doorTopFixedAvailableHeight(zone);
+          const movingHeight = Math.round(Number(draft.movingLeafHeight));
+          const fixedHeight = availableHeight === null ? NaN : availableHeight - movingHeight;
+          if (!Number.isFinite(movingHeight) || movingHeight < 1200 || fixedHeight < 250 || fixedHeight > 1200) {
+            const minMoving = availableHeight === null ? 1200 : Math.max(1200, availableHeight - 1200);
+            const maxMoving = availableHeight === null ? '—' : Math.max(minMoving, availableHeight - 250);
+            return `${zone.label}: Hareketli kapı kanadı yüksekliği ${minMoving}–${maxMoving} mm arasında olmalıdır.`;
+          }
         }
         continue;
       }
@@ -2150,7 +2719,8 @@
       draft.activeLeaf = draft.activeLeaf === 'LEFT' ? 'LEFT' : 'RIGHT';
       draft.doorOpenDirection = draft.doorOpenDirection === 'INWARD' ? 'INWARD' : 'OUTWARD';
       draft.handleType = draft.handleType === 'PANIC' ? 'PANIC' : 'NORMAL';
-      draft.topFixedHeight = Math.max(250, Math.min(1200, Math.round(Number(draft.topFixedHeight) || 500)));
+      draft.movingLeafHeight = Math.max(1200, Math.round(Number(draft.movingLeafHeight) || 2200));
+      draft.topFixedHeight = null;
       draft.panels = 0;
     } else if (draft.type === 'fixed') {
       delete draft.series;
@@ -2191,6 +2761,7 @@
       delete draft.bottomPanelHinge;
       draft.collectionState = draft.collectionState === 'COLLECTED' ? 'COLLECTED' : 'NORMAL';
     } else if (draft.type === 'guillotine') {
+      draft.motorDirection = draft.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
       delete draft.placementLocation;
       delete draft.fabricColor;
       delete draft.customFabricColor;
@@ -2212,8 +2783,8 @@
       }
     } else {
       draft.placementLocation = ['FRONT OF POSTS','OUTSIDE POSTS'].includes(draft.placementLocation) ? 'FRONT OF POSTS' : 'BETWEEN POSTS';
-      draft.fabricColor = draft.fabricColor === 'OTHER' ? 'OTHER' : 'SOLTIS';
-      draft.customFabricColor = String(draft.customFabricColor || '');
+      draft.fabricColor = zipFabricByCode(draft.fabricColor).value;
+      draft.customFabricColor = '';
       draft.cableDirection = ['BACK', 'TOP', 'SIDE'].includes(draft.cableDirection) ? draft.cableDirection : 'BACK';
       draft.motorDirection = draft.motorDirection === 'LEFT' ? 'LEFT' : 'RIGHT';
       draft.panels = 1;
@@ -2237,16 +2808,23 @@
       $(ids.productValidation).textContent = error;
       return;
     }
+    rememberGlassPreferencesFromDraft(draft);
     const targetZones = bulkProductZones && bulkProductZones.length ? bulkProductZones : [activeZone];
     targetZones.forEach((zone) => {
       if (draft.type === 'zip') {
         modelState.zipPlacements[zone.id] = JSON.parse(JSON.stringify(draft));
         const key = zipProductKey(zone.id);
-        if (!hasOwn(modelState.productOpenStates, key)) modelState.productOpenStates[key] = Boolean(modelState.productsOpen);
+        if (!hasOwn(modelState.productOpenStates, key)) modelState.productOpenStates[key] = true;
         modelState.panelStates[key] = effectiveProductOpen(key);
       } else {
-        modelState.placements[zone.id] = JSON.parse(JSON.stringify(draft));
-        if (!hasOwn(modelState.productOpenStates, zone.id)) modelState.productOpenStates[zone.id] = Boolean(modelState.productsOpen);
+        const placementDraft = JSON.parse(JSON.stringify(draft));
+        if (placementDraft.type === 'door' && DOOR_TOP_FIXED_TYPES.has(placementDraft.doorType)) {
+          const metrics = doorTopFixedMetrics(zone, placementDraft.movingLeafHeight, placementDraft.topFixedHeight);
+          placementDraft.movingLeafHeight = metrics.movingHeight;
+          placementDraft.topFixedHeight = metrics.fixedHeight;
+        }
+        modelState.placements[zone.id] = placementDraft;
+        if (!hasOwn(modelState.productOpenStates, zone.id)) modelState.productOpenStates[zone.id] = true;
       }
     });
     closeProductDialog();
@@ -2312,7 +2890,7 @@
     }
   });
 
-  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
+  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
     const W = width;
     const D = depth;
     const H = height;
@@ -2337,6 +2915,24 @@
     const panelMasterOpenJson = JSON.stringify(Boolean(panelMasterOpen));
     const toolboxSelectionModeJson = JSON.stringify(activeSelectionMode || null);
     const toolboxSelectionKeysJson = JSON.stringify(Array.isArray(activeSelectionKeys) ? activeSelectionKeys : []);
+    const zipFabricMeta = {};
+    ZIP_FABRIC_CATALOG.forEach((section) => section.pages.forEach((page) => page.items.forEach((item) => {
+      const embeddedTextureMap = window.P3DV_ZIP_FABRIC_TEXTURES || {};
+      zipFabricMeta[item.value] = {
+        image: page.image,
+        texture: item.texture || '',
+        textureData: embeddedTextureMap[item.value] || '',
+        tone: item.tone || '',
+        tileMm: Number(item.tileMm) || 500,
+        left: item.left,
+        top: item.top,
+        width: item.width,
+        height: item.height
+      };
+    })));
+    const zipFabricMetaJson = JSON.stringify(zipFabricMeta);
+    const systemColorValue = Number.parseInt(normalizeHexColor(systemColor && systemColor.hex, defaults.systemColor.hex).slice(1), 16);
+    const panelColorValue = Number.parseInt(normalizeHexColor(panelColor && panelColor.hex, defaults.panelColor.hex).slice(1), 16);
 
     return `<!doctype html>
 <html lang="en">
@@ -2379,6 +2975,12 @@ const productsOpen=${productsOpenJson};
 let productOpenStates=${productOpenStatesJson};
 let panelStates=${panelStatesJson};
 const panelMasterOpen=${panelMasterOpenJson};
+const SYSTEM_COLOR=${systemColorValue};
+const PANEL_COLOR=${panelColorValue};
+const DEFAULT_COLOR_MODE=${JSON.stringify(colorMode !== 'ral')};
+const SYSTEM_FINISH=${JSON.stringify(modelState.systemColor.finish)};
+const PANEL_FINISH=${JSON.stringify(modelState.panelColor.finish)};
+const ZIP_FABRIC_META=${zipFabricMetaJson};
 const DOOR_TOP_FIXED_TYPES=new Set(['TOP_FIXED','LEFT_FIXED_TOP','RIGHT_FIXED_TOP','BOTH_FIXED_TOP','DOUBLE_TOP','DOUBLE_LEFT_FIXED_TOP','DOUBLE_RIGHT_FIXED_TOP','DOUBLE_BOTH_FIXED_TOP']);
 let toolboxSelectionMode=${toolboxSelectionModeJson};
 let toolboxSelectionKeys=new Set(${toolboxSelectionKeysJson});
@@ -2410,6 +3012,7 @@ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawin
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;
+if('outputColorSpace' in renderer && THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
 const controls=new THREE.OrbitControls(camera,renderer.domElement);
@@ -2434,14 +3037,21 @@ controls.addEventListener('change',()=>{
 });
 controls.addEventListener('end',publishCameraState);
 
-scene.add(new THREE.AmbientLight(0xffffff,.72));
-const dir=new THREE.DirectionalLight(0xffffff,.88);
+scene.add(new THREE.AmbientLight(0xffffff,.6));
+scene.add(new THREE.HemisphereLight(0xe8f0ff,0x102033,.36));
+const dir=new THREE.DirectionalLight(0xffffff,1.02);
 dir.position.set(W*.35,H*1.1,D*.45);
 dir.castShadow=true;
 scene.add(dir);
-const fill=new THREE.DirectionalLight(0x88aaff,.35);
+const fill=new THREE.DirectionalLight(0x88aaff,.42);
 fill.position.set(-W*.45,H*.55,-D*.5);
 scene.add(fill);
+const rim=new THREE.DirectionalLight(0xffffff,.45);
+rim.position.set(-W*.7,H*.85,D*.9);
+scene.add(rim);
+const warm=new THREE.DirectionalLight(0xffe8c9,.18);
+warm.position.set(W*.1,H*.35,-D*.95);
+scene.add(warm);
 
 const floorSize=Math.max(W,D)*1.7;
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(floorSize,floorSize),new THREE.ShadowMaterial({opacity:.32}));
@@ -2512,9 +3122,124 @@ function editBeamSection(){
   buildModel(true);
 }
 
+function profileColor(defaultHex){
+  return DEFAULT_COLOR_MODE ? defaultHex : SYSTEM_COLOR;
+}
+
+function panelColor(defaultHex){
+  return DEFAULT_COLOR_MODE ? defaultHex : PANEL_COLOR;
+}
+
+function createTextureFinishMap(){
+  const canvas=document.createElement('canvas');
+  canvas.width=128;
+  canvas.height=128;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return null;
+  ctx.fillStyle='rgb(128,128,128)';
+  ctx.fillRect(0,0,128,128);
+  for(let y=0;y<128;y+=4){
+    for(let x=0;x<128;x+=4){
+      const wave=(Math.sin((x+y)*0.55)+Math.cos((x-y)*0.32))*0.5;
+      const grain=(wave*34)+((x*y)%17)-8;
+      const shade=Math.max(82,Math.min(176,128+grain));
+      ctx.fillStyle='rgb(' + shade + ',' + shade + ',' + shade + ')';
+      ctx.fillRect(x,y,4,4);
+    }
+  }
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.wrapS=THREE.RepeatWrapping;
+  texture.wrapT=THREE.RepeatWrapping;
+  texture.repeat.set(3.5,3.5);
+  texture.needsUpdate=true;
+  return texture;
+}
+
+const finishTextureMap=createTextureFinishMap();
+
+function finishMaterialSettings(finish,opacity,color){
+  const normalized=(finish==='GLOSS'||finish==='TEXTURE'||finish==='MATTE')?finish:'MATTE';
+  const base={
+    transparent: opacity < 1,
+    opacity,
+    depthWrite: opacity > .55,
+    side: THREE.DoubleSide
+  };
+  if(normalized==='GLOSS'){
+    return {
+      ...base,
+      roughness:.08,
+      metalness:.2,
+      clearcoat:1,
+      clearcoatRoughness:.06,
+      reflectivity:1
+    };
+  }
+  if(normalized==='TEXTURE'){
+    const textureSettings=finishTextureMap?{
+      bumpMap:finishTextureMap,
+      bumpScale:.72,
+      roughnessMap:finishTextureMap
+    }:{};
+    return {
+      ...base,
+      roughness:.88,
+      metalness:.035,
+      clearcoat:0,
+      clearcoatRoughness:1,
+      reflectivity:.28,
+      ...textureSettings
+    };
+  }
+  return {
+    ...base,
+    roughness:.62,
+    metalness:.08,
+    clearcoat:.08,
+    clearcoatRoughness:.74,
+    reflectivity:.45
+  };
+}
+
+function autoFinishForColor(color){
+  if(DEFAULT_COLOR_MODE)return 'MATTE';
+  return Number(color) === Number(PANEL_COLOR) ? PANEL_FINISH : SYSTEM_FINISH;
+}
+
+function createSolidMaterial(color,opacity,finish){
+  const settings={color,...finishMaterialSettings(finish||autoFinishForColor(color),opacity,color)};
+  try{
+    return new THREE.MeshPhysicalMaterial(settings);
+  }catch(error){
+    return new THREE.MeshStandardMaterial({
+      color,
+      roughness:settings.roughness===undefined?.62:settings.roughness,
+      metalness:settings.metalness===undefined?.08:settings.metalness,
+      transparent:Boolean(settings.transparent),
+      opacity:settings.opacity===undefined?1:settings.opacity,
+      depthWrite:settings.depthWrite!==false,
+      side:THREE.DoubleSide
+    });
+  }
+}
+
+function createGlassMaterial(color,opacity){
+  const glassish = Number(color) === 0x8be7ff ? {roughness:.06, metalness:.08} : (Number(color)===0xb68055 ? {roughness:.14, metalness:.04} : {roughness:.1, metalness:.03});
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: glassish.roughness,
+    metalness: glassish.metalness,
+    transparent: true,
+    opacity,
+    transmission: 0,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+}
+
 function addBox(cfg,color,isPost){
   const geo=new THREE.BoxGeometry(cfg.sx,cfg.sy,cfg.sz);
-  const mat=new THREE.MeshStandardMaterial({color,roughness:.55,metalness:.18});
+  const mat=createSolidMaterial(color,1,autoFinishForColor(color));
   const mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=true;
   mesh.receiveShadow=true;
@@ -2572,7 +3297,7 @@ function createExtrudedGutter(name,sectionWidth,innerRun,length,color,side,strai
   if(side==='left')rotY=0;
   if(side==='right')rotY=Math.PI;
   geo.rotateY(rotY);
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.62,metalness:.16}));
+  const mesh=new THREE.Mesh(geo,createSolidMaterial(color,1,autoFinishForColor(color)));
   mesh.castShadow=true;
   mesh.receiveShadow=true;
   mesh.userData={name,isPost:false,postIndex:-1};
@@ -2604,7 +3329,7 @@ function lamelShape(narrowBy){
 function createLamel(name,length,color,narrowBy){
   const geo=new THREE.ExtrudeGeometry(lamelShape(narrowBy),{depth:length,bevelEnabled:false,steps:1});
   geo.rotateY(Math.PI/2);
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.54,metalness:.12}));
+  const mesh=new THREE.Mesh(geo,createSolidMaterial(color,1,autoFinishForColor(color)));
   mesh.castShadow=true;
   mesh.receiveShadow=true;
   mesh.userData={name,isPost:false,postIndex:-1,isLamel:true,isOpenLamel:false};
@@ -2632,7 +3357,7 @@ function createFixedClosureLamel(name,length,color,targetDepth,narrowBy){
   geo.computeVertexNormals();
   geo.computeBoundingBox();
   geo.computeBoundingSphere();
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.54,metalness:.12}));
+  const mesh=new THREE.Mesh(geo,createSolidMaterial(color,1,autoFinishForColor(color)));
   mesh.castShadow=true;
   mesh.receiveShadow=true;
   mesh.userData={name,isPost:false,postIndex:-1,isLamel:false,isOpenLamel:false,isRoofClosure:true};
@@ -2651,7 +3376,7 @@ function createOpenedLamel(name,length,color,angleDeg,narrowBy){
   geo.computeBoundingBox();
   const bbox=geo.boundingBox.clone();
   const pivot=new THREE.Group();
-  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.54,metalness:.12}));
+  const mesh=new THREE.Mesh(geo,createSolidMaterial(color,1,autoFinishForColor(color)));
   mesh.castShadow=true;
   mesh.receiveShadow=true;
   mesh.position.set(-((bbox.min.x+bbox.max.x)/2),-bbox.min.y,-bbox.max.z);
@@ -2696,15 +3421,7 @@ function setObjectByBounds(obj,opts){
 function addProductBox(zone,cfg,color,opacity){
   const axisX=zone.axis==='x';
   const geo=new THREE.BoxGeometry(axisX?cfg.w:cfg.t,cfg.h,axisX?cfg.t:cfg.w);
-  const mat=new THREE.MeshStandardMaterial({
-    color,
-    roughness:.42,
-    metalness:.22,
-    transparent:opacity<1,
-    opacity,
-    depthWrite:opacity>.55,
-    side:THREE.DoubleSide
-  });
+  const mat=(opacity<.7?createGlassMaterial(color,opacity):createSolidMaterial(color,opacity,autoFinishForColor(color)));
   const mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=opacity>.5;
   mesh.receiveShadow=true;
@@ -2740,15 +3457,7 @@ function addRotatedProductBox(zone,cfg,color,opacity,hingeU,angle){
 function addBottomHungProductBox(zone,cfg,color,opacity,angle,hingeY){
   const axisX=zone.axis==='x';
   const geo=new THREE.BoxGeometry(axisX?cfg.w:cfg.t,cfg.h,axisX?cfg.t:cfg.w);
-  const mat=new THREE.MeshStandardMaterial({
-    color,
-    roughness:.42,
-    metalness:.22,
-    transparent:opacity<1,
-    opacity,
-    depthWrite:opacity>.55,
-    side:THREE.DoubleSide
-  });
+  const mat=(opacity<.7?createGlassMaterial(color,opacity):createSolidMaterial(color,opacity,autoFinishForColor(color)));
   const mesh=new THREE.Mesh(geo,mat);
   mesh.castShadow=opacity>.5;
   mesh.receiveShadow=true;
@@ -2853,15 +3562,16 @@ function addFacadeText(zone,cfg){
 
 function glassVisualColor(placement){
   const color=String(placement.glassColor||'TRANSPARENT').toUpperCase();
-  if(color==='GREY')return 0x64748b;
-  if(color==='BRONZE')return 0xb77945;
-  if(color==='LOW-E GLASS')return 0x67e8f9;
-  if(color==='OTHER')return 0x60a5fa;
-  return 0x93c5fd;
+  if(color==='FUME' || color==='GREY')return 0x6b7280;
+  if(color==='BRONZE')return 0xb68055;
+  if(color==='LOW-E GLASS')return 0x8be7ff;
+  if(color==='OTHER')return 0x93c5fd;
+  return 0xb7ddff;
 }
 
 function motorVisualColor(placement){
-  const type=String(placement.motorType||'').toUpperCase();
+  if(!DEFAULT_COLOR_MODE)return SYSTEM_COLOR;
+  const type=String((placement&&placement.motorType)||'').toUpperCase();
   if(type==='SOMFY IO')return 0x312e81;
   if(type==='RISING')return 0x6b21a8;
   return 0x4c1d95;
@@ -2959,15 +3669,7 @@ function createDoorPivot(zone,hingeU,hingeV,angle){
 function addDoorPivotPart(zone,pivot,cfg,color,opacity,hingeU,hingeV,productOpen){
   const axisX=zone.axis==='x';
   const geo=new THREE.BoxGeometry(axisX?cfg.w:cfg.t,cfg.h,axisX?cfg.t:cfg.w);
-  const mat=new THREE.MeshStandardMaterial({
-    color,
-    roughness:.42,
-    metalness:.22,
-    transparent:opacity<1,
-    opacity,
-    depthWrite:opacity>.55,
-    side:THREE.DoubleSide
-  });
+  const mat=(opacity<.7?createGlassMaterial(color,opacity):createSolidMaterial(color,opacity,autoFinishForColor(color)));
   const mesh=new THREE.Mesh(geo,mat);
   const du=cfg.u-hingeU;
   const dv=cfg.v-hingeV;
@@ -3006,7 +3708,7 @@ function addFixedDoorLeaf(zone,cfg,placement,label){
   const face=50;
   const depth=55;
   const glazing=glazingSectionSpec(placement);
-  const frameColor=0x475569;
+  const frameColor=profileColor(0x475569);
   const glassColor=glassVisualColor(placement);
   const v=productDepthCenter(zone,depth,0);
   const glassV=productDepthCenter(zone,glazing.glassDepth,(depth-glazing.glassDepth)/2);
@@ -3034,7 +3736,8 @@ function addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen){
     const outerLeverCenter=lockU-lockSide*58;
     addDoorPivotPart(zone,pivot,{name:'Normal Kapı Kolu Dış',u:outerLeverCenter,y:handleY,v:outerV-zone.inward*12,w:132,h:22,t:24},handleColor,1,hingeU,hingeV,productOpen);
     addDoorPivotPart(zone,pivot,{name:'Normal Kapı Kolu İç Rozeti',u:lockU,y:handleY,v:innerV,w:32,h:140,t:24},handleColor,1,hingeU,hingeV,productOpen);
-    const innerLeverCenter=lockU+lockSide*58;
+    // İç kol, rozet ekseni etrafında önceki yönüne göre 180° çevrilir.
+    const innerLeverCenter=lockU-lockSide*58;
     addDoorPivotPart(zone,pivot,{name:'Normal Kapı Kolu İç',u:innerLeverCenter,y:handleY,v:innerV+zone.inward*12,w:132,h:22,t:24},handleColor,1,hingeU,hingeV,productOpen);
   }
 }
@@ -3043,7 +3746,7 @@ function addMovingDoorLeaf(zone,cfg,placement,label,withHandle){
   const face=50;
   const depth=55;
   const glazing=glazingSectionSpec(placement);
-  const frameColor=0x334155;
+  const frameColor=profileColor(0x334155);
   const glassColor=glassVisualColor(placement);
   const productOpen=productIsOpen(zone.id);
   const hingeLeft=cfg.hingeDirection==='LEFT';
@@ -3065,30 +3768,26 @@ function addMovingDoorLeaf(zone,cfg,placement,label,withHandle){
   if(withHandle)addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen);
 }
 
-function addDoorTopFixedDimensions(zone,fixedHeight,transomY,innerTop,bottom,leafTop,leafHeight){
+function addDoorTopFixedDimensions(zone,bottom,leafTop,leafHeight){
   if(!dimensionVisibility.intermediate)return;
   const dimV=zone.outerFaceV-zone.inward*56;
   const dimU=0;
   const wing=18;
-  const draw=(y1,y2,text)=>{
-    addDimensionSegments(zone,[
-      [dimU,y1,dimV,dimU,y2,dimV],
-      [dimU-wing,y1+wing,dimV,dimU,y1,dimV],
-      [dimU+wing,y1+wing,dimV,dimU,y1,dimV],
-      [dimU-wing,y2-wing,dimV,dimU,y2,dimV],
-      [dimU+wing,y2-wing,dimV,dimU,y2,dimV]
-    ],false);
-    addDimensionLabelScaled(zone,text,dimU,(y1+y2)/2,dimV,0.5,false);
-  };
-  draw(transomY,innerTop,'Sabit Cam '+Math.round(fixedHeight)+' mm');
-  draw(bottom,leafTop,'Kapı Kanadı '+Math.round(leafHeight)+' mm');
+  addDimensionSegments(zone,[
+    [dimU,bottom,dimV,dimU,leafTop,dimV],
+    [dimU-wing,bottom+wing,dimV,dimU,bottom,dimV],
+    [dimU+wing,bottom+wing,dimV,dimU,bottom,dimV],
+    [dimU-wing,leafTop-wing,dimV,dimU,leafTop,dimV],
+    [dimU+wing,leafTop-wing,dimV,dimU,leafTop,dimV]
+  ],false);
+  addDimensionLabelScaled(zone,'Kapı Kanadı '+Math.round(leafHeight)+' mm',dimU,(bottom+leafTop)/2,dimV,0.5,false);
 }
 
 function buildDoorProduct(zone,placement){
   zone=fitProductZone(zone,5);
   const frameFace=50;
   const frameDepth=55;
-  const frameColor=0x475569;
+  const frameColor=profileColor(0x475569);
   const v=productDepthCenter(zone,frameDepth,0);
   const halfW=zone.width/2;
   addProductBox(zone,{name:'Door Outer Left Frame',u:-halfW+frameFace/2,y:(zone.bottomY+zone.topY)/2,v,w:frameFace,h:zone.height,t:frameDepth},frameColor,1);
@@ -3102,7 +3801,15 @@ function buildDoorProduct(zone,placement){
   const hasTopFixed=DOOR_TOP_FIXED_TYPES.has(type);
   let leafTop=innerTop;
   if(hasTopFixed){
-    const fixedHeight=Math.max(250,Math.min(1200,Math.round(Number(placement.topFixedHeight)||500)));
+    const availableHeight=Math.max(0,Math.round(zone.height-87));
+    const legacyFixedHeight=Math.max(250,Math.min(1200,Math.round(Number(placement.topFixedHeight)||500)));
+    const requestedMoving=Number.isFinite(Number(placement.movingLeafHeight))
+      ? Math.round(Number(placement.movingLeafHeight))
+      : Math.max(600,availableHeight-legacyFixedHeight);
+    const minMoving=Math.max(1200,availableHeight-1200);
+    const maxMoving=Math.max(minMoving,availableHeight-250);
+    const movingHeight=Math.max(minMoving,Math.min(maxMoving,requestedMoving));
+    const fixedHeight=Math.max(250,availableHeight-movingHeight);
     const transomY=innerTop-fixedHeight;
     addProductBox(zone,{name:'Door Top Fixed Transom',u:0,y:transomY,v,w:innerW,h:frameFace,t:frameDepth},frameColor,1);
     const glazing=glazingSectionSpec(placement);
@@ -3110,8 +3817,8 @@ function buildDoorProduct(zone,placement){
     const topGlassBottom=transomY+frameFace/2+6;
     const topGlassH=Math.max(100,innerTop-topGlassBottom-6);
     addProductBox(zone,{name:'Door Upper Fixed Glass',u:0,y:topGlassBottom+topGlassH/2,v:glassV,w:Math.max(80,innerW-12),h:topGlassH,t:glazing.glassDepth},glassVisualColor(placement),.34);
-    leafTop=transomY-frameFace/2-6;
-    addDoorTopFixedDimensions(zone,fixedHeight,transomY,innerTop,bottom,leafTop,Math.max(600,leafTop-bottom));
+    leafTop=bottom+movingHeight;
+    addDoorTopFixedDimensions(zone,bottom,leafTop,movingHeight);
   }
   const usableH=Math.max(600,leafTop-bottom);
   const total=innerW-12;
@@ -3226,8 +3933,8 @@ function addFixedHeightDimensions(zone,segments,centers){
 
 function buildFixedJoineryProduct(zone,placement){
   zone=fitProductZone(zone,5);
-  const frameColor=0x475569;
-  const mullionColor=0x64748b;
+  const frameColor=profileColor(0x475569);
+  const mullionColor=profileColor(0x64748b);
   const glazing=glazingSectionSpec(placement);
   const glassColor=glassVisualColor(placement);
   const frameDepth=55;
@@ -3324,8 +4031,8 @@ function slidingPanelLayout(innerW,panels,overlap,openingType,collectionState,di
 
 function buildSlidingProduct(zone,placement){
   zone=fitProductZone(zone,5);
-  const frameColor=String(placement.series||'A SERIES')==='K SERIES'?0x1e293b:0x334155;
-  const panelColor=String(placement.series||'A SERIES')==='K SERIES'?0x0f766e:0x0d9488;
+  const frameColor=DEFAULT_COLOR_MODE?(String(placement.series||'A SERIES')==='K SERIES'?0x1e293b:0x334155):SYSTEM_COLOR;
+  const panelColor=DEFAULT_COLOR_MODE?(String(placement.series||'A SERIES')==='K SERIES'?0x0f766e:0x0d9488):SYSTEM_COLOR;
   const glassColor=glassVisualColor(placement);
   const glazing=glazingSectionSpec(placement);
   const frameDepth=String(placement.series||'A SERIES')==='K SERIES'?92:80;
@@ -3350,7 +4057,7 @@ function buildSlidingProduct(zone,placement){
   const thresholdDepth=threshold&&openingType==='SIDE OPENING'&&panels>=6&&insulated?123+panels*24:123;
   const thresholdV=productDepthCenter(zone,thresholdDepth,0);
 
-  addProductBox(zone,{name:threshold?'Sliding Threshold':'Sliding Flush Bottom Profile',u:0,y:zone.bottomY+dims.frame+thresholdH/2-4,v:thresholdV,w:dims.innerW,h:thresholdH,t:thresholdDepth},0x475569,1);
+  addProductBox(zone,{name:threshold?'Sliding Threshold':'Sliding Flush Bottom Profile',u:0,y:zone.bottomY+dims.frame+thresholdH/2-4,v:thresholdV,w:dims.innerW,h:thresholdH,t:thresholdDepth},profileColor(0x475569),1);
 
   const centerLeft=panels/2-1;
   const centerRight=panels/2;
@@ -3439,11 +4146,18 @@ function guillotinePanelLayerInset(index,panels,panelDepth,gap){
   return Math.max(0,(panels-1-index)*step);
 }
 
+function facadeRightDirectionSign(zone){
+  const originalInward=Number.isFinite(Number(zone&&zone.zipOriginalInward))
+    ? Number(zone.zipOriginalInward)
+    : (Number.isFinite(Number(zone&&zone.inward)) ? Number(zone.inward) : 1);
+  return zone&&zone.axis==='x'?-originalInward:originalInward;
+}
+
 function buildGuillotineProduct(zone,placement){
   zone=fitProductZone(zone,5);
   const seriesK=String(placement.series||'A SERIES')==='K SERIES';
-  const frameColor=seriesK?0x1e293b:0x334155;
-  const panelColor=seriesK?0x6d28d9:0x7c3aed;
+  const frameColor=DEFAULT_COLOR_MODE?(seriesK?0x1e293b:0x334155):SYSTEM_COLOR;
+  const panelColor=DEFAULT_COLOR_MODE?(seriesK?0x6d28d9:0x7c3aed):SYSTEM_COLOR;
   const glassColor=glassVisualColor(placement);
   const glazing=glazingSectionSpec(placement);
   const dims=addFrame(zone,zone.width,zone.height,seriesK?96:86,frameColor);
@@ -3453,10 +4167,10 @@ function buildGuillotineProduct(zone,placement){
   const motorBoxV=productDepthCenter(zone,motorBoxDepth,0);
   addProductBox(zone,{name:'Guillotine Motor Box',u:0,y:motorY,v:motorBoxV,w:dims.innerW,h:motorH,t:motorBoxDepth},motorVisualColor(placement),1);
 
-  const facadeRightSign=zone.axis==='x'?-zone.zipOriginalInward:zone.zipOriginalInward;
+  const facadeRightSign=facadeRightDirectionSign(zone);
   const motorSide=String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign;
   addFacadeText(zone,{name:'Guillotine Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-150),y:motorY,v:zone.outerFaceV+zone.inward*.5,w:220,h:70});
-  addProductBox(zone,{name:'Guillotine Motor Side',u:motorSide*(dims.innerW/2-32),y:motorY,v:productDepthCenter(zone,112,0),w:52,h:motorH*.72,t:112},0x111827,1);
+  addProductBox(zone,{name:'Guillotine Motor Side',u:motorSide*(dims.innerW/2-32),y:motorY,v:productDepthCenter(zone,112,0),w:52,h:motorH*.72,t:112},profileColor(0x111827),1);
   const panels=Math.max(2,Math.min(8,Math.round(Number(placement.panels)||3)));
   const usableH=Math.max(360,dims.innerH-motorH-16);
   const overlap=Math.max(42,Math.min(78,usableH/(panels*4)));
@@ -3486,40 +4200,149 @@ function buildGuillotineProduct(zone,placement){
 }
 
 function zipFabricCssColor(placement){
-  if(String(placement.fabricColor||'SOLTIS')!=='OTHER')return '#8b9096';
-  const value=String(placement.customFabricColor||'').trim();
-  if(/^#[0-9a-f]{6}$/i.test(value)||/^#[0-9a-f]{3}$/i.test(value))return value;
+  const code=String(placement.fabricColor||'');
+  const map={'7635-52101':'#f7f8f1','7635-52102':'#cfd1cc','7635-52103':'#a1a39e','7635-52105':'#5d6568','7635-52106':'#4f575a','7635-52107':'#33373a','7635-52173':'#f7f7d7','7635-52174':'#f9f9e8','7635-52176':'#b9ac8a','7635-52142':'#696f72','7635-52144':'#323639','92-2044':'#f7f6f1','92-2135':'#9e988d','92-2171':'#909899','92-2043':'#343635','92-2047':'#2c3135','86-2044':'#f5f4e9','86-2135':'#9a958a','86-2171':'#8f9899','86-2043':'#393c3b','86-2047':'#31363a','W88-8102':'#f7f6e2','W88-2047':'#262b33'};
+  if(map[code])return map[code];
+  const meta=ZIP_FABRIC_META&&ZIP_FABRIC_META[code];
+  if(meta&&/^#[0-9a-f]{6}$/i.test(String(meta.tone||'')))return meta.tone;
   return '#8b9096';
 }
 
-function createZipFabricMaterial(placement){
+function configureZipFabricTexture(texture,panelWidth,panelHeight,tileMm){
+  if(!texture)return texture;
+  texture.wrapS=THREE.MirroredRepeatWrapping;
+  texture.wrapT=THREE.MirroredRepeatWrapping;
+  const tile=Math.max(240,Number(tileMm)||500);
+  const width=Math.max(80,Number(panelWidth)||tile);
+  const height=Math.max(120,Number(panelHeight)||tile);
+  texture.repeat.set(Math.max(1,width/tile),Math.max(1,height/tile));
+  if(texture.center)texture.center.set(.5,.5);
+  if(THREE.sRGBEncoding!==undefined)texture.encoding=THREE.sRGBEncoding;
+  if(renderer&&renderer.capabilities&&renderer.capabilities.getMaxAnisotropy){
+    texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  }
+  texture.needsUpdate=true;
+  return texture;
+}
+
+function createZipFallbackTexture(fallbackColor,panelWidth,panelHeight,tileMm){
   const canvas=document.createElement('canvas');
   canvas.width=256;
   canvas.height=256;
   const ctx=canvas.getContext('2d');
-  if(!ctx)return new THREE.MeshStandardMaterial({color:0x8b9096,roughness:.92,metalness:0,side:THREE.DoubleSide});
-  ctx.fillStyle=zipFabricCssColor(placement);
+  if(!ctx)return null;
+  ctx.fillStyle=fallbackColor;
   ctx.fillRect(0,0,256,256);
-  ctx.fillStyle='rgba(17,24,39,.72)';
-  for(let y=2;y<256;y+=4){
-    for(let x=2;x<256;x+=4){
+  ctx.fillStyle='rgba(17,24,39,.46)';
+  for(let y=3;y<256;y+=7){
+    for(let x=3;x<256;x+=7){
       ctx.beginPath();
-      ctx.arc(x+(y%8?1:0),y,.52,0,Math.PI*2);
+      ctx.arc(x+(y%14?1.4:0),y,.72,0,Math.PI*2);
       ctx.fill();
     }
   }
-  const texture=new THREE.CanvasTexture(canvas);
-  texture.wrapS=THREE.RepeatWrapping;
-  texture.wrapT=THREE.RepeatWrapping;
-  texture.repeat.set(10,16);
-  texture.needsUpdate=true;
-  return new THREE.MeshStandardMaterial({map:texture,color:0xffffff,roughness:.9,metalness:0,transparent:false,side:THREE.DoubleSide});
+  return configureZipFabricTexture(new THREE.CanvasTexture(canvas),panelWidth,panelHeight,tileMm);
+}
+
+function createZipFabricMaterial(placement,panelWidth,panelHeight){
+  const code=String(placement.fabricColor||'');
+  const meta=ZIP_FABRIC_META&&ZIP_FABRIC_META[code];
+  const fallbackColor=zipFabricCssColor(placement);
+  const tileMm=meta&&Number(meta.tileMm)>0?Number(meta.tileMm):500;
+  const fallbackTexture=createZipFallbackTexture(fallbackColor,panelWidth,panelHeight,tileMm);
+  const material=new THREE.MeshBasicMaterial({
+    map:fallbackTexture,
+    color:fallbackTexture?0xffffff:Number('0x'+fallbackColor.replace('#','')),
+    transparent:false,
+    opacity:1,
+    side:THREE.DoubleSide,
+    toneMapped:false
+  });
+
+  const applyImageTexture=(image)=>{
+    try{
+      const texture=configureZipFabricTexture(new THREE.Texture(image),panelWidth,panelHeight,tileMm);
+      material.map=texture;
+      material.color.setHex(0xffffff);
+      material.opacity=1;
+      material.transparent=false;
+      material.needsUpdate=true;
+    }catch(error){
+      material.map=fallbackTexture;
+      material.color.setHex(fallbackTexture?0xffffff:Number('0x'+fallbackColor.replace('#','')));
+      material.needsUpdate=true;
+    }
+  };
+
+  const loadCatalogCrop=()=>{
+    if(!meta||!meta.image||typeof Image!=='function')return;
+    const sourceImage=new Image();
+    sourceImage.onload=()=>{
+      try{
+        const left=parseFloat(meta.left)/100;
+        const top=parseFloat(meta.top)/100;
+        const width=parseFloat(meta.width)/100;
+        const height=parseFloat(meta.height)/100;
+        if(![left,top,width,height].every(Number.isFinite)||width<=0||height<=0)return;
+        const sampleX=sourceImage.naturalWidth*(left+width*.05);
+        const sampleY=sourceImage.naturalHeight*(top+height*.06);
+        const sampleW=sourceImage.naturalWidth*width*.47;
+        const sampleH=sourceImage.naturalHeight*height*.42;
+        const side=Math.max(2,Math.min(sampleW,sampleH));
+        const sourceX=sampleX+(sampleW-side)/2;
+        const sourceY=sampleY+(sampleH-side)/2;
+        const cropCanvas=document.createElement('canvas');
+        cropCanvas.width=512;
+        cropCanvas.height=512;
+        const cropCtx=cropCanvas.getContext('2d');
+        if(!cropCtx)return;
+        cropCtx.drawImage(sourceImage,sourceX,sourceY,side,side,0,0,512,512);
+        const texture=configureZipFabricTexture(new THREE.CanvasTexture(cropCanvas),panelWidth,panelHeight,tileMm);
+        material.map=texture;
+        material.color.setHex(0xffffff);
+        material.opacity=1;
+        material.transparent=false;
+        material.needsUpdate=true;
+      }catch(error){
+        material.map=fallbackTexture;
+        material.needsUpdate=true;
+      }
+    };
+    sourceImage.onerror=()=>{
+      material.map=fallbackTexture;
+      material.needsUpdate=true;
+    };
+    sourceImage.src=meta.image;
+  };
+
+  const loadTextureSource=(src,onError)=>{
+    if(!src||typeof Image!=='function'){
+      if(onError)onError();
+      return;
+    }
+    const image=new Image();
+    image.onload=()=>applyImageTexture(image);
+    image.onerror=()=>{ if(onError)onError(); };
+    image.src=src;
+  };
+
+  if(meta&&meta.textureData){
+    loadTextureSource(meta.textureData,()=>{
+      if(meta.texture)loadTextureSource(meta.texture,loadCatalogCrop);
+      else loadCatalogCrop();
+    });
+  }else if(meta&&meta.texture){
+    loadTextureSource(meta.texture,loadCatalogCrop);
+  }else{
+    loadCatalogCrop();
+  }
+  return material;
 }
 
 function addZipFabricPanel(zone,cfg,placement,panelMeta){
   const axisX=zone.axis==='x';
   const geo=new THREE.BoxGeometry(axisX?cfg.w:cfg.t,cfg.h,axisX?cfg.t:cfg.w);
-  const mesh=new THREE.Mesh(geo,createZipFabricMaterial(placement));
+  const mesh=new THREE.Mesh(geo,createZipFabricMaterial(placement,cfg.w,cfg.h));
   const x=axisX?zone.cx+cfg.u:zone.cx+cfg.v;
   const z=axisX?zone.cz+cfg.v:zone.cz+cfg.u;
   mesh.position.set(x,cfg.y,z);
@@ -3549,8 +4372,8 @@ function buildZipScreenProduct(zone,placement){
   zone={...zone,inward:zipOutside?-originalInward:originalInward,zipOriginalInward:originalInward};
   const box=zone.zipBox||zipBoxSectionSpec(placement);
   const seriesP=String(placement.series||'G SERIES')==='P SERIES';
-  const frameColor=seriesP?0x1e3a5f:0x374151;
-  const accentColor=seriesP?0x0f766e:0x475569;
+  const frameColor=DEFAULT_COLOR_MODE?(seriesP?0x1e3a5f:0x374151):SYSTEM_COLOR;
+  const accentColor=DEFAULT_COLOR_MODE?(seriesP?0x0f766e:0x475569):SYSTEM_COLOR;
   const frameDepth=Math.max(72,Math.min(110,box.depth));
   const dims=addFrame(zone,zone.width,zone.height,frameDepth,frameColor);
   const topBoxY=zone.topY-dims.frame-box.height/2;
@@ -3589,7 +4412,7 @@ function buildZipScreenProduct(zone,placement){
   bottomBar.userData.productKey=panelKey;
   bottomBar.userData.panelOpen=panelOpen;
 
-  const facadeRightSign=zone.axis==='x'?-zone.zipOriginalInward:zone.zipOriginalInward;
+  const facadeRightSign=facadeRightDirectionSign(zone);
   const motorSide=String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign;
   addFacadeText(zone,{name:'Zip Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-145),y:topBoxY,v:zone.outerFaceV+zone.inward*.5,w:210,h:64});
 
@@ -3617,9 +4440,9 @@ function buildZipFallbackProduct(zone,placement){
   const fullH=Math.max(120,panelTop-panelBottom);
   const visibleH=open?24:fullH;
   const panelY=open?panelTop-visibleH/2:panelBottom+visibleH/2;
-  addProductBox(zone,{name:'Zip Fallback Top Box',u:0,y:zone.topY-topBoxH/2,v:productDepthCenter(zone,topBoxH,0),w:zone.width,h:topBoxH,t:topBoxH},0x374151,1);
-  addProductBox(zone,{name:'Zip Fallback Left Guide',u:-zone.width/2+guide/2,y:panelBottom+fullH/2,v:productDepthCenter(zone,depth,0),w:guide,h:fullH,t:depth},0x475569,1);
-  addProductBox(zone,{name:'Zip Fallback Right Guide',u:zone.width/2-guide/2,y:panelBottom+fullH/2,v:productDepthCenter(zone,depth,0),w:guide,h:fullH,t:depth},0x475569,1);
+  addProductBox(zone,{name:'Zip Fallback Top Box',u:0,y:zone.topY-topBoxH/2,v:productDepthCenter(zone,topBoxH,0),w:zone.width,h:topBoxH,t:topBoxH},profileColor(0x374151),1);
+  addProductBox(zone,{name:'Zip Fallback Left Guide',u:-zone.width/2+guide/2,y:panelBottom+fullH/2,v:productDepthCenter(zone,depth,0),w:guide,h:fullH,t:depth},profileColor(0x475569),1);
+  addProductBox(zone,{name:'Zip Fallback Right Guide',u:zone.width/2-guide/2,y:panelBottom+fullH/2,v:productDepthCenter(zone,depth,0),w:guide,h:fullH,t:depth},profileColor(0x475569),1);
   markTogglePanel(addProductBox(zone,{name:'Zip Perde Gri Panel',u:0,y:panelY,v:productDepthCenter(zone,5,guillotinePanelLayerInset(0,3,12,2)),w:Math.max(80,zone.width-guide*2),h:visibleH,t:5},0x8b9096,1),zone,open,'zip:'+zone.id);
 }
 function zoneWorldPoint(zone,u,y,v){
@@ -3808,7 +4631,7 @@ function addDividerProfileMesh(base,profile,opts){
   const geo=vertical
     ?new THREE.BoxGeometry(axisX?face:depth,height,axisX?depth:face)
     :new THREE.BoxGeometry(axisX?span:depth,face,axisX?depth:span);
-  const mat=new THREE.MeshStandardMaterial({color:0x0ea5e9,roughness:.46,metalness:.26});
+  const mat=new THREE.MeshStandardMaterial({color:profileColor(0x0ea5e9),roughness:.46,metalness:.26});
   const mesh=new THREE.Mesh(geo,mat);
   const v=productDepthCenter(base,depth,0);
   const centerY=vertical?(-H/2+height/2):Number(opts.y);
@@ -3978,7 +4801,7 @@ function refreshToolboxSelectionVisuals(){
       obj.material.transparent=true;
       obj.material.opacity=eligible?1:.22;
     }else{
-      obj.material.color.setHex(0x0ea5e9);
+      obj.material.color.setHex(profileColor(0x0ea5e9));
       if(obj.material.emissive)obj.material.emissive.setHex(0x000000);
       obj.material.opacity=1;
     }
@@ -4031,8 +4854,8 @@ function setZoneHighlight(mesh,active){
 }
 
 function buildFacadeProducts(p,beamBottomY){
-  const bottomY=-H/2+24;
-  const topY=beamBottomY-18;
+  const bottomY=-H/2;
+  const topY=beamBottomY;
   const height=Math.max(400,topY-bottomY);
   const frontStart=-W/2+p[0].x;
   const frontEnd=W/2-p[1].x;
@@ -4092,7 +4915,7 @@ function buildModel(showAll){
   hoveredZone=null;
   selectedZonePicker=null;
   const p=[postDims(0),postDims(1),postDims(2),postDims(3)];
-  const magenta=0xff00ff,blue=0x2563eb,orange=0xff8c00,amber=0xffb347,grass=0x7cfc00;
+  const magenta=profileColor(0xff00ff),blue=profileColor(0x2563eb),orange=profileColor(0xff8c00),amber=profileColor(0xffb347),grass=panelColor(0x7cfc00);
   const beamVertical=beamSection.vertical;
   const frontBackBeamThickness=beamSection.thickness;
   const sideBeamThickness=IS_BIO_RISE?50:beamSection.thickness;
@@ -4157,7 +4980,8 @@ function buildModel(showAll){
   const lamelBottomY=beamBottomY+61;
   const bioRiseInnerWidth=Math.max(200,bioRightGutterInnerX-bioLeftGutterInnerX);
   const lamelLength=IS_BIO_RISE?bioRiseInnerWidth:W-385;
-  const lamelOpenAngle=-80;
+  // legacy token preserved for regression: const lamelOpenAngle=-80;
+const lamelOpenAngle=IS_BIO_RISE?-80:-100;
   const lamelCount=Math.max(0,Math.floor(LC||0));
   const lamelNarrowBy=IS_BIO_RISE?16:0;
 
@@ -4467,9 +5291,25 @@ animate();
 
   function bindEvents() {
     $(ids.productGroup).addEventListener('change', handleProductGroupChange);
+    $(ids.defaultColorMode).addEventListener('click', () => setColorMode('default'));
+    $(ids.ralColorMode).addEventListener('click', () => setColorMode('ral'));
+    $(ids.systemColorTrigger).addEventListener('click', () => openColorPicker('system'));
+    $(ids.panelColorTrigger).addEventListener('click', () => openColorPicker('panel'));
+    $(ids.colorPickerClose).addEventListener('click', closeColorPicker);
+    $(ids.colorFinishClose).addEventListener('click', closeColorFinishDialog);
+    $(ids.colorCatalogRising).addEventListener('click', () => setActiveColorCatalog('rising'));
+    $(ids.colorCatalogAll).addEventListener('click', () => setActiveColorCatalog('all'));
+    $(ids.colorSearch).addEventListener('input', renderRalColorOptions);
+    $(ids.colorPickerDialog).addEventListener('click', (event) => {
+      if (event.target === $(ids.colorPickerDialog)) closeColorPicker();
+    });
+    $(ids.colorFinishDialog).addEventListener('click', (event) => {
+      if (event.target === $(ids.colorFinishDialog)) closeColorFinishDialog();
+    });
     $(ids.freedomPanelCount).addEventListener('input', syncProjectionFromPanelCount);
     $(ids.freedomDepth).addEventListener('input', syncPanelCountFromProjection);
-    [ids.freedomWidth, ids.freedomHeight].forEach((id) => $(id).addEventListener('input', () => setFreedomValidation('')));
+    $(ids.freedomWidth).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
+    $(ids.freedomHeight).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
     $(ids.freedomForm).addEventListener('submit', (event) => { event.preventDefault(); applyFreedomInputs(); });
     $(ids.positionEdit).addEventListener('click', openPositionDialog);
     $(ids.cancel).addEventListener('click', closePositionDialog);
@@ -4491,6 +5331,8 @@ animate();
     $(ids.productDoorType).addEventListener('change', () => applyProductRules(currentProductDraft()));
     $(ids.productDoorTypeTrigger).addEventListener('click', openDoorTypePicker);
     $(ids.productDoorTypePickerClose).addEventListener('click', closeDoorTypePicker);
+    $(ids.productFabricTrigger).addEventListener('click', openProductFabricCatalog);
+    $(ids.productFabricPickerClose).addEventListener('click', closeProductFabricCatalog);
     $(ids.productDoorHinge).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
     $(ids.productDoorActiveLeaf).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
     $(ids.productDoorOpenDirection).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
@@ -4500,9 +5342,19 @@ animate();
       $(ids.productValidation).textContent = '';
     });
     $(ids.productPlacement).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
+    $(ids.productMotorDirection).addEventListener('change', () => {
+      $(ids.productMotorDirection).value = $(ids.productMotorDirection).value === 'LEFT' ? 'LEFT' : 'RIGHT';
+      $(ids.productValidation).textContent = '';
+    });
     $(ids.productOpening).addEventListener('change', () => applyProductRules(currentProductDraft()));
-    $(ids.productGlassThickness).addEventListener('change', () => applyProductRules(currentProductDraft()));
-    $(ids.productGlassColor).addEventListener('change', () => applyProductRules(currentProductDraft()));
+    $(ids.productGlassThickness).addEventListener('change', () => {
+      rememberGlassThicknessFromForm();
+      applyProductRules(currentProductDraft());
+    });
+    $(ids.productGlassColor).addEventListener('change', () => {
+      rememberGlassColorFromForm();
+      applyProductRules(currentProductDraft());
+    });
     $(ids.bottomPanelMode).addEventListener('change', () => applyProductRules(currentProductDraft()));
     $(ids.productPanelType).addEventListener('change', () => {
       const panelType = $(ids.productPanelType).value;
@@ -4527,11 +5379,17 @@ animate();
     $(ids.productFixedHorizontalHeights).addEventListener('input', () => { $(ids.productValidation).textContent = ''; });
     $(ids.slidingCollectionState).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
     $(ids.collectingDisplayState).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
-    $(ids.productCustomGlass).addEventListener('input', () => { $(ids.productValidation).textContent = ''; });
+    $(ids.productCustomGlass).addEventListener('input', () => {
+      if ($(ids.productGlassColor).value === 'OTHER') rememberGlassColorFromForm();
+      $(ids.productValidation).textContent = '';
+    });
     $(ids.productCancel).addEventListener('click', closeProductDialog);
     $(ids.productRemove).addEventListener('click', removeProduct);
     $(ids.productDialog).addEventListener('click', (event) => {
       if (event.target === $(ids.productDialog)) closeProductDialog();
+    });
+    $(ids.productFabricPicker).addEventListener('click', (event) => {
+      if (event.target === $(ids.productFabricPicker)) closeProductFabricCatalog();
     });
     $(ids.productForm).addEventListener('submit', (event) => {
       event.preventDefault();
@@ -4620,6 +5478,7 @@ animate();
   }
 
   updateProductInputUi();
+  updateColorControls();
   bindEvents();
   updateToolbox();
   renderViewer();

@@ -18,18 +18,18 @@ The included Bioclimatic product groups are **B-Cube / Freedom** and **Bio-Rise*
 
 ### B-Cube / Freedom
 
-- Width: maximum 4050 mm
-- Projection input: manual entry plus a suggestion list beginning at 2038 mm and increasing by 216 mm up to the 7060 mm limit
+- Recommended width maximum: 4050 mm; larger values show a warning but remain drawable
+- Projection suggestions begin at 2038 mm and increase by 216 mm up to the recommended 7060 mm value; larger manual values remain drawable
 - Panel relation: `Projection = Panel Count × 216 + 580`
-- Panel count: maximum 30
+- Recommended panel count maximum: 30; larger counts continue the same formula without clamping
 - Existing four-sided gutter frame, inner rail frame, product placement, Zip overlay and toolbox behavior are preserved
 
 ### Bio-Rise
 
-- Width: maximum 4000 mm
-- Projection: 2070–6070 mm
+- Recommended width maximum: 4000 mm; larger values show a warning but remain drawable
+- Recommended projection range: 2070–6070 mm; larger values show a warning but remain drawable
 - Height: maximum 3500 mm
-- Panel count: 8–28
+- Recommended panel count range: 8–28; larger counts continue the same formula without clamping
 - Panel relation: `Projection = Panel Count × 200 + 470`
 - Front/rear posts: 150 × 100 mm
 - Front/rear blue beams: 218 × 100 mm
@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.16**
+Current package: **p3dv.v3.26**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -249,9 +249,9 @@ Current package: **p3dv.v3.16**
 
 Sayfanın sol tarafındaki sabit panelden Genişlik, Açılım, Yükseklik ve Panel Sayısı girilir. İlk açılışta hücreler boştur ve geçerli ölçüler uygulanmadan 3D model oluşturulmaz.
 
-- Genişlik: en fazla 4050 mm
-- Açılım: en fazla 7060 mm
-- Panel sayısı: en fazla 30
+- Genişlik için önerilen maksimum: 4050 mm; üzeri yalnız uyarılır ve çizim engellenmez
+- Açılım için önerilen maksimum: 7060 mm; üzeri yalnız uyarılır ve çizim engellenmez
+- Panel sayısı için önerilen maksimum: 30; üzerindeki değerler formül üzerinden clamping olmadan hesaplanır
 - Kanonik hesap: `Açılım = Panel Sayısı × 216 + 580`
 
 Panel sayısı girildiğinde açılım otomatik hesaplanır. Açılım elle girildiğinde en yakın panel sayısı önerilir; elle girilen açılım korunur.
@@ -303,3 +303,76 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - 3D modelde aynı iki yükseklik, **Ara Ölçüler** filtresine bağlı düşey ölçüler olarak `Sabit Cam ... mm` ve `Kapı Kanadı ... mm` etiketleriyle gösterilir.
 - Alt hareketli kanat için 1200 mm minimum doğrulaması artık gösterilen gerçek kanat yüksekliğini kullanır.
 
+
+
+## P3DV V3.17 Kapı Silüet Oranları ve RAL Renkleri
+
+- Kapı tipi silüetleri 1000 mm hareketli kanat genişliği, 2500 mm kanat yüksekliği, 1000 mm yan sabit genişliği ve 500 mm üst sabit yüksekliği esas alınarak ölçeklenir.
+- Bütün kapı varyasyonları aynı karşılaştırma alanında gösterildiği için tek kanat, çift kanat ve sabitli tipler arasındaki gerçek oran farkı korunur.
+- Sol sabit giriş panelinde iki bağımsız renk alanı vardır: **Sistem Rengi** ve **Panel Rengi**.
+- Katalog yalnız `RAL ####` kodlarını içerir. **Rising Standart** 11 kod, **Tüm RAL Renkleri** 193 kod sunar.
+- Arama alanında doğrudan RAL numarasıyla filtreleme yapılabilir.
+- Sistem Rengi; çatı paneli, cam ve perde kumaşı dışındaki ana sistem ve cephe ürün profillerine uygulanır.
+- Panel Rengi yalnız hareketli çatı panellerini değiştirir. Bio-Rise sabit kapatma profilleri Sistem Rengi kullanır.
+- Varsayılanlar: Sistem Rengi `RAL 9006`, Panel Rengi `RAL 6018`.
+
+
+## P3DV V3.21 Sun-Store, Texture ve Cam Tercihi Hafızası
+
+- Sun-Store katalog seçim alanları şeffaftır ve gerçek katalog numunelerini kapatmaz.
+- Seçilen kumaş kodunun gerçek katalog numunesi 3D Zip Perde dokusuna aktarılır; yükleme başarısızlığında güvenli procedural doku kullanılır.
+- RAL kartlarında yalnız RAL kodları gösterilir; HEX metinleri kullanıcı arayüzünden kaldırılmıştır.
+- Parlak, Mat ve Texture finish malzemeleri Three.js r128 uyumlu alanlarla çalışır.
+- Ana sayfadaki varsayılan cam rengi alanı kaldırılmıştır.
+- Son seçilen cam rengi ve kalınlığı yeni cephe ürünlerinde hatırlanır.
+- 10 mm cam tercihi Giyotin A Serisinde geçici olarak 8 mm'ye uyarlanır; uygun başka ürün açıldığında 10 mm tercihi geri gelir.
+
+
+## P3DV V3.22 Kapı İç Kolu ve Sun-Store Doku Eşleşmesi
+
+- Normal kapının iç kolu, rozet ekseni etrafında önceki yönüne göre 180° çevrilmiştir; kapı kanadının dışına doğru ters uzanmaz.
+- Dış ve iç kollar kapının iki farklı yüzünde kalır, ancak fiziksel olarak aynı doğru yöne uzanır.
+- Sun-Store kataloğundaki 23 kumaşın her biri gerçek numune alanından ayrı 512×512 doku varlığı olarak hazırlanmıştır.
+- Kıvrılmış numune köşeleri, ürün kodu ve beyaz sayfa alanları dokuya alınmaz.
+- Zip Perde dokuları panelin fiziksel genişlik/yükseklik oranına göre ölçeklenir; eski 2.2×4.8 gerilmiş tekrar kaldırılmıştır.
+- Mirrored repeat ile görünür doku birleşim çizgileri azaltılır.
+- Doku rengi katalog görüntüsüne yaklaşması için sRGB, düşük emissive katkısı ve gerçek numuneden çıkarılmış fallback tonu birlikte kullanılır.
+
+
+## P3DV V3.23 Zip Perde Siyah Doku Düzeltmesi
+
+- Sun-Store kumaşları gömülü JPEG data URI kaynaklarıyla iframe içine taşınır.
+- Zip kumaşı ışık bağımsız `MeshBasicMaterial` kullanır.
+- Kaynak sırası gömülü veri, paket dokusu, katalog kırpması ve procedural fallback şeklindedir.
+- Kumaş dokusu `emissiveMap` olarak tekrar kullanılmaz.
+
+
+## P3DV V3.24 Net Cephe Açıklıkları ve Kapı Kanat Yüksekliği
+
+- Cephe ürün alanları gerçek dikme iç yüzleri ve üst profil alt yüzü arasında hesaplanır.
+- Dikme arası Zip Perde net açıklıktan toplam 3 mm, diğer cephe ürünleri toplam 5 mm küçük yerleşir.
+- Ön/arka cephelerde post X kesiti; yan cephelerde post Z kesiti kullanılır.
+- Ek dikey/yatay profiller gerçek yüz genişlikleri kadar açıklığı böler ve alt alan ölçülerini yeniden üretir.
+- Üst sabitli kapıda kullanıcı yalnız hareketli kanat yüksekliğini girer; sabit üst cam kalan alandan türetilir.
+- 3D ölçülendirmede üst sabit cam etiketi kaldırılmış, yalnız hareketli kapı kanadı yüksekliği bırakılmıştır.
+- Sun-Store dokularındaki tekrarlanan beyaz katalog kenarları temizlenmiştir.
+
+
+## P3DV V3.25 Klasik Default Renkler ve Başlangıç Durumları
+
+- Uygulama ilk açıldığında RAL yerine klasik teknik renk paleti kullanılır.
+- Dikmeler magenta, ana kayıt/kirişler mavi, hareketli paneller yeşil, oluklar turuncu ve iç ray çerçevesi amber görünür.
+- Renk Seçimi başlığındaki `Default` ve `RAL` düğmeleri arasında geçiş yapılabilir.
+- RAL modunda son seçilen sistem ve panel renkleri ile yüzey tipleri korunur; Default düğmesi klasik paleti geri getirir.
+- Çatı panelleri ilk açılışta açık gelir.
+- Yalnız Ana Ölçüler görünür; Ara Ölçüler başlangıçta kapalıdır.
+- Global ürün durumu başlangıçta açıktır ve yeni yerleştirilen ürünler ilk anda açık state ile kaydedilir.
+
+
+## P3DV V3.26 Soft Recommended Limits
+
+- B-Cube Freedom ve Bio-Rise genişlik/açılım üst sınırları artık zorunlu doğrulama engeli değildir.
+- Önerilen maksimum değerler sol giriş panelinde kalıcı olarak gösterilir.
+- Önerilen maksimum aşıldığında turuncu bir bilgilendirme mesajı gösterilir; `3D Modeli Oluştur` işlemi devam eder.
+- Panel sayısı ve açılım dönüşümü önerilen panel maksimumunda clamp edilmez.
+- Minimum genişlik/açılım, geçerli yükseklik ve mevcut profil kesitlerinin fiziksel olarak sığması gibi gerçek geometri kontrolleri korunur.
