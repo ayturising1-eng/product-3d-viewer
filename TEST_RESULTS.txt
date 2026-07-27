@@ -1,7 +1,7 @@
-P3DV V3.32 TEST RESULTS
+P3DV V3.33 TEST RESULTS
 ======================
 
-PASS — NODE / STATİK
+PASS - NODE / STATIK
 --------------------
 - `node --check app.js`
 - `node --check ral-colors.js`
@@ -12,28 +12,45 @@ PASS — NODE / STATİK
 - `node tests/p3dv-v3.13-door-tests.js`: 417 kontrol
 - `node tests/p3dv-v3.31-quick-pdf-tests.js`: 43 kontrol
 - `node tests/p3dv-v3.31-folding-tests.js`: 50 kontrol
-- `node tests/p3dv-v3.32-ar-tests.js`: 51 kontrol
+- `node tests/p3dv-v3.32-ar-tests.js`: 52 kontrol
+- `node tests/p3dv-v3.33-manual-ar-tests.js`: 41 kontrol
 - Oluşturulan iframe viewer JavaScript sözdizimi Regression A/B tarafından doğrulandı.
-- 4000 mm × 0.001 = 4 m ölçek sözleşmesi doğrulandı.
+- 4000 mm x 0.001 = 4 m ölçek sözleşmesi doğrulandı.
 - Hızlı test düğmesi sayısı 10 olarak korundu.
+- Zorunlu hit-test kaynağının kaldırıldığı doğrulandı.
+- Manuel hareket adımı 10 cm ve zemin kotu adımı 1 cm olarak doğrulandı.
+- Landscape/fullscreen/yön kilidi sözleşmesi doğrulandı.
 
-PASS — GERÇEK CHROMIUM
+PASS - GERÇEK CHROMIUM
 ----------------------
 - Test 1 senaryosu açıldı.
 - `Ürün Listesi PDF` düğmesi gerçek download olayı oluşturdu.
 - İndirilen dosya: `B-Cube-Freedom-4000x5980x2700-urun-listesi.pdf`
 - Dosya imzası: `%PDF-1.4`
 - Dosya boyutu: 314.393 bayt
-- AR düğmesi, iframe izinleri ve parent/iframe durum mesajı gerçek Chromium DOM ortamında doğrulandı.
-- Mock XR sonucu parent durum alanına doğru aktarıldı.
+- Sayfa sayısı: 6
+- Sayfa boyutu: A4
+- Altı PDF sayfası PNG olarak render edildi.
+- İlk, veri ve son sayfalar kırpılma/taşma açısından görsel olarak kontrol edildi.
+- Iframe `srcdoc` içinde aşağıdaki manuel AR öğeleri doğrulandı:
+  - Konumu Sabitle
+  - Yeniden Konumlandır
+  - Yatay Kamera
+  - Zemin kotu sürgüsü
+  - 1 cm ve 10 cm kontroller
+- PDF düğmesi indirme sonrası normal etiketine döndü.
+- AR düğmesi görünür kaldı.
 - Browser page error: 0
+- Browser console error: 0
 
 YAPILAMAYAN DONANIM TESTİ
 -------------------------
 - Gerçek Android telefon kamerası açılmadı.
-- ARCore/WebXR gerçek hit-test sonucu alınmadı.
+- ARCore/WebXR gerçek dünya takibi çalıştırılmadı.
 - Fiziksel 4 metre referansla 4000 mm model karşılaştırılmadı.
-- Cihaz hareketinde ankraj kararlılığı ölçülmedi.
+- Kullanıcının zemin kotu ayarının fiziksel doğruluğu ölçülmedi.
+- Landscape yön kilidi gerçek telefon tarayıcısında doğrulanmadı.
+- Cihaz hareketinde dünya koordinatı kararlılığı ölçülmedi.
 - iPhone/iPad Quick Look testi yapılmadı; bu sürümde USDZ akışı yoktur.
 
 SONUÇ

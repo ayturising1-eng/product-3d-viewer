@@ -1129,11 +1129,11 @@
       button.disabled = true;
       button.textContent = 'AR Hazırlanıyor…';
     }
-    setMobileArStatus('Kamera ve gerçek yüzey algılama başlatılıyor…');
+    setMobileArStatus('Kamera ve manuel gerçek ölçekli yerleşim başlatılıyor…');
     try {
       const result = await child.startP3DVAR();
       if (result && result.ok) {
-        setMobileArStatus(result.message || 'AR oturumu başlatıldı. Zemini tarayın ve ürünü yerleştirin.', 'success');
+        setMobileArStatus(result.message || 'AR oturumu başlatıldı. Ürün gerçek ölçekte çizildi; konumunu elle ayarlayın.', 'success');
       } else {
         setMobileArStatus((result && result.message) || 'AR oturumu başlatılamadı.', (result && result.retryInsideViewer) ? 'warning' : 'error');
       }
@@ -4476,15 +4476,35 @@ body.ar-active #viewerHint{display:none}
 #arLaunchGate .ar-gate-card{width:min(430px,calc(100% - 32px));padding:20px;border:1px solid rgba(125,211,252,.4);border-radius:16px;background:rgba(15,23,42,.94);box-shadow:0 18px 60px rgba(0,0,0,.35);text-align:center}
 #arLaunchGate strong{display:block;margin-bottom:8px;font-size:18px;color:#f8fafc}
 #arLaunchGate p{margin:0 0 14px;color:#bfdbfe;font-size:13px;line-height:1.55}
-#arLaunchGate button,#arOverlay button{border:1px solid rgba(255,255,255,.26);border-radius:10px;background:#0f766e;color:#fff;padding:11px 14px;font:600 13px Segoe UI,Arial,sans-serif}
-#arLaunchGate button.ghost,#arOverlay button.ghost{background:rgba(15,23,42,.72)}
+#arLaunchGate button,#arOverlay button{border:1px solid rgba(255,255,255,.26);border-radius:9px;background:#0f766e;color:#fff;padding:9px 10px;font:600 12px Segoe UI,Arial,sans-serif;touch-action:manipulation}
+#arLaunchGate button.ghost,#arOverlay button.ghost{background:rgba(15,23,42,.78)}
 #arOverlay{position:absolute;inset:0;z-index:65;pointer-events:none;color:#f8fafc}
 #arScaleBadge{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);padding:9px 11px;border:1px solid rgba(94,234,212,.5);border-radius:10px;background:rgba(6,78,75,.82);font-size:12px;line-height:1.4;backdrop-filter:blur(5px)}
-#arTrackingStatus{position:absolute;left:12px;right:12px;bottom:82px;padding:9px 11px;border:1px solid rgba(125,211,252,.35);border-radius:10px;background:rgba(15,23,42,.78);font-size:12px;line-height:1.45;text-align:center;backdrop-filter:blur(5px)}
-#arControls{position:absolute;left:10px;right:10px;bottom:12px;display:flex;justify-content:center;gap:7px;flex-wrap:wrap;pointer-events:auto}
-#arControls button{min-width:70px;padding:10px 11px}
-#arControls button.primary{background:#0f766e}
-#arControls button.warning{background:#92400e}
+#arTrackingStatus{position:absolute;left:12px;right:12px;top:58px;padding:9px 11px;border:1px solid rgba(125,211,252,.35);border-radius:10px;background:rgba(15,23,42,.78);font-size:12px;line-height:1.45;text-align:center;backdrop-filter:blur(5px)}
+#arControlPanel{position:absolute;left:8px;right:8px;bottom:8px;max-height:56%;padding:9px;border:1px solid rgba(125,211,252,.28);border-radius:13px;background:rgba(15,23,42,.84);backdrop-filter:blur(8px);pointer-events:auto;overflow:auto}
+.ar-control-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:center}
+.ar-control-row+ .ar-control-row{margin-top:7px}
+.ar-control-row button{flex:1 1 82px;min-width:68px}
+.ar-control-row button.primary{background:#0f766e}
+.ar-control-row button.warning{background:#92400e}
+.ar-control-row button:disabled{opacity:.45}
+.ar-rotate-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.ar-rotate-row button{min-width:0}
+.ar-control-section{margin-top:8px;padding-top:8px;border-top:1px solid rgba(148,163,184,.22)}
+.ar-control-section>strong{display:block;margin-bottom:6px;color:#bfdbfe;font-size:11px;text-align:center}
+.ar-move-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:330px;margin:0 auto}
+.ar-move-grid .blank{visibility:hidden}
+#arGroundRow{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;align-items:center}
+#arGroundOffsetInput{width:100%;accent-color:#2dd4bf}
+#arGroundValue{min-width:52px;text-align:center;font:700 11px Segoe UI,Arial,sans-serif;color:#ccfbf1}
+@media (orientation:landscape){
+  #arTrackingStatus{left:12px;right:338px;top:58px}
+  #arControlPanel{left:auto;right:8px;top:8px;bottom:8px;width:310px;max-height:none}
+  #arScaleBadge{max-width:calc(100% - 350px)}
+}
+body.ar-landscape #arTrackingStatus{left:12px;right:338px;top:58px}
+body.ar-landscape #arControlPanel{left:auto;right:8px;top:8px;bottom:8px;width:310px;max-height:none}
+body.ar-landscape #arScaleBadge{max-width:calc(100% - 350px)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr` + `ipt>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></scr` + `ipt>
@@ -4494,21 +4514,48 @@ body.ar-active #viewerHint{display:none}
 <div id="viewerHint">Dikmeler arasındaki boşluğa tıklayın. Bir ürün panelini açıp kapatmak için çift tıklayın.</div>
 <div id="arLaunchGate" hidden>
   <div class="ar-gate-card">
-    <strong>Gerçek Alan Yerleşimi</strong>
-    <p>Kamera izni için bu ekran içindeki düğmeye dokunun. Ürün, WebXR yüzey algılamasıyla gerçek ölçekte yerleştirilecektir.</p>
+    <strong>Manuel Gerçek Alan Yerleşimi</strong>
+    <p>Kamera açıldığında ürün 1:1 ölçekte hemen çizilir. Zemin kotunu, mesafeyi, yönü ve konumu ekrandaki kontrollerle kendiniz ayarlarsınız.</p>
     <button id="arLaunchGateBtn" type="button">Kamerayı Aç</button>
     <button id="arLaunchGateCancelBtn" class="ghost" type="button">Vazgeç</button>
   </div>
 </div>
 <div id="arOverlay" hidden>
   <div id="arScaleBadge">Gerçek Ölçek 1:1</div>
-  <div id="arTrackingStatus">Telefonu yavaşça hareket ettirerek zemini tarayın.</div>
-  <div id="arControls">
-    <button id="arPlaceBtn" class="primary" type="button">Yerleştir</button>
-    <button id="arResetBtn" type="button">Yeniden Konumlandır</button>
-    <button id="arRotateLeftBtn" type="button">↶ 15°</button>
-    <button id="arRotateRightBtn" type="button">15° ↷</button>
-    <button id="arExitBtn" class="warning" type="button">AR Kapat</button>
+  <div id="arTrackingStatus">Ürün hazırlanıyor; gerçek ölçekte kameranın önüne çizilecek.</div>
+  <div id="arControlPanel">
+    <div class="ar-control-row">
+      <button id="arLockBtn" class="primary" type="button">Konumu Sabitle</button>
+      <button id="arRepositionBtn" type="button" disabled>Yeniden Konumlandır</button>
+      <button id="arLandscapeBtn" type="button">Yatay Kamera</button>
+    </div>
+    <div class="ar-control-section">
+      <strong>Konum · Her dokunuş 10 cm</strong>
+      <div class="ar-move-grid">
+        <span class="blank"></span><button id="arMoveForwardBtn" type="button">↑ İleri</button><span class="blank"></span>
+        <button id="arMoveLeftBtn" type="button">← Sol</button><button id="arMoveBackBtn" type="button">↓ Geri</button><button id="arMoveRightBtn" type="button">Sağ →</button>
+      </div>
+    </div>
+    <div class="ar-control-section">
+      <strong>Zemin Kotu · 1 cm hassasiyet</strong>
+      <div id="arGroundRow">
+        <button id="arMoveDownBtn" type="button">-1 cm</button>
+        <input id="arGroundOffsetInput" type="range" min="-150" max="150" step="1" value="0" aria-label="Zemin kotu santimetre" />
+        <span id="arGroundValue">0 cm</span>
+        <button id="arMoveUpBtn" type="button">+1 cm</button>
+      </div>
+      <div class="ar-control-row"><button id="arGroundZeroBtn" type="button">Zemin Kotunu Sıfırla</button></div>
+    </div>
+    <div class="ar-control-section">
+      <strong>Döndürme</strong>
+      <div class="ar-control-row ar-rotate-row">
+        <button id="arRotateFineLeftBtn" type="button">↶ 1°</button>
+        <button id="arRotateLeftBtn" type="button">↶ 15°</button>
+        <button id="arRotateRightBtn" type="button">15° ↷</button>
+        <button id="arRotateFineRightBtn" type="button">1° ↷</button>
+      </div>
+    </div>
+    <div class="ar-control-section"><div class="ar-control-row"><button id="arExitBtn" class="warning" type="button">AR Kapat</button></div></div>
   </div>
 </div>
 <script>
@@ -4645,27 +4692,26 @@ let animStep=0;
 let timer=null;
 
 const AR_METERS_PER_MM=0.001;
+const AR_DEFAULT_EYE_HEIGHT=1.45;
+const AR_MOVE_STEP=.10;
+const AR_HEIGHT_STEP=.01;
 const arRoot=new THREE.Group();
 arRoot.visible=false;
 scene.add(arRoot);
-const arReticle=new THREE.Mesh(
-  new THREE.RingGeometry(.13,.18,48).rotateX(-Math.PI/2),
-  new THREE.MeshBasicMaterial({color:0x2dd4bf,side:THREE.DoubleSide,transparent:true,opacity:.92})
-);
-arReticle.matrixAutoUpdate=true;
-arReticle.visible=false;
-scene.add(arReticle);
 let arSession=null;
-let arHitTestSource=null;
 let arReferenceSpace=null;
-let arSurfaceReady=false;
-let arPlaced=false;
+let arPlacementInitialized=false;
+let arPlacementLocked=false;
 let arBaseYaw=0;
 let arYawOffset=0;
+let arBaseGroundY=0;
+let arGroundOffset=0;
 let arLastStatusAt=0;
-let arLastHitPosition=new THREE.Vector3();
-let arLastCameraPosition=new THREE.Vector3();
-let arRestoreRendererAlpha=1;
+let arLandscapeMode=false;
+const arManualPosition=new THREE.Vector3();
+const arLastCameraPosition=new THREE.Vector3();
+const arCameraForward=new THREE.Vector3();
+const arCameraRight=new THREE.Vector3();
 let arRestoreCameraNear=camera.near;
 let arRestoreCameraFar=camera.far;
 
@@ -4683,11 +4729,11 @@ async function getArCapabilities(){
   }
   if(!navigator.xr || typeof navigator.xr.isSessionSupported!=='function'){
     const ios=isLikelyIosDevice();
-    return {supported:false,reason:ios?'ios-webxr':'webxr-missing',message:ios?'Bu iPhone/iPad tarayıcısında WebXR AR desteği bulunamadı. Bu sürümde gerçek ölçekli yerleştirme Android Chrome/WebXR cihazlarında çalışır.':'Bu tarayıcı WebXR artırılmış gerçeklik özelliğini desteklemiyor. Android Chrome ve ARCore destekli cihaz kullanın.'};
+    return {supported:false,reason:ios?'ios-webxr':'webxr-missing',message:ios?'Bu iPhone/iPad tarayıcısında WebXR AR desteği bulunamadı. Bu sürümde manuel gerçek ölçekli yerleştirme Android Chrome/WebXR cihazlarında çalışır.':'Bu tarayıcı WebXR artırılmış gerçeklik özelliğini desteklemiyor. Android Chrome ve ARCore destekli cihaz kullanın.'};
   }
   try{
     const supported=await navigator.xr.isSessionSupported('immersive-ar');
-    return {supported:Boolean(supported),reason:supported?'':'immersive-ar-unsupported',message:supported?('AR hazır · '+Math.round(W)+' mm = '+(W/1000).toFixed(2)+' m · ölçek kilitli 1:1'):'Cihaz WebXR kullanıyor ancak immersive-ar oturumunu desteklemiyor.'};
+    return {supported:Boolean(supported),reason:supported?'':'immersive-ar-unsupported',message:supported?('AR hazır · '+Math.round(W)+' mm = '+(W/1000).toFixed(2)+' m · manuel konum · ölçek kilitli 1:1'):'Cihaz WebXR kullanıyor ancak immersive-ar oturumunu desteklemiyor.'};
   }catch(error){
     return {supported:false,reason:'capability-error',message:'AR desteği denetlenemedi: '+error.message};
   }
@@ -4710,6 +4756,46 @@ function showArLaunchGate(show){
   if(gate)gate.hidden=!show;
 }
 
+function eachArMaterial(callback){
+  group.traverse(object=>{
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    materials.filter(Boolean).forEach(callback);
+  });
+}
+
+function setArGhostMode(enabled){
+  eachArMaterial(material=>{
+    material.userData=material.userData||{};
+    if(enabled){
+      if(!material.userData.p3dvArSaved){
+        material.userData.p3dvArSaved={opacity:material.opacity,transparent:material.transparent,depthWrite:material.depthWrite};
+      }
+      const saved=material.userData.p3dvArSaved;
+      material.transparent=true;
+      material.opacity=Math.max(.08,Number(saved.opacity||1)*.46);
+      material.depthWrite=false;
+    }else if(material.userData.p3dvArSaved){
+      const saved=material.userData.p3dvArSaved;
+      material.opacity=saved.opacity;
+      material.transparent=saved.transparent;
+      material.depthWrite=saved.depthWrite;
+      delete material.userData.p3dvArSaved;
+    }
+    material.needsUpdate=true;
+  });
+}
+
+function updateArControlState(){
+  const lock=document.getElementById('arLockBtn');
+  const reposition=document.getElementById('arRepositionBtn');
+  if(lock)lock.disabled=!arPlacementInitialized||arPlacementLocked;
+  if(reposition)reposition.disabled=!arPlacementInitialized||!arPlacementLocked;
+  const ground=document.getElementById('arGroundOffsetInput');
+  const groundValue=document.getElementById('arGroundValue');
+  if(ground)ground.value=String(Math.round(arGroundOffset*100));
+  if(groundValue)groundValue.textContent=(arGroundOffset>=0?'+':'')+Math.round(arGroundOffset*100)+' cm';
+}
+
 function prepareModelForAr(){
   if(timer)clearInterval(timer);
   parts.forEach(part=>part.visible=true);
@@ -4727,6 +4813,7 @@ function prepareModelForAr(){
   arRoot.position.set(0,0,0);
   arRoot.rotation.set(0,0,0);
   arRoot.visible=false;
+  setArGhostMode(true);
   controls.enabled=false;
   arRestoreCameraNear=camera.near;
   arRestoreCameraFar=camera.far;
@@ -4736,11 +4823,21 @@ function prepareModelForAr(){
   document.body.classList.add('ar-active');
   document.getElementById('arOverlay').hidden=false;
   setArScaleBadge();
+  updateArControlState();
+}
+
+async function resetArOrientation(){
+  arLandscapeMode=false;
+  document.body.classList.remove('ar-landscape');
+  const button=document.getElementById('arLandscapeBtn');
+  if(button)button.textContent='Yatay Kamera';
+  try{if(screen.orientation&&typeof screen.orientation.unlock==='function')screen.orientation.unlock();}catch(error){}
+  try{if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen();}catch(error){}
 }
 
 function restoreModelAfterAr(){
-  arReticle.visible=false;
   arRoot.visible=false;
+  setArGhostMode(false);
   if(group.parent)group.parent.remove(group);
   scene.add(group);
   group.scale.set(1,1,1);
@@ -4761,45 +4858,133 @@ function restoreModelAfterAr(){
 }
 
 function applyArPlacementTransform(){
+  arRoot.position.set(arManualPosition.x,arBaseGroundY+arGroundOffset,arManualPosition.z);
   arRoot.rotation.set(0,arBaseYaw+arYawOffset,0);
+  arRoot.visible=arPlacementInitialized;
+  updateArControlState();
 }
 
-function placeArModel(){
-  if(!arSurfaceReady){
-    setArTrackingText('Henüz uygun zemin bulunamadı. Telefonu yavaşça hareket ettirin.');
-    return false;
-  }
-  arPlaced=true;
-  arReticle.visible=false;
-  setArTrackingText('Ürün yerleştirildi · ölçek 1:1 kilitli. Taşımak için Yeniden Konumlandır seçin.');
-  postArStatus('Ürün gerçek yüzeye 1:1 ölçekte yerleştirildi.','success');
+function arDefaultDistance(){
+  return Math.max(3,Math.hypot(W,D)*AR_METERS_PER_MM*.68);
+}
+
+function getArCameraAxes(){
+  const xrCamera=renderer.xr.getCamera(camera);
+  xrCamera.getWorldPosition(arLastCameraPosition);
+  xrCamera.getWorldDirection(arCameraForward);
+  arCameraForward.y=0;
+  if(arCameraForward.lengthSq()<.0001)arCameraForward.set(0,0,-1);
+  arCameraForward.normalize();
+  arCameraRight.crossVectors(arCameraForward,new THREE.Vector3(0,1,0)).normalize();
+  return {camera:xrCamera,position:arLastCameraPosition,forward:arCameraForward,right:arCameraRight};
+}
+
+function initializeManualArPlacement(){
+  if(arPlacementInitialized)return true;
+  const axes=getArCameraAxes();
+  const distance=arDefaultDistance();
+  arManualPosition.copy(axes.position).addScaledVector(axes.forward,distance);
+  arBaseGroundY=axes.position.y-AR_DEFAULT_EYE_HEIGHT;
+  arGroundOffset=0;
+  const dx=axes.position.x-arManualPosition.x;
+  const dz=axes.position.z-arManualPosition.z;
+  arBaseYaw=Math.atan2(-dx,-dz);
+  arYawOffset=0;
+  arPlacementInitialized=true;
+  arPlacementLocked=false;
+  setArGhostMode(true);
+  applyArPlacementTransform();
+  setArTrackingText('Ürün '+distance.toFixed(1)+' m öne gerçek ölçekte çizildi. Oklarla konumu, zemin kotunu ve yönü ayarlayın; ardından Konumu Sabitleyin.');
+  postArStatus('Ürün kameranın önüne 1:1 ölçekte çizildi; manuel konumlandırma hazır.','success');
   return true;
 }
 
-function resetArPlacement(){
-  arPlaced=false;
-  arSurfaceReady=false;
-  arRoot.visible=false;
-  arReticle.visible=false;
-  setArTrackingText('Telefonu yavaşça hareket ettirerek zemini yeniden tarayın.');
+function lockArPlacement(){
+  if(!arPlacementInitialized)return false;
+  arPlacementLocked=true;
+  setArGhostMode(false);
+  updateArControlState();
+  setArTrackingText('Konum sabitlendi · gerçek ölçek 1:1. İnce ayar düğmeleri ölçeği değiştirmeden çalışır.');
+  postArStatus('Manuel AR konumu sabitlendi.','success');
+  return true;
+}
+
+function reopenArPlacement(){
+  if(!arPlacementInitialized)return false;
+  arPlacementLocked=false;
+  setArGhostMode(true);
+  updateArControlState();
+  setArTrackingText('Yeniden konumlandırma açık · ürün yarı saydamdır. Taşıyın ve tekrar sabitleyin.');
+  return true;
+}
+
+function moveArModel(direction,amount){
+  if(!arPlacementInitialized)return;
+  const axes=getArCameraAxes();
+  if(direction==='forward')arManualPosition.addScaledVector(axes.forward,amount);
+  if(direction==='right')arManualPosition.addScaledVector(axes.right,amount);
+  applyArPlacementTransform();
+  const distance=axes.position.distanceTo(arRoot.position);
+  setArTrackingText('Konum ayarlandı · kamera mesafesi yaklaşık '+distance.toFixed(1)+' m · ölçek 1:1.');
+}
+
+function setArGroundOffset(valueMeters){
+  arGroundOffset=Math.max(-1.5,Math.min(1.5,Number(valueMeters)||0));
+  applyArPlacementTransform();
+  setArTrackingText('Zemin kotu '+(arGroundOffset>=0?'+':'')+Math.round(arGroundOffset*100)+' cm · gerçek ürün yüksekliği değişmedi.');
+}
+
+function adjustArGround(delta){
+  setArGroundOffset(arGroundOffset+delta);
 }
 
 function rotateArModel(delta){
+  if(!arPlacementInitialized)return;
   arYawOffset+=delta;
   applyArPlacementTransform();
   setArTrackingText('Yön '+Math.round(arYawOffset*180/Math.PI)+'° ayarlandı · gerçek ölçek değişmedi.');
 }
 
-async function cleanupArSession(){
-  if(arHitTestSource && typeof arHitTestSource.cancel==='function'){
-    try{arHitTestSource.cancel();}catch(error){}
+async function setArLandscapeMode(enable){
+  const requested=Boolean(enable);
+  let fullscreenOk=Boolean(document.fullscreenElement);
+  let lockOk=false;
+  if(requested){
+    try{
+      if(!document.fullscreenElement&&document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen();
+        fullscreenOk=true;
+      }
+    }catch(error){}
+    try{
+      if(screen.orientation&&typeof screen.orientation.lock==='function'){
+        await screen.orientation.lock('landscape');
+        lockOk=true;
+      }
+    }catch(error){}
+    arLandscapeMode=true;
+    document.body.classList.add('ar-landscape');
+    const button=document.getElementById('arLandscapeBtn');
+    if(button)button.textContent='Dikey Kamera';
+    const message=lockOk?'Yatay kamera kilitlendi · ürün konumu ve 1:1 ölçek korundu.':'Yatay kilit tarayıcı tarafından verilmedi. Telefonu yatay çevirin; geniş arayüz hazır.';
+    setArTrackingText(message);
+    postArStatus(message,lockOk?'success':'warning');
+  }else{
+    await resetArOrientation();
+    setArTrackingText('Dikey kamera düzenine dönüldü · ürün konumu ve ölçek korundu.');
+    postArStatus('Dikey kamera düzenine dönüldü.','success');
   }
-  arHitTestSource=null;
+  return {fullscreen:fullscreenOk,locked:lockOk};
+}
+
+async function cleanupArSession(){
   arReferenceSpace=null;
   arSession=null;
-  arPlaced=false;
-  arSurfaceReady=false;
+  arPlacementInitialized=false;
+  arPlacementLocked=false;
   arYawOffset=0;
+  arGroundOffset=0;
+  await resetArOrientation();
   restoreModelAfterAr();
   parent.postMessage({source:'product-3d-viewer',type:'ar-session-ended'},'*');
 }
@@ -4811,7 +4996,6 @@ async function beginArSession(){
   renderer.xr.enabled=true;
   renderer.xr.setReferenceSpaceType('local');
   const sessionInit={
-    requiredFeatures:['hit-test'],
     optionalFeatures:['dom-overlay','local-floor'],
     domOverlay:{root:document.body}
   };
@@ -4821,14 +5005,12 @@ async function beginArSession(){
   try{
     await renderer.xr.setSession(session);
     arReferenceSpace=await session.requestReferenceSpace('local');
-    const viewerSpace=await session.requestReferenceSpace('viewer');
-    arHitTestSource=await session.requestHitTestSource({space:viewerSpace});
     prepareModelForAr();
     showArLaunchGate(false);
-    setArTrackingText('Telefonu yavaşça hareket ettirin. Yeşil halka zemini bulduğunda Yerleştir düğmesine dokunun.');
+    setArTrackingText('Kamera açık · ürün ilk karede gerçek ölçekte çizilecek. Zemin araması zorunlu değildir.');
     postArStatus('Kamera açıldı · '+Math.round(W)+' mm ürün '+(W/1000).toFixed(2)+' m gerçek genişlikte tutuluyor.','success');
-    session.addEventListener('select',()=>{if(!arPlaced)placeArModel();});
-    return {ok:true,message:'Kamera açıldı. Zemini tarayın; ürün ölçeği 1:1 kilitlidir.'};
+    session.addEventListener('select',()=>{if(!arPlacementLocked)lockArPlacement();});
+    return {ok:true,message:'Kamera açıldı. Ürün 1:1 ölçekte hemen çizilir; konumu ve zemin kotunu elle ayarlayın.'};
   }catch(error){
     try{await session.end();}catch(endError){}
     throw error;
@@ -4858,52 +5040,19 @@ window.startP3DVAR=async function(){
 };
 
 function updateArFrame(frame){
-  if(!arSession || !frame || !arHitTestSource || !arReferenceSpace || arPlaced)return;
-  const hitResults=frame.getHitTestResults(arHitTestSource);
-  if(!hitResults.length){
-    arSurfaceReady=false;
-    arReticle.visible=false;
-    arRoot.visible=false;
-    const now=performance.now();
-    if(now-arLastStatusAt>650){
-      setArTrackingText('Zemin aranıyor… Telefonu yavaşça sağa-sola ve yukarı-aşağı hareket ettirin.');
-      arLastStatusAt=now;
-    }
+  if(!arSession||!frame)return;
+  if(!arPlacementInitialized){
+    initializeManualArPlacement();
     return;
   }
-  const pose=hitResults[0].getPose(arReferenceSpace);
-  if(!pose)return;
-  const matrix=new THREE.Matrix4().fromArray(pose.transform.matrix);
-  const elements=matrix.elements;
-  const surfaceUp=new THREE.Vector3(elements[4],elements[5],elements[6]).normalize();
-  if(surfaceUp.y<.62){
-    arSurfaceReady=false;
-    arReticle.visible=false;
-    arRoot.visible=false;
-    setArTrackingText('Dikey/eğimli yüzey algılandı. Pergola için kamerayı zemine yöneltin.');
-    return;
-  }
-  arLastHitPosition.setFromMatrixPosition(matrix);
-  const xrCamera=renderer.xr.getCamera(camera);
-  xrCamera.getWorldPosition(arLastCameraPosition);
-  const dx=arLastCameraPosition.x-arLastHitPosition.x;
-  const dz=arLastCameraPosition.z-arLastHitPosition.z;
-  if(Math.hypot(dx,dz)>.05)arBaseYaw=Math.atan2(-dx,-dz);
-  arSurfaceReady=true;
-  arReticle.visible=true;
-  arReticle.position.copy(arLastHitPosition);
-  arReticle.rotation.set(0,0,0);
-  arRoot.position.copy(arLastHitPosition);
-  applyArPlacementTransform();
   arRoot.visible=true;
-  const distance=arLastCameraPosition.distanceTo(arLastHitPosition);
-  const diagonal=Math.hypot(W,D)*AR_METERS_PER_MM;
-  const suggested=Math.max(2.5,diagonal*.72);
   const now=performance.now();
-  if(now-arLastStatusAt>400){
-    const distanceText='Kamera mesafesi '+distance.toFixed(1)+' m';
-    const guidance=distance<suggested?(' · ürünün tamamı için yaklaşık '+suggested.toFixed(1)+' m geri çekilin.'):' · kadraj mesafesi uygun.';
-    setArTrackingText('Zemin bulundu · '+distanceText+guidance);
+  if(now-arLastStatusAt>900&&!arPlacementLocked){
+    const axes=getArCameraAxes();
+    const distance=axes.position.distanceTo(arRoot.position);
+    const suggested=arDefaultDistance();
+    const guidance=distance<suggested*.72?' · ürünün tamamını görmek için Geri düğmesiyle uzaklaştırın.':' · konumu elle ayarlayın.';
+    setArTrackingText('Manuel yerleşim açık · kamera mesafesi '+distance.toFixed(1)+' m'+guidance);
     arLastStatusAt=now;
   }
 }
@@ -4915,14 +5064,36 @@ if(arLaunchGateBtn)arLaunchGateBtn.addEventListener('click',async()=>{
 });
 const arLaunchGateCancelBtn=document.getElementById('arLaunchGateCancelBtn');
 if(arLaunchGateCancelBtn)arLaunchGateCancelBtn.addEventListener('click',()=>showArLaunchGate(false));
-const arPlaceBtn=document.getElementById('arPlaceBtn');
-if(arPlaceBtn)arPlaceBtn.addEventListener('click',placeArModel);
-const arResetBtn=document.getElementById('arResetBtn');
-if(arResetBtn)arResetBtn.addEventListener('click',resetArPlacement);
+const arLockBtn=document.getElementById('arLockBtn');
+if(arLockBtn)arLockBtn.addEventListener('click',lockArPlacement);
+const arRepositionBtn=document.getElementById('arRepositionBtn');
+if(arRepositionBtn)arRepositionBtn.addEventListener('click',reopenArPlacement);
+const arMoveForwardBtn=document.getElementById('arMoveForwardBtn');
+if(arMoveForwardBtn)arMoveForwardBtn.addEventListener('click',()=>moveArModel('forward',AR_MOVE_STEP));
+const arMoveBackBtn=document.getElementById('arMoveBackBtn');
+if(arMoveBackBtn)arMoveBackBtn.addEventListener('click',()=>moveArModel('forward',-AR_MOVE_STEP));
+const arMoveLeftBtn=document.getElementById('arMoveLeftBtn');
+if(arMoveLeftBtn)arMoveLeftBtn.addEventListener('click',()=>moveArModel('right',-AR_MOVE_STEP));
+const arMoveRightBtn=document.getElementById('arMoveRightBtn');
+if(arMoveRightBtn)arMoveRightBtn.addEventListener('click',()=>moveArModel('right',AR_MOVE_STEP));
+const arMoveDownBtn=document.getElementById('arMoveDownBtn');
+if(arMoveDownBtn)arMoveDownBtn.addEventListener('click',()=>adjustArGround(-AR_HEIGHT_STEP));
+const arMoveUpBtn=document.getElementById('arMoveUpBtn');
+if(arMoveUpBtn)arMoveUpBtn.addEventListener('click',()=>adjustArGround(AR_HEIGHT_STEP));
+const arGroundZeroBtn=document.getElementById('arGroundZeroBtn');
+if(arGroundZeroBtn)arGroundZeroBtn.addEventListener('click',()=>setArGroundOffset(0));
+const arGroundOffsetInput=document.getElementById('arGroundOffsetInput');
+if(arGroundOffsetInput)arGroundOffsetInput.addEventListener('input',event=>setArGroundOffset(Number(event.target.value)/100));
+const arRotateFineLeftBtn=document.getElementById('arRotateFineLeftBtn');
+if(arRotateFineLeftBtn)arRotateFineLeftBtn.addEventListener('click',()=>rotateArModel(-Math.PI/180));
+const arRotateFineRightBtn=document.getElementById('arRotateFineRightBtn');
+if(arRotateFineRightBtn)arRotateFineRightBtn.addEventListener('click',()=>rotateArModel(Math.PI/180));
 const arRotateLeftBtn=document.getElementById('arRotateLeftBtn');
 if(arRotateLeftBtn)arRotateLeftBtn.addEventListener('click',()=>rotateArModel(-Math.PI/12));
 const arRotateRightBtn=document.getElementById('arRotateRightBtn');
 if(arRotateRightBtn)arRotateRightBtn.addEventListener('click',()=>rotateArModel(Math.PI/12));
+const arLandscapeBtn=document.getElementById('arLandscapeBtn');
+if(arLandscapeBtn)arLandscapeBtn.addEventListener('click',()=>setArLandscapeMode(!arLandscapeMode));
 const arExitBtn=document.getElementById('arExitBtn');
 if(arExitBtn)arExitBtn.addEventListener('click',()=>{if(arSession)arSession.end();});
 

@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.32**
+Current package: **p3dv.v3.33**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -406,15 +406,21 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - PDF ayırıcı karakterleri yerel PDF motorunda ASCII uyumlu hale getirildi.
 
 
-## P3DV V3.32 Mobil Gerçek Alan Yerleşimi
+## P3DV V3.33 Manuel Mobil Gerçek Alan Yerleşimi
 
-- Toolbox içine `Gerçek Alanda Gör` düğmesi eklendi.
-- Mobil AR akışı WebXR `immersive-ar` ve `hit-test` yüzey algılama altyapısını kullanır.
-- P3DV içindeki milimetre tabanlı model AR sahnesinde `0.001` katsayısıyla metreye çevrilir; 4000 mm genişlik 4,00 metre olarak yerleştirilir.
-- Model ölçeği kullanıcı tarafından değiştirilemez. AR içinde yalnız yerleştirme, yeniden konumlandırma ve 15 derecelik yön döndürme kontrolleri bulunur.
-- Ürünün alt kotu algılanan zemine oturur; dikey veya aşırı eğimli yüzeylerde yerleştirme yapılmaz.
-- Kamera mesafesi ve model diyagonaline göre kadraj önerisi otomatik gösterilir.
-- AR oturumu doğrudan açılamazsa, kullanıcı aktivasyonu için 3D alan içinde ikinci bir `Kamerayı Aç` düğmesi gösterilir.
+- Toolbox içindeki `Gerçek Alanda Gör` düğmesi korunmuştur.
+- Zorunlu WebXR hit-test ve zemin tarama bekleme akışı kaldırılmıştır.
+- Kamera açıldığında ürün gerçek ölçekte ve yarı saydam olarak kameranın önüne otomatik çizilir.
+- P3DV milimetre geometrisi AR sahnesinde `0.001` katsayısıyla metreye çevrilir; 4000 mm genişlik tam 4,00 metre olur.
+- Kullanıcı ürünü 10 cm adımlarla ileri, geri, sola ve sağa taşıyabilir.
+- Zemin kotu sürgüyle veya 1 cm düğmeleriyle manuel ayarlanabilir.
+- Yön 1 derece ve 15 derece adımlarla değiştirilebilir.
+- `Konumu Sabitle` ve `Yeniden Konumlandır` durumları yarı saydam/normal görünümle ayrılmıştır.
+- `Yatay Kamera` düğmesi tam ekran ve landscape yön kilidini dener; izin verilmezse telefonu yatay çevirme yönlendirmesi gösterilir.
+- Yatay/dikey geçişte ürün konumu, dönüşü ve 1:1 ölçek korunur.
+- Pinch veya serbest ölçeklendirme bulunmaz.
+- AR oturumu doğrudan açılamazsa kullanıcı aktivasyonu için 3D alan içinde ikinci bir `Kamerayı Aç` düğmesi gösterilir.
 - Uygulamanın HTTPS üzerinden açılması gerekir. WebXR/ARCore desteklemeyen tarayıcılarda açıklayıcı uyarı gösterilir.
 - iPhone/iPad için bu sürümde USDZ/Quick Look dışa aktarımı bulunmaz; desteklenmeyen cihazlarda gerçek ölçek taklidi yapılmaz.
-- Mevcut `Test 1`–`Test 10` hızlı test yapısı ve yerel PDF motoru korunmuştur.
+- Mevcut `Test 1`-`Test 10` hızlı test yapısı ve yerel PDF motoru korunmuştur.
+

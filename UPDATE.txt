@@ -1,43 +1,48 @@
-P3DV.V3.32 UPDATE
+P3DV.V3.33 UPDATE
 =================
 
 KULLANICI TALEBİ
 ----------------
-Mobil kullanıcı çizimi oluşturduktan sonra telefon kamerasını açabilsin ve ürünü kamera kadrajındaki gerçek alana otomatik, derinlik tutarlı ve 1:1 fiziksel ölçekte yerleştirebilsin. 4000 mm genişliğindeki ürün AR sahnesinde gerçekten 4,00 metre olmalıdır.
+Mobil AR akışında kullanıcıya zorunlu zemin buldurmak yerine ürün kamera açılır açılmaz gerçek ölçekte çizilsin. Kullanıcı ürünün konumunu ve zemin kotunu kendisi ayarlasın. Ayrıca daha geniş kadraj için yatay kamera düğmesi eklensin.
 
 YAPILANLAR
 ----------
-- Toolbox içine `Gerçek Alanda Gör` düğmesi ve canlı AR durum alanı eklendi.
-- Viewer iframe izinlerine `camera; xr-spatial-tracking; fullscreen` eklendi.
-- WebXR `immersive-ar` oturumu ve zorunlu `hit-test` yüzey algılama akışı eklendi.
-- P3DV milimetre geometrisi AR dünya koordinatlarına `0.001` ölçek katsayısıyla aktarılır.
-- Model alt kotu algılanan zemin noktasına otomatik oturtulur.
-- Yüzey normali kontrolü eklendi; dikey/aşırı eğimli yüzeylere pergola yerleştirilmez.
-- Ürün kameraya doğru otomatik yönlendirilir.
-- Kullanıcı kontrolleri eklendi:
-  - Yerleştir
-  - Yeniden Konumlandır
-  - Sola 15 derece döndür
-  - Sağa 15 derece döndür
-  - AR Kapat
-- Pinch veya serbest ölçeklendirme eklenmedi; model ölçeği 1:1 kilitlidir.
-- Kamera mesafesi ve ürün diyagonaline göre otomatik geri çekilme/kadraj önerisi eklendi.
-- Parent düğmesinden kamera izni açılamazsa iframe içinde kullanıcı hareketiyle çalışan ikinci `Kamerayı Aç` geçidi eklendi.
-- HTTPS, WebXR ve Android/ARCore uyumluluk uyarıları eklendi.
-- WebXR desteklemeyen iPhone/iPad için sahte ölçekli kamera modu kullanılmaz; açık destek uyarısı gösterilir.
-- Masaüstü 3D, hızlı testler, ürün yerleştirme ve yerel PDF motoru korunmuştur.
+- Zorunlu `hit-test` yüzey algılama ve zemin bekleme akışı kaldırıldı.
+- AR oturumu yalnız `immersive-ar` ve DOM overlay/local-floor opsiyonlarıyla başlatılır.
+- Kamera açıldığında ürün ilk XR karesinde 1:1 ölçekte kameranın önüne otomatik çizilir.
+- İlk yerleşim yarı saydamdır; `Konumu Sabitle` ile normal görünüme geçer.
+- `Yeniden Konumlandır` ile yarı saydam manuel ayar moduna dönülür.
+- Manuel hareket kontrolleri eklendi:
+  - 10 cm ileri
+  - 10 cm geri
+  - 10 cm sol
+  - 10 cm sağ
+- Manuel zemin kotu kontrolleri eklendi:
+  - 1 cm yukarı/aşağı
+  - -150 cm / +150 cm sürgü
+  - Zemin kotunu sıfırla
+- Döndürme kontrolleri genişletildi:
+  - 1 derece sol/sağ
+  - 15 derece sol/sağ
+- `Yatay Kamera` / `Dikey Kamera` geçişi eklendi.
+- Yatay kamera düğmesi tam ekran ve `screen.orientation.lock('landscape')` çağrısını dener.
+- Yön kilidi reddedilirse yatay kontrol düzeni açılır ve telefonu elle çevirme uyarısı gösterilir.
+- Yatay/dikey geçiş sırasında ürün konumu, zemin kotu, dönüşü ve ölçeği korunur.
+- Model ölçeği daima `0.001` olarak kalır; pinch veya serbest ölçeklendirme eklenmedi.
+- 4000 mm genişlik AR dünya koordinatında tam 4,00 metre olarak korunur.
+- Masaüstü 3D, hızlı testler, katlanır cam ve yerel PDF motoru korunmuştur.
 
 DEĞİŞTİRİLEN / EKLENEN DOSYALAR
 -------------------------------
 - app.js
 - index.html
-- styles.css
 - README.md
 - AR_GUIDE.md
 - VERSION.txt
 - UPDATE.txt
 - TEST_RESULTS.txt
 - tests/p3dv-v3.32-ar-tests.js
+- tests/p3dv-v3.33-manual-ar-tests.js
 - mevcut regresyon testlerinin sürüm tokenları
 
 DOĞRULAMA
@@ -48,14 +53,19 @@ DOĞRULAMA
 - Door/Product: 417 PASS
 - Quick/PDF: 43 PASS
 - Katlanır Cam: 50 PASS
-- V3.32 AR statik/kontrat testi: 51 PASS
-- Oluşturulan viewer iframe JavaScript sözdizimi: PASS (Regression A/B içinde)
+- Genel AR sözleşmesi: 52 PASS
+- V3.33 manuel AR sözleşmesi: 41 PASS
+- Oluşturulan viewer iframe JavaScript sözdizimi: PASS
 - Gerçek Chromium PDF indirmesi: PASS
   - `%PDF-1.4`
   - 314.393 bayt
+  - 6 sayfa A4
   - B-Cube Freedom Test 1
-- Gerçek Chromium parent/iframe AR durum mesajı el sıkışması: PASS (mock XR sonucu)
+- PDF sayfaları PNG olarak render edilip taşma/kırpılma açısından kontrol edildi.
+- Gerçek Chromium ortamında manuel AR kontrol öğelerinin iframe içinde oluştuğu doğrulandı.
+- Browser page error: 0
+- Browser console error: 0
 
 KRİTİK DONANIM SINIRI
 ---------------------
-Bu çalışma ortamında gerçek Android telefon, ARCore kamerası veya fiziksel 4 metre referansı bulunmadığından kamera açılması, gerçek yüzey hit-test sonucu ve metreyle fiziksel ölçek doğrulaması yapılmadı. V3.32 bu nedenle yazılım/test paketi olarak hazırlanmıştır; gerçek cihaz kabul testi ayrıca zorunludur.
+Bu çalışma ortamında gerçek Android telefon, ARCore kamerası veya fiziksel 4 metre referansı bulunmadığından kamera açılması, cihaz hareketinde dünya takibi, manuel zemin kotunun fiziksel doğruluğu ve gerçek landscape yön kilidi donanım üzerinde doğrulanmadı. V3.33 gerçek cihaz test sürümüdür; mobil kabul testi ayrıca zorunludur.
