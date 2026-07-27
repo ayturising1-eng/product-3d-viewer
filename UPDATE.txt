@@ -1,234 +1,61 @@
-P3DV.V3.26 UPDATE
+P3DV.V3.32 UPDATE
 =================
 
 KULLANICI TALEBİ
 ----------------
-B-Cube Freedom ve Bio-Rise için gösterilen maksimum genişlik ve açılım değerlerinin kullanıcıyı bilgilendirmeye devam etmesi, ancak bu değerlerin aşılmasının 3D çizimi engellememesi istendi.
+Mobil kullanıcı çizimi oluşturduktan sonra telefon kamerasını açabilsin ve ürünü kamera kadrajındaki gerçek alana otomatik, derinlik tutarlı ve 1:1 fiziksel ölçekte yerleştirebilsin. 4000 mm genişliğindeki ürün AR sahnesinde gerçekten 4,00 metre olmalıdır.
 
 YAPILANLAR
 ----------
-- Genişlik ve açılım üst sınırları zorunlu doğrulama engelinden çıkarılarak önerilen maksimumlara dönüştürüldü.
-- Sol giriş panelinde ürün grubuna göre dinamik ve kalıcı öneri metinleri eklendi:
-  - B-Cube Freedom: genişlik 4050 mm, açılım 7060 mm
-  - Bio-Rise: genişlik 4000 mm, açılım 6070 mm
-- Önerilen maksimum aşılırsa turuncu uyarı gösterilir; çizim oluşturma devam eder.
-- Genişlik, açılım ve panel sayısı girişlerindeki native `max` nitelikleri kaldırıldı.
-- Poz ölçüsü düzenleme ekranındaki genişlik/açılım `max` kısıtları da kaldırıldı.
-- `projectionFromPanelCount()` ve `panelCountFromProjection()` önerilen panel maksimumunda clamp edilmeyecek şekilde güncellendi.
-- `modelReady()` ve `readModel()` genişlik/açılım/panel üst sınırlarını çizim engeli olarak kullanmaz.
-- Önerilen maksimumun üzerindeki panel sayısı aynı kanonik formülle daha büyük açılım üretir.
-- Ürün grubu değiştirildiğinde mevcut genişlik yeni grubun önerilen maksimumunu aşıyorsa değer silinmez; yalnız uyarı gösterilir.
-- Minimum genişlik/açılım, yükseklik sınırları ve profil kesitlerinin fiziksel olarak sığması kontrolleri korunur.
-
-ÖRNEK DOĞRULAMALAR
--------------------
-- Freedom: 35 panel → 8140 mm açılım; 5000 mm genişlik ile çizim oluşturulur ve uyarı gösterilir.
-- Bio-Rise: 32 panel → 6870 mm açılım; 4500 mm genişlik ile çizim oluşturulur ve uyarı gösterilir.
-
-DEĞİŞTİRİLEN DOSYALAR
-----------------------
-- app.js
-- index.html
-- styles.css
-- README.md
-- UPDATE.txt
-- VERSION.txt
-- TEST_RESULTS.txt
-- tests/p3dv-v3.13-regression-a.js
-- tests/p3dv-v3.13-regression-b.js
-- tests/p3dv-v3.13-door-tests.js
-
-TESTLER
--------
-- `node --check app.js`: PASS
-- `node --check ral-colors.js`: PASS
-- `node --check zip-fabric-textures.js`: PASS
-- Regression A: 73 PASS
-- Regression B: 78 PASS
-- Door/Product/Soft Limits: 417 PASS
-- Freedom ve Bio-Rise önerilen maksimum üstü çizim testi: PASS
-- Panel/açılım unclamped formül testi: PASS
-- ZIP bütünlük kontrolü: PASS
-
-GÖRSEL SINIR
-------------
-- Gerçek Three.js piksel/render doğrulaması bu çalışma ortamında güvenilir biçimde çalıştırılmadı.
-- Statik ve Node çalışma zamanı testleri gerçek tarayıcı piksel doğrulaması değildir.
-
-P3DV.V3.25 UPDATE
-=================
-
-KULLANICI TALEBİ
-----------------
-Renk kartelası eklenmeden önceki klasik teknik renklerin uygulamanın ilk açılış varsayılanı olması; Renk Seçimi başlığında Default düğmesi bulunması; çatı panellerinin açık, yalnız ana ölçülerin görünür, ara ölçülerin kapalı başlaması ve yeni yerleştirilen ürünlerin her zaman açık halde gelmesi istendi.
-
-YAPILANLAR
-----------
-- Yeni `colorMode` state alanı eklendi: `default` ve `ral`.
-- İlk açılış modu `default` olarak ayarlandı.
-- Klasik ana sistem paleti geri getirildi:
-  - Dikmeler: magenta `#FF00FF`
-  - Ana kayıt/kirişler: mavi `#2563EB`
-  - Oluklar: turuncu `#FF8C00`
-  - İç ray çerçevesi: amber `#FFB347`
-  - Hareketli çatı panelleri: yeşil `#7CFC00`
-- Kapı, Sabit Doğrama, Sürme, Giyotin, Zip Perde ve ara profil renkleri Default modda RAL öncesindeki ürün bazlı teknik renklerine döndürüldü.
-- Renk Seçimi başlığına `Default` ve `RAL` mod düğmeleri eklendi.
-- RAL seçimi yapıldığında RAL modu otomatik etkinleşir; Default düğmesi klasik paleti geri getirir.
-- Modlar arasında geçişte son seçilen RAL sistem/panel kodları ve Parlak/Mat/Texture tercihleri kaybolmaz.
-- `panelMasterOpen` başlangıç değeri `true` yapıldı; Paneller Açık işaretli başlar.
-- Ölçü görünürlüğü başlangıcı `Ara Ölçüler: kapalı`, `Ana Ölçüler: açık` olarak değiştirildi.
-- `productsOpen` başlangıç değeri `true` yapıldı; toolbox `Ürünler Açık` durumunda başlar.
-- Yeni yerleştirilen ana ürünler ve Zip Perde katmanları, global durumdan bağımsız olarak ilk anda açık state ile kaydedilir.
-
-DEĞİŞTİRİLEN DOSYALAR
-----------------------
-- app.js
-- index.html
-- styles.css
-- README.md
-- UPDATE.txt
-- VERSION.txt
-- TEST_RESULTS.txt
-- tests/p3dv-v3.13-door-tests.js
-- tests/p3dv-v3.13-regression-a.js
-- tests/p3dv-v3.13-regression-b.js
-
-TESTLER
--------
-- `node --check app.js`: PASS
-- `node --check ral-colors.js`: PASS
-- `node --check zip-fabric-textures.js`: PASS
-- Regression A: 73 PASS
-- Regression B: 78 PASS
-- Door/Product/Color/Startup: 411 PASS
-- Default ↔ RAL state ve son seçim koruma testi: PASS
-- Paneller Açık / yalnız Ana Ölçüler başlangıç testi: PASS
-- Yeni ana ürün ve Zip Perde açık state testi: PASS
-- ZIP bütünlük kontrolü: PASS
-
-GÖRSEL SINIR
-------------
-- Gerçek Three.js piksel/render doğrulaması bu çalışma ortamında güvenilir biçimde çalıştırılmadı.
-- Statik ve Node çalışma zamanı testleri gerçek tarayıcı piksel doğrulaması değildir.
-
-P3DV.V3.24 UPDATE
-=================
-
-KULLANICI TALEBİ
-----------------
-Zip Perde kumaşında yatay ara profil gibi görünen çizgilerin kaldırılması; ürün yerleşim alanlarının gerçek dikme ve üst profil kesitlerine göre yeniden hesaplanması; ön/arka/yan cephelerde ve ek profil sonrası oluşan alt alanlarda aynı net açıklık mantığının kullanılması; üst sabitli kapıda yalnız hareketli kanat yüksekliğinin kullanıcıdan alınması ve yalnız bu ölçünün 3D'de gösterilmesi istendi.
-
-KÖK NEDEN / ANALİZ
-------------------
-- Cephe ürün alanları zeminden 24 mm yukarıda ve üst profil altından 18 mm aşağıda başlatılıyordu. Bu nedenle gerçek açıklık yüksekliğinden toplam 42 mm eksik alan kullanılıyordu.
-- Genişlik hesabı dikmelerin gerçek X/Z kesitlerini düşüyordu; yükseklik ise gizli görsel boşluklar nedeniyle kanonik değildi.
-- Zip kumaşında yatay profil gibi görünen beyaz çizgiler geometri değildi. Sun-Store numune dokularının beyaz katalog kenarları dikey tekrarlandığında yatay şerit oluşturuyordu.
-- Üst sabitli kapıda kullanıcı sabit cam yüksekliğini giriyor, hareketli kanat yüksekliği türetiliyordu; istenen iş akışının tersiydi.
-
-YAPILANLAR
-----------
-- Cephe net açıklığı zeminden doğrudan üst profil altına kadar kuruldu: `bottomY = -H/2`, `topY = beamBottomY`.
-- Freedom 4000×3000, 100×220 dikmeler/profil örneğinde net ön açıklık 3800×2780 mm olur.
-- Dikme arası Zip Perde dış ölçüsü net açıklıktan toplam 3 mm küçük ve merkezli kalır.
-- Sürme, Giyotin, Sabit Doğrama ve Kapı dış ölçüsü net açıklıktan toplam 5 mm küçük ve merkezli kalır.
-- Ön/arka cephe genişliği ilgili dikmelerin X kesitleri; sağ/sol cephe genişliği ilgili dikmelerin Z kesitleri kullanılarak hesaplanır.
-- Ek dikey/yatay profiller, gerçek profil yüz genişliklerini açıklıktan düşürür; oluşan alt alanlar ürün yerleşimi ve ara ölçüler için aynı kanonik zone verisini kullanır.
-- Üst sabitli kapı formu `Hareketli Kapı Kanadı Yüksekliği` girişine dönüştürüldü.
-- Üst sabit cam yüksekliği kalan gerçek alandan otomatik türetilir ve placement içinde geriye uyumlu `topFixedHeight` olarak da saklanır.
-- 3D kapı ölçüsünde yalnız hareketli kanat yüksekliği gösterilir; sabit cam yüksekliği etiketi kaldırıldı.
-- 23 Sun-Store kumaş dokusunun beyaz katalog kenarları temizlendi; dokular merkez numuneden yeniden üretildi ve gömülü JPEG veri haritası yenilendi.
-
-DOĞRULANAN ÖRNEK
------------------
-Freedom 4000×3000, dikmeler 100+100 mm, üst profil 220 mm:
-- Net açıklık: 3800×2780 mm
-- Zip Perde: 3797×2777 mm
-- Diğer ürünler: 3795×2775 mm
+- Toolbox içine `Gerçek Alanda Gör` düğmesi ve canlı AR durum alanı eklendi.
+- Viewer iframe izinlerine `camera; xr-spatial-tracking; fullscreen` eklendi.
+- WebXR `immersive-ar` oturumu ve zorunlu `hit-test` yüzey algılama akışı eklendi.
+- P3DV milimetre geometrisi AR dünya koordinatlarına `0.001` ölçek katsayısıyla aktarılır.
+- Model alt kotu algılanan zemin noktasına otomatik oturtulur.
+- Yüzey normali kontrolü eklendi; dikey/aşırı eğimli yüzeylere pergola yerleştirilmez.
+- Ürün kameraya doğru otomatik yönlendirilir.
+- Kullanıcı kontrolleri eklendi:
+  - Yerleştir
+  - Yeniden Konumlandır
+  - Sola 15 derece döndür
+  - Sağa 15 derece döndür
+  - AR Kapat
+- Pinch veya serbest ölçeklendirme eklenmedi; model ölçeği 1:1 kilitlidir.
+- Kamera mesafesi ve ürün diyagonaline göre otomatik geri çekilme/kadraj önerisi eklendi.
+- Parent düğmesinden kamera izni açılamazsa iframe içinde kullanıcı hareketiyle çalışan ikinci `Kamerayı Aç` geçidi eklendi.
+- HTTPS, WebXR ve Android/ARCore uyumluluk uyarıları eklendi.
+- WebXR desteklemeyen iPhone/iPad için sahte ölçekli kamera modu kullanılmaz; açık destek uyarısı gösterilir.
+- Masaüstü 3D, hızlı testler, ürün yerleştirme ve yerel PDF motoru korunmuştur.
 
 DEĞİŞTİRİLEN / EKLENEN DOSYALAR
 -------------------------------
 - app.js
 - index.html
-- zip-fabric-textures.js
-- assets/fabric-pages/sun-store/textures/*.png
+- styles.css
 - README.md
-- UPDATE.txt
+- AR_GUIDE.md
 - VERSION.txt
+- UPDATE.txt
 - TEST_RESULTS.txt
-- tests/p3dv-v3.13-door-tests.js
-- tests/p3dv-v3.13-regression-a.js
-- tests/p3dv-v3.13-regression-b.js
+- tests/p3dv-v3.32-ar-tests.js
+- mevcut regresyon testlerinin sürüm tokenları
 
-TESTLER
--------
-- `node --check app.js`: PASS
-- `node --check ral-colors.js`: PASS
-- `node --check zip-fabric-textures.js`: PASS
-- Regression A: 73 PASS
-- Regression B: 78 PASS
-- Door/Product/Geometry/Sun-Store: 380 PASS
-- Freedom 4000×3000 net açıklık ve 3/5 mm tolerans runtime testi: PASS
-- Dikey + yatay ara profil alt alan runtime testi: PASS
-- Üst sabitli kapı hareketli kanat yüksekliği kayıt/geometri testi: PASS
-- ZIP bütünlük kontrolü: PASS
-
-GÖRSEL SINIR
-------------
-- Gerçek Three.js piksel/render doğrulaması bu çalışma ortamında güvenilir biçimde çalıştırılmadı.
-- Statik ve Node çalışma zamanı testleri gerçek tarayıcı piksel doğrulaması değildir.
-
-P3DV.V3.23 UPDATE
-=================
-
-KULLANICI TALEBİ
-----------------
-Zip Perde kumaşının hangi Sun-Store numunesi seçilirse seçilsin 3D sahnede siyah görünmesi bildirildi. Kumaş yüzeyinin önünde bir hotspot/örtü olup olmadığı ve katalog dokusu yükleme zinciri incelendi.
-
-KÖK NEDEN
+DOĞRULAMA
 ---------
-- 3D viewer `iframe srcdoc` içinde çalışıyor; Zip kumaş dokuları göreli dış dosya yollarından asenkron yükleniyordu.
-- Statik/dosya tabanlı kullanımda iframe içindeki göreli görüntü yükleme zinciri güvenilir değildi.
-- Kumaş dokusu aynı anda `map` ve `emissiveMap` olarak `MeshStandardMaterial` içine bağlanıyordu. Kaynak veya shader zinciri başarısız olduğunda bütün perde yüzeyi siyaha düşebiliyordu.
-- Görüntüdeki siyah alan bir katalog hotspot katmanı değildi; Zip kumaş mesh'inin kendi material sonucuydu.
-
-YAPILANLAR
-----------
-- 23 Sun-Store kumaş dokusu 384×384 sıkıştırılmış JPEG veri URI'ları olarak `zip-fabric-textures.js` içine alındı.
-- `zip-fabric-textures.js`, `app.js` öncesinde yüklenir.
-- Seçilen kumaşın gömülü verisi viewer `srcdoc` içine aktarılır; Zip kumaşı artık haricî dosya erişimine bağımlı değildir.
-- Doku kaynak önceliği: gömülü veri URI → paket içindeki PNG → katalog sayfasından kırpma → procedural renk/desen fallback.
-- Zip kumaş material'ı `MeshBasicMaterial` tabanına geçirildi. Böylece katalog rengi ışık, emissive veya fiziksel shader ayarları nedeniyle siyaha dönüşmez.
-- `emissiveMap` ve kumaştaki düşük emissive katkısı tamamen kaldırıldı.
-- Kumaş malzemesi `toneMapped:false` kullanır; seçilen katalog tonu doğrudan korunur.
-- Mevcut fiziksel panel oranına göre tekrar ölçeği ve `MirroredRepeatWrapping` davranışı korundu.
-
-DEĞİŞTİRİLEN / EKLENEN DOSYALAR
--------------------------------
-- app.js
-- index.html
-- zip-fabric-textures.js
-- README.md
-- UPDATE.txt
-- VERSION.txt
-- TEST_RESULTS.txt
-- tests/p3dv-v3.13-door-tests.js
-- tests/p3dv-v3.13-regression-a.js
-- tests/p3dv-v3.13-regression-b.js
-
-TESTLER
--------
-- `node --check app.js`: PASS
-- `node --check ral-colors.js`: PASS
-- `node --check zip-fabric-textures.js`: PASS
+- app.js / RAL / kumaş / PDF motoru Node sözdizimi: PASS
 - Regression A: 73 PASS
 - Regression B: 78 PASS
-- Door/Product/Sun-Store: 356 PASS
-- 23 gömülü JPEG kumaş veri URI kontrolü: PASS
-- Generated iframe içinde gömülü Zip doku verisi kontrolü: PASS
-- ZIP bütünlük kontrolü: PASS
+- Door/Product: 417 PASS
+- Quick/PDF: 43 PASS
+- Katlanır Cam: 50 PASS
+- V3.32 AR statik/kontrat testi: 51 PASS
+- Oluşturulan viewer iframe JavaScript sözdizimi: PASS (Regression A/B içinde)
+- Gerçek Chromium PDF indirmesi: PASS
+  - `%PDF-1.4`
+  - 314.393 bayt
+  - B-Cube Freedom Test 1
+- Gerçek Chromium parent/iframe AR durum mesajı el sıkışması: PASS (mock XR sonucu)
 
-GÖRSEL SINIR
-------------
-- Çalışma ortamındaki Chromium politika kısıtlaması localhost ve file URL'lerini engellediği için güvenilir gerçek Three.js piksel testi çalıştırılamadı.
-- Statik ve Node çalışma zamanı testleri gerçek tarayıcı piksel doğrulaması değildir.
+KRİTİK DONANIM SINIRI
+---------------------
+Bu çalışma ortamında gerçek Android telefon, ARCore kamerası veya fiziksel 4 metre referansı bulunmadığından kamera açılması, gerçek yüzey hit-test sonucu ve metreyle fiziksel ölçek doğrulaması yapılmadı. V3.32 bu nedenle yazılım/test paketi olarak hazırlanmıştır; gerçek cihaz kabul testi ayrıca zorunludur.

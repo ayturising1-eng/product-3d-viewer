@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>p3dv.v3.26 · Product 3d Viewer</title>
+  <title>p3dv.v3.32 · Product 3d Viewer</title>
   <link rel="stylesheet" href="./styles.css" />
   <meta name="theme-color" content="#115da8" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.26</span></h1>
+    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.32</span></h1>
   </header>
 
   <main class="app">
@@ -70,6 +70,8 @@
           </button>
           <small class="ral-color-note">Default modda dikmeler magenta, kayıtlar mavi, paneller yeşil ve iç oluklar turuncu-sarı klasik renktedir. RAL seçimi kullanıcı isteğiyle etkinleşir.</small>
         </section>
+
+
       </aside>
       <section class="viewer-shell" aria-label="3D viewer">
         <div class="viewer-meta">
@@ -89,7 +91,7 @@
             <button id="toolboxSelectionCancelBtn" class="ghost" type="button">İptal · Esc</button>
           </div>
         </div>
-        <iframe id="viewerFrame" title="Bioclimatic ürün 3D viewer"></iframe>
+        <iframe id="viewerFrame" title="Bioclimatic ürün 3D viewer" allow="camera; xr-spatial-tracking; fullscreen"></iframe>
       </section>
 
       <aside class="viewer-toolbox" aria-label="3D ön izleme araç kutusu">
@@ -110,13 +112,32 @@
         <div class="toolbox-actions utility-actions">
           <button id="toolboxResetCameraBtn" type="button">Kamerayı Sıfırla</button>
           <button id="replayAnimationBtn" class="product-state-toggle is-open" type="button">Ürünler Açık</button>
+          <button id="exportProductListPdfBtn" type="button">Ürün Listesi PDF</button>
+          <button id="mobileArBtn" class="mobile-ar-button" type="button">Gerçek Alanda Gör</button>
         </div>
+        <div id="mobileArStatus" class="mobile-ar-status" aria-live="polite">Mobil cihazda ürünü 1:1 gerçek ölçekte yerleştirmek için kullanılır.</div>
         <div class="product-open-filter" role="group" aria-label="Ürün açık kapalı durumları">
           <strong>Ürün Durumları</strong>
           <label class="panel-master-toggle"><input id="toolboxPanelMasterInput" type="checkbox" checked /> Paneller Açık</label>
           <span id="toolboxProductOpenEmpty" class="product-open-empty">Henüz yerleştirilmiş ürün yok.</span>
           <div id="toolboxProductOpenList" class="product-open-list"></div>
         </div>
+
+        <div class="toolbox-separator"></div>
+        <div class="toolbox-section-title">Hızlı Testler</div>
+        <div class="quick-test-grid" role="group" aria-label="Hazır test senaryoları">
+          <button id="quickTestBtn1" type="button">Test 1</button>
+          <button id="quickTestBtn2" type="button">Test 2</button>
+          <button id="quickTestBtn3" type="button">Test 3</button>
+          <button id="quickTestBtn4" type="button">Test 4</button>
+          <button id="quickTestBtn5" type="button">Test 5</button>
+          <button id="quickTestBtn6" type="button">Test 6</button>
+          <button id="quickTestBtn7" type="button">Test 7</button>
+          <button id="quickTestBtn8" type="button">Test 8</button>
+          <button id="quickTestBtn9" type="button">Test 9</button>
+          <button id="quickTestBtn10" type="button">Test 10</button>
+        </div>
+        <div id="quickTestStatus" class="quick-test-status" aria-live="polite">Bir test seçildiğinde model, profiller, düzenlenmiş aralıklar, renkler ve cephe ürünleri otomatik hazırlanır.</div>
 
         <div class="toolbox-separator"></div>
         <div class="toolbox-section-title">Çoklu İşlemler</div>
@@ -359,6 +380,7 @@
           Ürün
           <select id="productTypeInput">
             <option value="sliding">Sürme Sistem</option>
+            <option value="folding">Katlanır Cam</option>
             <option value="guillotine">Giyotin Sistem</option>
             <option value="zip">Zip Perde</option>
             <option value="fixed">Sabit Doğrama</option>
@@ -439,6 +461,15 @@
           Panel Sayısı <span class="manual-chip">Manuel</span>
           <input id="productPanelsInput" type="number" inputmode="numeric" min="2" max="12" step="1" required />
           <small id="productPanelHint" class="field-hint">2–12 panel</small>
+        </label>
+
+        <label id="productFoldingPassageWrap" hidden>
+          Geçiş Kapısı
+          <select id="productFoldingPassageInput">
+            <option value="NO">Yok</option>
+            <option value="YES">Var · İlk kanat bağımsız açılır</option>
+          </select>
+          <small class="field-hint">İlk kanat gerektiğinde bağımsız geçiş kapısı olarak kullanılabilir.</small>
         </label>
 
         <label id="productFixedVerticalCountWrap" hidden>
@@ -612,6 +643,23 @@
         </div>
       </section>
 
+      <section id="foldingCollectionSection" class="collecting-display-section" hidden>
+        <div class="section-heading collecting-heading">
+          <strong>Katlanır Cam · Açık/Kapalı Görünüm</strong>
+          <span>Kanatları 90° döndürerek seçilen tarafta paketlenmiş biçimde gösterin.</span>
+        </div>
+        <div class="product-form-grid compact-grid">
+          <label>
+            3D Gösterim
+            <select id="foldingCollectionStateInput">
+              <option value="NORMAL">Kapalı / normal görünüm</option>
+              <option value="COLLECTED">Katlanmış göster</option>
+            </select>
+          </label>
+        </div>
+        <div id="foldingRuleNote" class="product-validation folding-rule-note" aria-live="polite"></div>
+      </section>
+
       <section id="collectingDisplaySection" class="collecting-display-section" hidden>
         <div class="section-heading collecting-heading">
           <strong>Giyotin · Toplanma Görünümü</strong>
@@ -641,6 +689,7 @@
 
   <script src="./ral-colors.js"></script>
   <script src="./zip-fabric-textures.js"></script>
+  <script src="./p3dv-pdf.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

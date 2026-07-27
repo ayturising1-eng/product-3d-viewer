@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.26**
+Current package: **p3dv.v3.32**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -376,3 +376,45 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Önerilen maksimum aşıldığında turuncu bir bilgilendirme mesajı gösterilir; `3D Modeli Oluştur` işlemi devam eder.
 - Panel sayısı ve açılım dönüşümü önerilen panel maksimumunda clamp edilmez.
 - Minimum genişlik/açılım, geçerli yükseklik ve mevcut profil kesitlerinin fiziksel olarak sığması gibi gerçek geometri kontrolleri korunur.
+
+
+## P3DV V3.30 Yerel PDF Motoru ve Hızlı Testler
+
+- PDF üretimi artık harici jsPDF CDN bağlantısına bağlı değildir; `p3dv-pdf.js` paket içinde bulunur.
+- `Ürün Listesi PDF` düğmesi gerçek Chromium tarayıcıda Freedom ve Bio-Rise senaryolarıyla dosya indirerek doğrulanmıştır.
+- Three.js görüntüsü alınamazsa PDF indirmeyi iptal etmek yerine güvenli yedek görünüş oluşturulur.
+- Toolbox içinde `Test 1`–`Test 10` hazır senaryo butonları bulunur.
+- Senaryolar; dikey/yatay ara profil, merkez dışına alınmış profil konumları, düzenlenmiş alan aralıkları, RAL renk ve yüzeyler, dört cephe, tüm yan ürün tipleri, ana ürün + zip katmanı, ürün/panel açık-kapalı durumları ve stres ölçülerini kapsar.
+- Bir test seçildiğinde model, cephe profilleri, ürünler, renkler ve görünürlük durumları tek tıklamayla hazırlanır.
+
+
+## P3DV V3.31 Katlanır Cam
+
+- Yeni cephe ürünü olarak **Katlanır Cam** eklendi.
+- Product Request Form mantığındaki `Folding A Series - Premium` ve `Folding K Series - Smart` seçenekleri P3DV seçim ekranına uyarlandı.
+- A Serisi `Standard` ve `Top-Hung`; K Serisi `Standard` tipini kullanır.
+- Katlanma yönleri sola, sağa ve iki yana seçilebilir.
+- İlk kanat isteğe bağlı bağımsız geçiş kapısı olarak tanımlanabilir.
+- Panel sayısı net açıklık / 600 mm formülüyle otomatik hesaplanır.
+- Tek tarafa önerilen maksimum 8 panel aşılırsa yön otomatik olarak iki yana çevrilir; çizim engellenmez.
+- 2800 mm üzeri yükseklik öneri uyarısı verir fakat ürün yerleşimini engellemez.
+- Katlanır cam tek tip eşikli kabul edilir ve alt profil yüksekliği 70 mm'dir.
+- Açık görünümde kanatlar 90 derece dönerek seçilen tarafta paketlenir; açılım noktaları oklarla gösterilir.
+- A Serisi cam seçenekleri 8 mm, 10 mm, 12 mm ve yalıtımlı camdır; K Serisi yalıtımlı cam kullanır.
+- PDF raporunda seri, tip, katlanma yönü, panel sayısı, yaklaşık panel genişliği, geçiş kapısı, 70 mm alt profil, cam ve görünüm bilgileri yer alır.
+- Test 1 sola katlanma, Test 2 sağa katlanma ve geçiş kapısı, Test 3 dokuz panelde otomatik iki yana geçiş, Test 10 ise iki yana yoğun senaryoyu hazırlar.
+- PDF ayırıcı karakterleri yerel PDF motorunda ASCII uyumlu hale getirildi.
+
+
+## P3DV V3.32 Mobil Gerçek Alan Yerleşimi
+
+- Toolbox içine `Gerçek Alanda Gör` düğmesi eklendi.
+- Mobil AR akışı WebXR `immersive-ar` ve `hit-test` yüzey algılama altyapısını kullanır.
+- P3DV içindeki milimetre tabanlı model AR sahnesinde `0.001` katsayısıyla metreye çevrilir; 4000 mm genişlik 4,00 metre olarak yerleştirilir.
+- Model ölçeği kullanıcı tarafından değiştirilemez. AR içinde yalnız yerleştirme, yeniden konumlandırma ve 15 derecelik yön döndürme kontrolleri bulunur.
+- Ürünün alt kotu algılanan zemine oturur; dikey veya aşırı eğimli yüzeylerde yerleştirme yapılmaz.
+- Kamera mesafesi ve model diyagonaline göre kadraj önerisi otomatik gösterilir.
+- AR oturumu doğrudan açılamazsa, kullanıcı aktivasyonu için 3D alan içinde ikinci bir `Kamerayı Aç` düğmesi gösterilir.
+- Uygulamanın HTTPS üzerinden açılması gerekir. WebXR/ARCore desteklemeyen tarayıcılarda açıklayıcı uyarı gösterilir.
+- iPhone/iPad için bu sürümde USDZ/Quick Look dışa aktarımı bulunmaz; desteklenmeyen cihazlarda gerçek ölçek taklidi yapılmaz.
+- Mevcut `Test 1`–`Test 10` hızlı test yapısı ve yerel PDF motoru korunmuştur.

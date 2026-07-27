@@ -1,24 +1,41 @@
-P3DV V3.26 TEST RESULTS
+P3DV V3.32 TEST RESULTS
 ======================
 
-PASS
-----
+PASS — NODE / STATİK
+--------------------
 - `node --check app.js`
 - `node --check ral-colors.js`
 - `node --check zip-fabric-textures.js`
+- `node --check p3dv-pdf.js`
 - `node tests/p3dv-v3.13-regression-a.js`: 73 kontrol
 - `node tests/p3dv-v3.13-regression-b.js`: 78 kontrol
 - `node tests/p3dv-v3.13-door-tests.js`: 417 kontrol
-- Freedom 5000 mm genişlik / 8140 mm açılım / 35 panel çizim kontrolü
-- Bio-Rise 4500 mm genişlik / 6870 mm açılım / 32 panel çizim kontrolü
-- Önerilen maksimum uyarı tonu ve kalıcı maksimum bilgi metni kontrolü
-- Panel sayısı → açılım ve açılım → panel sayısı üst sınır clamping kaldırma kontrolü
-- HTML benzersiz ID kontrolü
-- UTF-8 ve bozuk karakter kontrolü
-- Secret taraması
-- ZIP bütünlük kontrolü
+- `node tests/p3dv-v3.31-quick-pdf-tests.js`: 43 kontrol
+- `node tests/p3dv-v3.31-folding-tests.js`: 50 kontrol
+- `node tests/p3dv-v3.32-ar-tests.js`: 51 kontrol
+- Oluşturulan iframe viewer JavaScript sözdizimi Regression A/B tarafından doğrulandı.
+- 4000 mm × 0.001 = 4 m ölçek sözleşmesi doğrulandı.
+- Hızlı test düğmesi sayısı 10 olarak korundu.
 
-GÖRSEL SINIR
-------------
-- Node regresyon testleri gerçek Three.js piksel/render doğrulaması değildir.
-- Güvenilir gerçek tarayıcı piksel testi bu çalışma ortamında yapılmadı.
+PASS — GERÇEK CHROMIUM
+----------------------
+- Test 1 senaryosu açıldı.
+- `Ürün Listesi PDF` düğmesi gerçek download olayı oluşturdu.
+- İndirilen dosya: `B-Cube-Freedom-4000x5980x2700-urun-listesi.pdf`
+- Dosya imzası: `%PDF-1.4`
+- Dosya boyutu: 314.393 bayt
+- AR düğmesi, iframe izinleri ve parent/iframe durum mesajı gerçek Chromium DOM ortamında doğrulandı.
+- Mock XR sonucu parent durum alanına doğru aktarıldı.
+- Browser page error: 0
+
+YAPILAMAYAN DONANIM TESTİ
+-------------------------
+- Gerçek Android telefon kamerası açılmadı.
+- ARCore/WebXR gerçek hit-test sonucu alınmadı.
+- Fiziksel 4 metre referansla 4000 mm model karşılaştırılmadı.
+- Cihaz hareketinde ankraj kararlılığı ölçülmedi.
+- iPhone/iPad Quick Look testi yapılmadı; bu sürümde USDZ akışı yoktur.
+
+SONUÇ
+-----
+Kod, sözleşme, iframe üretimi, normal 3D regresyonları ve gerçek PDF indirmesi başarılıdır. Mobil AR özelliğinin nihai kabulü için HTTPS yayın üzerinde ARCore destekli gerçek Android cihaz testi zorunludur.
