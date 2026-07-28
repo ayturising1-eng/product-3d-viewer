@@ -1,71 +1,74 @@
-P3DV.V3.33 UPDATE
+P3DV.V3.41 UPDATE
 =================
+
+BASELINE
+--------
+- Temiz geliştirme tabanı: `p3dv.v3.39`
+- Hatalı V3.40 paketi baseline olarak kullanılmadı.
 
 KULLANICI TALEBİ
 ----------------
-Mobil AR akışında kullanıcıya zorunlu zemin buldurmak yerine ürün kamera açılır açılmaz gerçek ölçekte çizilsin. Kullanıcı ürünün konumunu ve zemin kotunu kendisi ayarlasın. Ayrıca daha geniş kadraj için yatay kamera düğmesi eklensin.
+1. Freedom açık panel paketi kullanıcı terminolojisindeki Arka Cephe tarafında kalmalı.
+2. Panel paketi taşınırken panel duruşu, kesit yönü, alt/üst yönü, 100 derece efektif açı ve aralıklar bozulmamalı.
+3. Cephe terminolojisi:
+   - eski fiziksel `front` tarafı kullanıcıya `Arka Cephe`
+   - eski fiziksel `back` tarafı kullanıcıya `Ön Cephe`
+4. Katlanır Cam form sırası:
+   - Bakış Yönü
+   - Panellerin Açılma Yönü
+   - Katlanma Yönü
+5. Sol/Sağ seçimi kullanıcının seçtiği bakıştan karşıdan görünüşe göre yorumlanmalı.
+6. İçeri/Dışarı bakıştan bağımsız olarak daima sistemin içine ve dışına göre çalışmalı.
+7. `Dışarı` seçimi kaydetme sonrasında kaybolmamalı.
 
 YAPILANLAR
 ----------
-- Zorunlu `hit-test` yüzey algılama ve zemin bekleme akışı kaldırıldı.
-- AR oturumu yalnız `immersive-ar` ve DOM overlay/local-floor opsiyonlarıyla başlatılır.
-- Kamera açıldığında ürün ilk XR karesinde 1:1 ölçekte kameranın önüne otomatik çizilir.
-- İlk yerleşim yarı saydamdır; `Konumu Sabitle` ile normal görünüme geçer.
-- `Yeniden Konumlandır` ile yarı saydam manuel ayar moduna dönülür.
-- Manuel hareket kontrolleri eklendi:
-  - 10 cm ileri
-  - 10 cm geri
-  - 10 cm sol
-  - 10 cm sağ
-- Manuel zemin kotu kontrolleri eklendi:
-  - 1 cm yukarı/aşağı
-  - -150 cm / +150 cm sürgü
-  - Zemin kotunu sıfırla
-- Döndürme kontrolleri genişletildi:
-  - 1 derece sol/sağ
-  - 15 derece sol/sağ
-- `Yatay Kamera` / `Dikey Kamera` geçişi eklendi.
-- Yatay kamera düğmesi tam ekran ve `screen.orientation.lock('landscape')` çağrısını dener.
-- Yön kilidi reddedilirse yatay kontrol düzeni açılır ve telefonu elle çevirme uyarısı gösterilir.
-- Yatay/dikey geçiş sırasında ürün konumu, zemin kotu, dönüşü ve ölçeği korunur.
-- Model ölçeği daima `0.001` olarak kalır; pinch veya serbest ölçeklendirme eklenmedi.
-- 4000 mm genişlik AR dünya koordinatında tam 4,00 metre olarak korunur.
-- Masaüstü 3D, hızlı testler, katlanır cam ve yerel PDF motoru korunmuştur.
+1. Freedom panel paketi
+- V3.39'daki açık lamel paketinin fiziksel `minZ` konumu korundu.
+- Bu fiziksel taraf yeni kullanıcı terminolojisinde `Arka Cephe` olarak adlandırıldı.
+- Açık panel paketinin `rotation.y`, açık kesit yönü, alt/üst yönü, 100 derece efektif açısı ve 65 mm paket aralığı değiştirilmedi.
+- Dahili motor cephesi `front`, kullanıcı etiketi `Arka Cephe` olarak kaydedilir.
 
-DEĞİŞTİRİLEN / EKLENEN DOSYALAR
--------------------------------
-- app.js
-- index.html
-- README.md
-- AR_GUIDE.md
-- VERSION.txt
-- UPDATE.txt
-- TEST_RESULTS.txt
-- tests/p3dv-v3.32-ar-tests.js
-- tests/p3dv-v3.33-manual-ar-tests.js
-- mevcut regresyon testlerinin sürüm tokenları
+2. Cephe adlandırması
+- Ürün alanı, ürün listesi ve 3D viewer cephe etiketleri güncellendi:
+  - `front` -> `Arka Cephe`
+  - `back` -> `Ön Cephe`
+- PDF görünüş başlıkları da aynı terminolojiye geçirildi.
+- Geometri eksenleri ve kayıt anahtarları değiştirilmedi; yalnız kullanıcıya görünen isimler değiştirildi.
 
-DOĞRULAMA
----------
-- app.js / RAL / kumaş / PDF motoru Node sözdizimi: PASS
-- Regression A: 73 PASS
-- Regression B: 78 PASS
-- Door/Product: 417 PASS
-- Quick/PDF: 43 PASS
-- Katlanır Cam: 50 PASS
-- Genel AR sözleşmesi: 52 PASS
-- V3.33 manuel AR sözleşmesi: 41 PASS
-- Oluşturulan viewer iframe JavaScript sözdizimi: PASS
-- Gerçek Chromium PDF indirmesi: PASS
-  - `%PDF-1.4`
-  - 314.393 bayt
-  - 6 sayfa A4
-  - B-Cube Freedom Test 1
-- PDF sayfaları PNG olarak render edilip taşma/kırpılma açısından kontrol edildi.
-- Gerçek Chromium ortamında manuel AR kontrol öğelerinin iframe içinde oluştuğu doğrulandı.
-- Browser page error: 0
-- Browser console error: 0
+3. Dinamik Katlanır Cam bakış yönü
+- Önceki tüm cepheler için tek bir global ayna kuralı kaldırıldı.
+- Sol/Sağ eşlemesi artık seçili cephenin `axis` ve `inward` değerleri ile Bakış Yönünden hesaplanır.
+- Böylece Ön, Arka, Sol ve Sağ cephelerin her birinde İç Bakış / Dış Bakış gerçek kullanıcı bakışına göre çalışır.
+- İki yana toplama `BOTH` olarak korunur.
 
-KRİTİK DONANIM SINIRI
----------------------
-Bu çalışma ortamında gerçek Android telefon, ARCore kamerası veya fiziksel 4 metre referansı bulunmadığından kamera açılması, cihaz hareketinde dünya takibi, manuel zemin kotunun fiziksel doğruluğu ve gerçek landscape yön kilidi donanım üzerinde doğrulanmadı. V3.33 gerçek cihaz test sürümüdür; mobil kabul testi ayrıca zorunludur.
+4. Sistem içi / dışı açılma
+- Yeni `foldingFoldV` kuralı ile:
+  - `İçeri` = daima `zone.inward`
+  - `Dışarı` = daima `-zone.inward`
+- Bakış yönü İçeri/Dışarı fiziksel anlamını değiştirmez.
+
+5. `Dışarı` seçim kaybı düzeltmesi
+- Katlanır Cam kayıt akışındaki `delete draft.foldingOpenDirection` hatası kaldırıldı.
+- `OUTWARD` değeri form gönderimi, model kaydı ve yeniden açma sonrasında korunur.
+- Geçersiz / boş değerlerde güvenli varsayılan `INWARD` olur.
+
+6. Katlanır Cam form sırası
+- Ürün form grid alanına sabit kimlik eklendi.
+- Katlanır Cam formu açılır açılmaz alanlar gerçek DOM üzerinde yeniden sıralanır.
+- Görsel okuma sırası:
+  1. Bakış Yönü
+  2. Panellerin Açılma Yönü
+  3. Katlanma Yönü
+- Diğer ürünlere geçildiğinde ortak Katlanma/Açılım alanı normal yerine geri döner.
+
+KORUNANLAR
+----------
+- Freedom efektif panel açısı: 100 derece.
+- Freedom açık panel kesit/orientasyon düzeltmesi.
+- Bio-Rise geometrisi.
+- Katlanır Cam 33 mm net paket boşluğu.
+- Katlanır Cam 70 mm alt profil.
+- 8 panel üzeri otomatik iki yana toplama.
+- Kapı `↻` işaretleri.
+- PDF ve manuel AR altyapısı.

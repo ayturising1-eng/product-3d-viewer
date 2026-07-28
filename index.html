@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>p3dv.v3.33 · Product 3d Viewer</title>
+  <title>p3dv.v3.41 · Product 3d Viewer</title>
   <link rel="stylesheet" href="./styles.css" />
   <meta name="theme-color" content="#115da8" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.33</span></h1>
+    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.41</span></h1>
   </header>
 
   <main class="app">
@@ -31,10 +31,13 @@
             <input id="freedomWidthInput" type="number" inputmode="decimal" min="1000" step="1" placeholder="Önerilen maks. 4050 mm" />
             <small id="freedomWidthLimitNote" class="freedom-limit-note">Önerilen maksimum: 4050 mm · Üzeri uyarıyla çizilir.</small>
           </label>
-          <label>
+          <label class="projection-field">
             Açılım
-            <input id="freedomDepthInput" type="number" inputmode="decimal" min="2038" step="1" list="projectionOptions" placeholder="Önerilen 2038–7060 mm" />
-            <datalist id="projectionOptions"></datalist>
+            <div class="projection-control">
+              <select id="projectionOptions" aria-label="Açılım ve panel sayısı seçenekleri"></select>
+              <button id="projectionCustomToggleBtn" class="projection-custom-toggle" type="button">Özel değer</button>
+              <input id="freedomDepthInput" class="projection-custom-input" type="text" inputmode="decimal" min="2038" placeholder="Önerilen 2038–7060 mm" hidden />
+            </div>
             <small id="freedomDepthLimitNote" class="freedom-limit-note">Önerilen maksimum: 7060 mm · Üzeri uyarıyla çizilir.</small>
           </label>
           <label>
@@ -389,7 +392,7 @@
         </label>
       </div>
 
-      <div class="product-form-grid">
+      <div id="productFormGrid" class="product-form-grid">
         <label id="productSeriesWrap">
           Ürün Serisi
           <select id="productSeriesInput">
@@ -463,13 +466,22 @@
           <small id="productPanelHint" class="field-hint">2–12 panel</small>
         </label>
 
-        <label id="productFoldingPassageWrap" hidden>
-          Geçiş Kapısı
-          <select id="productFoldingPassageInput">
-            <option value="NO">Yok</option>
-            <option value="YES">Var · İlk kanat bağımsız açılır</option>
+        <label id="productFoldingViewWrap" hidden>
+          Bakış Yönü
+          <select id="productFoldingViewInput">
+            <option value="INSIDE VIEW" selected>İç Bakış</option>
+            <option value="OUTSIDE VIEW">Dış Bakış</option>
           </select>
-          <small class="field-hint">İlk kanat gerektiğinde bağımsız geçiş kapısı olarak kullanılabilir.</small>
+          <small class="field-hint">Bakış yönü, ürünü hangi taraftan karşınıza aldığınızı belirler. Sol/sağ seçimi bu bakışa göre; içeri/dışarı seçimi ise her zaman sistemin içine ve dışına göre değerlendirilir.</small>
+        </label>
+
+        <label id="productFoldingOpenDirectionWrap" hidden>
+          Panellerin Açılma Yönü
+          <select id="productFoldingOpenDirectionInput">
+            <option value="INWARD" selected>İçeri</option>
+            <option value="OUTWARD">Dışarı</option>
+          </select>
+          <small class="field-hint">İlk kanadın ve toplanan paket yönünün içeri mi dışarı mı açılacağını belirler.</small>
         </label>
 
         <label id="productFixedVerticalCountWrap" hidden>
@@ -598,7 +610,7 @@
           <div>
             <span class="door-type-picker-eyebrow">Kapı (Dış Bakış)</span>
             <h3 id="productDoorTypePickerTitle">Kapı Tipini Seçin</h3>
-            <p>Hareketli kanatlar mavi, sabit alanlar gri ve açılım hareketi panel içine sığan yeşil okla gösterilir.</p>
+            <p>Hareketli kanatlar mavi, sabit alanlar gri olarak gösterilir. Açılım yönü gerçek 3D kapı çiziminde kanat üzerindeki döner okla belirtilir.</p>
           </div>
           <button id="productDoorTypePickerClose" type="button" class="ghost door-type-picker-close">Geri</button>
         </div>

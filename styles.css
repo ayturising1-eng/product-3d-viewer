@@ -2017,3 +2017,34 @@ body {
   background: #fff0f0;
   color: #842424;
 }
+
+
+/* V3.36 ölçü girişleri */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.projection-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.projection-control .projection-custom-input {
+  grid-column: 1 / -1;
+}
+.projection-custom-toggle {
+  min-width: 84px;
+  white-space: nowrap;
+}
+.projection-control select,
+.projection-control .projection-custom-input {
+  width: 100%;
+}
+.projection-custom-input[hidden] {
+  display: none !important;
+}

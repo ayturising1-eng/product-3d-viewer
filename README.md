@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.33**
+Current package: **p3dv.v3.41**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -424,3 +424,54 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - iPhone/iPad için bu sürümde USDZ/Quick Look dışa aktarımı bulunmaz; desteklenmeyen cihazlarda gerçek ölçek taklidi yapılmaz.
 - Mevcut `Test 1`-`Test 10` hızlı test yapısı ve yerel PDF motoru korunmuştur.
 
+## P3DV V3.34 Freedom Lamel Yönü
+
+- Freedom üst görünüş lamel grubu sistem merkezi etrafında karşı tarafa alınmıştır.
+- Lameller motor kutusunun bulunduğu arka cephe tarafında konumlanır.
+- Bio-Rise lamel geometrisi etkilenmez.
+
+
+## P3DV V3.35 Freedom Efektif Panel Açısı
+
+- Freedom açık lamellerinin efektif açısı 100 derece olarak tanımlanmıştır.
+- Geometri içindeki 180 derece aynalama nedeniyle pivot dönüşü -80 derecedir.
+- Bio-Rise mevcut 100 derece efektif açısını korur.
+
+
+## P3DV V3.36 Freedom Arka Cephe ve Ölçü Kontrolleri
+
+- Freedom motor kutusunun toplandığı taraf Arka Cephe olarak tanımlanmıştır.
+- Katlanır cam paketlerinde panel profil derinliğine ek 33 mm net boşluk uygulanır.
+- Freedom ve Bio-Rise açılım listeleri ölçü ile karşılık gelen panel sayısını birlikte gösterir.
+- Açılım kontrolü seçimden sonra tekrar açılabilen select yapısına geçirilmiştir.
+- Genişlik, açılım ve yükseklik sayı alanlarındaki tarayıcı spinner okları kaldırılmıştır.
+
+
+## P3DV V3.37 Katlanır Cam Bakış Yönü ve Kapı Açılım İşaretleri
+
+- Katlanır Cam içindeki Geçiş Kapısı seçeneği kaldırılmıştır.
+- Katlanır Cam için `İç Bakış` ve `Dış Bakış` seçenekleri eklenmiştir; varsayılan `İç Bakış`tır.
+- Katlanma yönündeki ilk panelde büyük, merkezli `↻` işareti bulunur.
+- İki yana katlanmada her iki uçtaki ilk panelde `↻` gösterilir; diğer panellerde yalnız toplanma yönü oku bulunur.
+- Kapı kanatlarının tamamına büyük ve merkezli `↻` açılım işareti eklenmiştir.
+- Çift kanat kapıda aktif kanat işareti tam görünür, pasif kanat işareti daha siliktir.
+- Kapı tipi seçim kartlarındaki yeşil açılım oku kaldırılmıştır.
+
+## P3DV V3.38 Katlanır Cam Açılma Yönü
+
+- Katlanır Cam seçimleri `Bakış Yönü`, `Panellerin Toplanma Yönü` ve `Panellerin Açılma Yönü` olarak ayrılmıştır.
+- Açılma yönü `İçeri` veya `Dışarı` seçilebilir; varsayılan `İçeri`dir.
+- İki yana toplamada iki uçtaki ilk panellerin `↻` işaretleri simetrik hesaplanır.
+- Freedom açık lamellerinin ters duran kesit yönü düzeltilmiş, 100 derece efektif açı korunmuştur.
+
+## P3DV V3.41 Kanonik Cephe ve Dinamik Katlanır Cam Bakışı
+
+- V3.41 temiz olarak V3.39 baseline üzerinden hazırlanmıştır; V3.40 baseline olarak kullanılmamıştır.
+- Fiziksel `front` tarafı kullanıcıya `Arka Cephe`, fiziksel `back` tarafı kullanıcıya `Ön Cephe` olarak gösterilir.
+- Freedom açık panel paketi fiziksel `minZ` tarafında kalır; bu taraf yeni terminolojide Arka Cephedir. Panel yönü, alt/üst orientasyonu, 100 derece efektif açı ve paket aralıkları değişmez.
+- Katlanır Cam sol/sağ eşlemesi artık cephe ekseni, cephe iç yönü ve seçilen Bakış Yönüne göre dinamik hesaplanır.
+- `İçeri` her zaman sistemin içine, `Dışarı` her zaman sistemin dışına katlanır; bakış seçimi bu fiziksel anlamı değiştirmez.
+- Katlanır Cam kaydetme akışındaki `Dışarı` değerini silen hata kaldırılmıştır.
+- Katlanır Cam form sırası: Bakış Yönü -> Panellerin Açılma Yönü -> Katlanma Yönü.
+- Gerçek Chromium testinde `Dış Bakış + Dışarı + Sağ` kaydedilmiş, ürün yeniden açıldığında üç değer de korunmuştur.
+- Dört cephe ve 12 temel bakış/açılma/toplanma kombinasyonu sözleşme testleriyle doğrulanmıştır.

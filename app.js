@@ -42,6 +42,7 @@
     productSubgroup: 'productSubgroupValue',
     productFormula: 'productFormulaText',
     projectionOptions: 'projectionOptions',
+    projectionCustomToggle: 'projectionCustomToggleBtn',
     freedomForm: 'freedomInputForm',
     freedomWidth: 'freedomWidthInput',
     freedomWidthLimitNote: 'freedomWidthLimitNote',
@@ -57,6 +58,7 @@
     clearProducts: 'clearProductsBtn',
     productDialog: 'productDialog',
     productForm: 'productForm',
+    productFormGrid: 'productFormGrid',
     productZoneTitle: 'productZoneTitle',
     productZoneInfo: 'productZoneInfo',
     productType: 'productTypeInput',
@@ -83,8 +85,10 @@
     productCustomGlassLabel: 'productCustomGlassLabel',
     productCustomGlass: 'productCustomGlassInput',
     productPanels: 'productPanelsInput',
-    productFoldingPassageWrap: 'productFoldingPassageWrap',
-    productFoldingPassage: 'productFoldingPassageInput',
+    productFoldingViewWrap: 'productFoldingViewWrap',
+    productFoldingView: 'productFoldingViewInput',
+    productFoldingOpenDirectionWrap: 'productFoldingOpenDirectionWrap',
+    productFoldingOpenDirection: 'productFoldingOpenDirectionInput',
     productPanelHint: 'productPanelHint',
     productFixedVerticalCountWrap: 'productFixedVerticalCountWrap',
     productFixedVerticalCount: 'productFixedVerticalCountInput',
@@ -854,25 +858,67 @@
     return activeProductSpec(group).modelLabel;
   }
 
+  function projectionPresetSelect() {
+    return $(ids.projectionOptions);
+  }
+
+  function depthControlValue() {
+    const preset = projectionPresetSelect();
+    const custom = $(ids.freedomDepth);
+    if (!preset) return String(custom && custom.value || '').trim();
+    const presetValue = String(preset.value || '').trim();
+    const customValue = String(custom && custom.value || '').trim();
+    if (custom && !custom.hidden && customValue) return customValue;
+    return presetValue || customValue;
+  }
+
+  function setDepthControlValue(value) {
+    const preset = projectionPresetSelect();
+    const custom = $(ids.freedomDepth);
+    const text = String(value == null ? '' : value).trim();
+    if (!preset || !custom) return;
+    const sourceOptions = preset.options || preset.children || [];
+    const matching = Array.from(sourceOptions).some((option) => option.value === text);
+    if (text && matching) {
+      preset.value = text;
+      custom.value = text;
+      custom.hidden = true;
+    } else if (text) {
+      preset.value = '';
+      custom.value = text;
+      custom.hidden = false;
+    } else {
+      preset.value = '';
+      custom.value = '';
+      custom.hidden = true;
+    }
+  }
+
   function populateProjectionOptions() {
-    const list = $(ids.projectionOptions);
+    const list = projectionPresetSelect();
     if (!list) return;
     const spec = activeProductSpec();
+    const previousValue = depthControlValue();
     list.innerHTML = '';
+
     let lastValue = null;
     for (let value = spec.depthListStart; value <= spec.depthMax; value += spec.depthStep) {
       const option = document.createElement('option');
+      const panelCount = panelCountFromProjection(value, modelState.productGroup);
       option.value = String(value);
-      option.textContent = `${value} mm`;
+      option.textContent = `${value} mm · ${panelCount} Panel`;
       list.appendChild(option);
       lastValue = value;
     }
     if (lastValue !== spec.depthMax) {
       const option = document.createElement('option');
+      const panelCount = panelCountFromProjection(spec.depthMax, modelState.productGroup);
       option.value = String(spec.depthMax);
-      option.textContent = `${spec.depthMax} mm · Maksimum`;
+      option.textContent = `${spec.depthMax} mm · ${panelCount} Panel · Önerilen Maksimum`;
       list.appendChild(option);
     }
+
+    setDepthControlValue(previousValue);
   }
 
   function updateProductInputUi() {
@@ -887,6 +933,7 @@
     $(ids.freedomWidth).removeAttribute('max');
     $(ids.freedomWidth).placeholder = `Önerilen maks. ${spec.widthMax} mm`;
     setText(ids.freedomWidthLimitNote, `Önerilen maksimum: ${spec.widthMax} mm · Üzeri uyarıyla çizilir.`);
+    $(ids.freedomDepth).inputMode = 'decimal';
     $(ids.freedomDepth).min = String(spec.depthMin);
     $(ids.freedomDepth).removeAttribute('max');
     $(ids.freedomDepth).placeholder = `Önerilen ${spec.depthMin}–${spec.depthMax} mm`;
@@ -928,7 +975,7 @@
       applyProductGroupDefaults(nextGroup);
       modelState.depth = 0;
       modelState.panelCount = 0;
-      $(ids.freedomDepth).value = '';
+      setDepthControlValue('');
       $(ids.freedomPanelCount).value = '';
       const spec = activeProductSpec();
       if (spec.heightMax && Number(modelState.height) > spec.heightMax) {
@@ -1018,7 +1065,7 @@
 
   function productZoneLabel(zoneId, placement, sameFacadeIndex) {
     const facadeId = String(zoneId || '').split('|')[0];
-    const facadeNames = { front: 'Ön Cephe', back: 'Arka Cephe', left: 'Sol Cephe', right: 'Sağ Cephe' };
+    const facadeNames = { front: 'Arka Cephe', back: 'Ön Cephe', left: 'Sol Cephe', right: 'Sağ Cephe' };
     const suffix = sameFacadeIndex > 0 ? ` · Alan ${sameFacadeIndex + 1}` : '';
     return `${facadeNames[facadeId] || facadeId}${suffix} · ${productTypeLabel(placement)}`;
   }
@@ -1209,7 +1256,7 @@
       return;
     }
     $(ids.freedomWidth).value = String(nextWidth);
-    $(ids.freedomDepth).value = String(nextDepth);
+    setDepthControlValue(nextDepth);
     $(ids.freedomHeight).value = String(nextHeight);
     $(ids.freedomPanelCount).value = String(modelState.panelCount);
     closePositionDialog();
@@ -1218,7 +1265,8 @@
   }
 
   function readFreedomNumber(id) {
-    const raw = String($(id).value || '').trim().replace(',', '.');
+    const source = id === ids.freedomDepth ? depthControlValue() : String($(id).value || '').trim();
+    const raw = String(source || '').trim().replace(',', '.');
     if (!raw) return null;
     const value = Math.round(Number(raw));
     return Number.isFinite(value) ? value : null;
@@ -1265,7 +1313,7 @@
       return;
     }
     const depth = projectionFromPanelCount(count);
-    $(ids.freedomDepth).value = String(depth);
+    setDepthControlValue(depth);
     showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, panelCount: count });
   }
 
@@ -1996,9 +2044,13 @@
         ['RIGHT', 'Sağa'],
         ['BOTH', 'İki Yana']
       ],
-      passageDoors: [
-        ['NO', 'Yok'],
-        ['YES', 'Var · İlk Kanat']
+      views: [
+        ['INSIDE VIEW', 'İç Bakış'],
+        ['OUTSIDE VIEW', 'Dış Bakış']
+      ],
+      openDirections: [
+        ['INWARD', 'İçeri'],
+        ['OUTWARD', 'Dışarı']
       ],
       thicknessA: [
         ['8 MM', '8 mm'],
@@ -2305,6 +2357,10 @@
     return ['LEFT', 'RIGHT', 'BOTH'].includes(requestedDirection) ? requestedDirection : 'RIGHT';
   }
 
+  function foldingOpenDirectionValue(value) {
+    return value === 'OUTWARD' ? 'OUTWARD' : 'INWARD';
+  }
+
   function foldingAdvisory(zone, draft) {
     const warnings = [];
     const count = Math.max(2, Math.round(Number(draft && draft.panels) || 2));
@@ -2373,7 +2429,8 @@
         glassColor: defaultGlass,
         customGlassColor: customGlass,
         panels: 4,
-        passageDoor: 'NO',
+        foldingView: 'INSIDE VIEW',
+        foldingOpenDirection: 'INWARD',
         collectionState: 'NORMAL',
         thresholdProfile: 70
       };
@@ -2460,7 +2517,9 @@
       normalized.panels = Math.max(2, Math.round(Number(normalized.panels) || 4));
       normalized.openingType = 'FOLDING';
       normalized.openingDirection = foldingDirectionForPanels(normalized.panels, normalized.openingDirection);
-      normalized.passageDoor = normalized.passageDoor === 'YES' ? 'YES' : 'NO';
+      normalized.foldingView = normalized.foldingView === 'OUTSIDE VIEW' ? 'OUTSIDE VIEW' : 'INSIDE VIEW';
+      normalized.foldingOpenDirection = foldingOpenDirectionValue(normalized.foldingOpenDirection);
+      delete normalized.passageDoor;
       normalized.collectionState = normalized.collectionState === 'COLLECTED' ? 'COLLECTED' : 'NORMAL';
       normalized.thresholdProfile = 70;
       normalized.glassThickness = compatibleGlassThickness('folding', normalized.series, normalized.glassThickness, normalized.glassColor);
@@ -2595,7 +2654,8 @@
         { label: 'Katlanma Yönü', value: openingDirectionLabel(normalized) },
         { label: 'Panel Sayısı', value: String(normalized.panels) },
         { label: 'Yaklaşık Panel Genişliği', value: mmText(zone.width / Math.max(1, normalized.panels)) },
-        { label: 'Geçiş Kapısı', value: lookupOptionLabel(PRODUCT_OPTIONS.folding.passageDoors, normalized.passageDoor) },
+        { label: 'Bakış Yönü', value: lookupOptionLabel(PRODUCT_OPTIONS.folding.views, normalized.foldingView) },
+        { label: 'Açılma Yönü', value: lookupOptionLabel(PRODUCT_OPTIONS.folding.openDirections, normalized.foldingOpenDirection) },
         { label: 'Alt Profil', value: '70 mm · Eşikli' },
         { label: 'Cam Kalınlığı', value: lookupOptionLabel(normalized.series === 'K SERIES' ? PRODUCT_OPTIONS.folding.thicknessK : PRODUCT_OPTIONS.folding.thicknessA, normalized.glassThickness) },
         { label: 'Cam Rengi', value: glassColorLabel(normalized.glassColor, normalized.customGlassColor) },
@@ -2674,7 +2734,8 @@
       pushIfChanged('Tip', lookupOptionLabel(normalized.series === 'K SERIES' ? PRODUCT_OPTIONS.folding.subtypesK : PRODUCT_OPTIONS.folding.subtypesA, normalized.subtype), lookupOptionLabel(PRODUCT_OPTIONS.folding.subtypesA, defaultsForType.subtype));
       pushIfChanged('Katlanma yönü', openingDirectionLabel(normalized), openingDirectionLabel(defaultsForType));
       pushIfChanged('Panel sayısı', normalized.panels, defaultsForType.panels);
-      pushIfChanged('Geçiş kapısı', lookupOptionLabel(PRODUCT_OPTIONS.folding.passageDoors, normalized.passageDoor), lookupOptionLabel(PRODUCT_OPTIONS.folding.passageDoors, defaultsForType.passageDoor));
+      pushIfChanged('Bakış yönü', lookupOptionLabel(PRODUCT_OPTIONS.folding.views, normalized.foldingView), lookupOptionLabel(PRODUCT_OPTIONS.folding.views, defaultsForType.foldingView));
+      pushIfChanged('Açılma yönü', lookupOptionLabel(PRODUCT_OPTIONS.folding.openDirections, normalized.foldingOpenDirection), lookupOptionLabel(PRODUCT_OPTIONS.folding.openDirections, defaultsForType.foldingOpenDirection));
       pushIfChanged('Cam kalınlığı', normalized.glassThickness, defaultsForType.glassThickness);
       pushIfChanged('Cam rengi', glassColorLabel(normalized.glassColor, normalized.customGlassColor), glassColorLabel(defaultsForType.glassColor, defaultsForType.customGlassColor));
       pushIfChanged('3D gösterim', collectionStateLabel(normalized.collectionState), collectionStateLabel(defaultsForType.collectionState));
@@ -2836,8 +2897,8 @@
     const leftFaceDepth = Math.max(p[0].x, p[2].x);
     const rightFaceDepth = Math.max(p[1].x, p[3].x);
     const facades = [
-      { id: 'front', label: 'Ön Cephe', axis: 'x', cx: (frontStart + frontEnd) / 2, cz: -D / 2 + frontFaceDepth / 2, width: frontEnd - frontStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[0].x, endBoundaryWidth: p[1].x },
-      { id: 'back', label: 'Arka Cephe', axis: 'x', cx: (backStart + backEnd) / 2, cz: D / 2 - backFaceDepth / 2, width: backEnd - backStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[2].x, endBoundaryWidth: p[3].x },
+      { id: 'front', label: 'Arka Cephe', axis: 'x', cx: (frontStart + frontEnd) / 2, cz: -D / 2 + frontFaceDepth / 2, width: frontEnd - frontStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[0].x, endBoundaryWidth: p[1].x },
+      { id: 'back', label: 'Ön Cephe', axis: 'x', cx: (backStart + backEnd) / 2, cz: D / 2 - backFaceDepth / 2, width: backEnd - backStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[2].x, endBoundaryWidth: p[3].x },
       { id: 'left', label: 'Sol Cephe', axis: 'z', cx: -W / 2 + leftFaceDepth / 2, cz: (leftStart + leftEnd) / 2, width: leftEnd - leftStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[0].z, endBoundaryWidth: p[2].z },
       { id: 'right', label: 'Sağ Cephe', axis: 'z', cx: W / 2 - rightFaceDepth / 2, cz: (rightStart + rightEnd) / 2, width: rightEnd - rightStart, height, bottomY, topY, beamBottomY, startBoundaryWidth: p[1].z, endBoundaryWidth: p[3].z }
     ];
@@ -2888,7 +2949,7 @@
         panelColor: { code: 'RAL 9016', hex: '#E7E8E2', finish: 'MATTE' },
         profiles: { front: [quickTestProfile('qt1v1', 'vertical', 0.34)] },
         assignments: [
-          { facade: 'front', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'STANDARD', openingDirection: 'LEFT', panels: 4, passageDoor: 'NO', glassColor: 'FUME', collectionState: 'NORMAL' }) },
+          { facade: 'front', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'STANDARD', openingDirection: 'LEFT', foldingView: 'INSIDE VIEW', panels: 4, glassColor: 'FUME', collectionState: 'NORMAL' }) },
           { facade: 'front', zone: 1, primary: quickTestPlacement('guillotine', { subtype: 'CLEANABLE', mechanism: 'CHAIN', panelType: '1+2', panels: 3, motorDirection: 'LEFT', glassColor: 'TRANSPARENT' }), zip: quickTestPlacement('zip', { series: 'G SERIES', subtype: '110x110 BOX', placementLocation: 'FRONT OF POSTS', motorDirection: 'RIGHT', cableDirection: 'TOP', fabricColor: '7635-52142' }) },
           { facade: 'back', zone: 0, primary: quickTestPlacement('sliding', { openingType: 'CENTER OPENING', openingDirection: 'OUTSIDE', panels: 6, glassColor: 'BRONZE' }) },
           { facade: 'left', zone: 0, primary: quickTestPlacement('fixed', { verticalDivisions: 2, horizontalDivisions: 2, horizontalHeights: '1050;1050', glassColor: 'FUME' }) },
@@ -2896,7 +2957,7 @@
         ]
       },
       2: {
-        description: 'Freedom · yatay profil, K Seri katlanır cam sağa toplama ve geçiş kapısı, üst sabit kapı ve sabit doğrama.',
+        description: 'Freedom · yatay profil, K Seri katlanır cam dış bakış sağa toplama, üst sabit kapı ve sabit doğrama.',
         group: 'b-cube', width: 3600, panelCount: 20, height: 2800,
         systemColor: { code: 'RAL 9005', hex: '#0A0A0D', finish: 'GLOSS' },
         panelColor: { code: 'RAL 1013', hex: '#E9E5CE', finish: 'TEXTURE' },
@@ -2905,7 +2966,7 @@
           { facade: 'front', zone: 0, primary: quickTestPlacement('door', { doorType: 'DOUBLE_TOP', activeLeaf: 'LEFT', doorOpenDirection: 'INWARD', handleType: 'PANIC', topFixedHeight: 520, movingLeafHeight: 1750, glassColor: 'BRONZE' }) },
           { facade: 'front', zone: 1, primary: quickTestPlacement('fixed', { verticalDivisions: 3, horizontalDivisions: 1, glassColor: 'TRANSPARENT' }) },
           { facade: 'back', zone: 0, zip: quickTestPlacement('zip', { series: 'P SERIES', subtype: '130x130 BOX', placementLocation: 'BETWEEN POSTS', cableDirection: 'BACK', motorDirection: 'LEFT', fabricColor: '92-2047' }) },
-          { facade: 'left', zone: 0, primary: quickTestPlacement('folding', { series: 'K SERIES', subtype: 'STANDARD', panels: 5, openingDirection: 'RIGHT', passageDoor: 'YES', glassThickness: 'INSULATED GLASS', collectionState: 'COLLECTED' }) }
+          { facade: 'left', zone: 0, primary: quickTestPlacement('folding', { series: 'K SERIES', subtype: 'STANDARD', panels: 5, openingDirection: 'RIGHT', foldingView: 'OUTSIDE VIEW', glassThickness: 'INSULATED GLASS', collectionState: 'COLLECTED' }) }
         ]
       },
       3: {
@@ -2916,7 +2977,7 @@
         profiles: {},
         assignments: [
           { facade: 'front', zone: 0, primary: quickTestPlacement('guillotine', { subtype: 'UPWARD COLLECTING', mechanism: 'BELT', panelType: '1+2', panels: 3, collectionState: 'COLLECTED', motorDirection: 'RIGHT', glassColor: 'LOW-E GLASS', glassThickness: 'INSULATED GLASS' }) },
-          { facade: 'back', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'TOP-HUNG', openingDirection: 'RIGHT', panels: 9, passageDoor: 'YES', glassColor: 'FUME', collectionState: 'COLLECTED' }) },
+          { facade: 'back', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'TOP-HUNG', openingDirection: 'RIGHT', foldingView: 'OUTSIDE VIEW', panels: 9, glassColor: 'FUME', collectionState: 'COLLECTED' }) },
           { facade: 'left', zone: 0, zip: quickTestPlacement('zip', { series: 'P SERIES', subtype: '115x115 BOX', placementLocation: 'FRONT OF POSTS', cableDirection: 'SIDE', motorDirection: 'LEFT', fabricColor: '86-2043' }) },
           { facade: 'right', zone: 0, primary: quickTestPlacement('door', { doorType: 'DOUBLE_BOTH_FIXED_TOP', activeLeaf: 'RIGHT', doorOpenDirection: 'OUTWARD', topFixedHeight: 500, movingLeafHeight: 1950, glassColor: 'FUME' }) }
         ]
@@ -3030,7 +3091,7 @@
           right: [quickTestProfile('qt10rv1', 'vertical', 0.67)]
         },
         assignments: [
-          { facade: 'front', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'STANDARD', panels: 7, openingDirection: 'BOTH', passageDoor: 'YES', glassColor: 'BRONZE', collectionState: 'COLLECTED' }) },
+          { facade: 'front', zone: 0, primary: quickTestPlacement('folding', { series: 'A SERIES', subtype: 'STANDARD', panels: 7, openingDirection: 'BOTH', foldingView: 'INSIDE VIEW', glassColor: 'BRONZE', collectionState: 'COLLECTED' }) },
           { facade: 'front', zone: 1, primary: quickTestPlacement('guillotine', { subtype: 'UPWARD COLLECTING', collectionState: 'COLLECTED', motorDirection: 'LEFT' }) },
           { facade: 'front', zone: 2, primary: quickTestPlacement('door', { doorType: 'DOUBLE_TOP', topFixedHeight: 500, movingLeafHeight: 2100 }) },
           { facade: 'back', zone: 0, primary: quickTestPlacement('fixed', { verticalDivisions: 2, horizontalDivisions: 2, horizontalHeights: '1200;1000' }) },
@@ -3098,7 +3159,7 @@
   function syncQuickTestControls() {
     if ($(ids.productGroup)) $(ids.productGroup).value = modelState.productGroup;
     $(ids.freedomWidth).value = String(modelState.width);
-    $(ids.freedomDepth).value = String(modelState.depth);
+    setDepthControlValue(modelState.depth);
     $(ids.freedomHeight).value = String(modelState.height);
     $(ids.freedomPanelCount).value = String(modelState.panelCount);
     $(ids.toolboxIntermediateDimensions).checked = Boolean(dimensionVisibility.intermediate);
@@ -3160,10 +3221,10 @@
     const context = canvas.getContext('2d');
     const model = readModel();
     const labels = {
-      'front-left': 'Ön Sol Üst Görünüş',
-      'front-right': 'Ön Sağ Üst Görünüş',
-      'back-left': 'Arka Sol Üst Görünüş',
-      'back-right': 'Arka Sağ Üst Görünüş'
+      'front-left': 'Arka Sol Üst Görünüş',
+      'front-right': 'Arka Sağ Üst Görünüş',
+      'back-left': 'Ön Sol Üst Görünüş',
+      'back-right': 'Ön Sağ Üst Görünüş'
     };
     const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, '#334155');
@@ -3399,10 +3460,10 @@
       const usableWidth = pageWidth - margin * 2;
       const views = collectPdfViews();
       const captions = {
-        'front-left': 'Ön sol üst görünüş',
-        'front-right': 'Ön sağ üst görünüş',
-        'back-left': 'Arka sol üst görünüş',
-        'back-right': 'Arka sağ üst görünüş'
+        'front-left': 'Arka sol üst görünüş',
+        'front-right': 'Arka sağ üst görünüş',
+        'back-left': 'Ön sol üst görünüş',
+        'back-right': 'Ön sağ üst görünüş'
       };
       const groups = [views.slice(0, 2), views.slice(2, 4)];
       groups.forEach((group, pageIndex) => {
@@ -3459,7 +3520,6 @@
     const frame = '#475569';
     const fixed = '#cbd5e1';
     const moving = '#93c5fd';
-    const accent = '#22c55e';
     const leafWidth = 1000;
     const sideFixedWidth = 1000;
     const leafHeight = 2500;
@@ -3500,28 +3560,11 @@
     const inset = 45;
     const strokeWidth = 58;
 
-    const swingArrow = (x, width, hinge) => {
-      const insetX = Math.max(120, width * 0.18);
-      const startX = hinge === 'RIGHT' ? x + width - insetX : x + insetX;
-      const endX = hinge === 'RIGHT' ? x + insetX + 40 : x + width - insetX - 40;
-      const startY = leafY + leafHeight - 300;
-      const endY = leafY + 520;
-      const radius = Math.max(320, Math.min(560, width * .46));
-      const sweep = hinge === 'RIGHT' ? 0 : 1;
-      const head = hinge === 'RIGHT'
-        ? `<path d="M ${endX} ${endY} l 92 -14 M ${endX} ${endY} l 34 84" stroke="${accent}" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />`
-        : `<path d="M ${endX} ${endY} l -92 -14 M ${endX} ${endY} l -34 84" stroke="${accent}" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />`;
-      return `<circle cx="${startX}" cy="${startY}" r="34" fill="${accent}" />`
-        + `<path d="M ${startX} ${startY} A ${radius} ${radius} 0 0 ${sweep} ${endX} ${endY}" stroke="${accent}" stroke-width="40" stroke-linecap="round" fill="none" />`
-        + head;
-    };
-
     let panes = '';
     let cursor = originX;
     segments.forEach((segment) => {
       const fill = segment.kind === 'moving' ? moving : fixed;
       panes += `<rect x="${cursor + inset}" y="${leafY + inset}" width="${segment.width - inset * 2}" height="${leafHeight - inset * 2}" rx="42" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" />`;
-      if (segment.kind === 'moving') panes += swingArrow(cursor, segment.width, segment.hinge);
       cursor += segment.width;
     });
 
@@ -3598,6 +3641,23 @@
     $(id).hidden = Boolean(hidden);
   }
 
+  function applyProductFieldOrder(type) {
+    const grid = $(ids.productFormGrid);
+    if (!grid || typeof grid.insertBefore !== 'function') return;
+    const directionWrap = $(ids.productDirectionWrap);
+    const glassThicknessWrap = $(ids.productGlassThicknessWrap);
+    const panelsWrap = $(ids.productPanelsWrap);
+    const viewWrap = $(ids.productFoldingViewWrap);
+    const openWrap = $(ids.productFoldingOpenDirectionWrap);
+    if (type === 'folding') {
+      if (panelsWrap && viewWrap) grid.insertBefore(viewWrap, panelsWrap.nextSibling);
+      if (viewWrap && openWrap) grid.insertBefore(openWrap, viewWrap.nextSibling);
+      if (openWrap && directionWrap) grid.insertBefore(directionWrap, openWrap.nextSibling);
+    } else if (directionWrap && glassThicknessWrap) {
+      grid.insertBefore(directionWrap, glassThicknessWrap);
+    }
+  }
+
   function setDoorFieldsHidden(hidden) {
     setHidden(ids.productDoorTypeWrap, hidden);
     setHidden(ids.productDoorHingeWrap, hidden);
@@ -3667,7 +3727,8 @@
       fabricColor: $(ids.productFabric).value,
       customFabricColor: '',
       panels: Number($(ids.productPanels).value),
-      passageDoor: $(ids.productFoldingPassage).value,
+      foldingView: $(ids.productFoldingView).value,
+      foldingOpenDirection: $(ids.productFoldingOpenDirection).value,
       verticalDivisions: Number($(ids.productFixedVerticalCount).value),
       horizontalDivisions: Number($(ids.productFixedHorizontalCount).value),
       horizontalHeights: $(ids.productFixedHorizontalHeights).value,
@@ -3712,6 +3773,7 @@
 
   function applyProductRules(seed) {
     const type = $(ids.productType).value;
+    applyProductFieldOrder(type);
     const draft = { ...productDefaults(type), ...(seed || currentProductDraft()), type };
     const isFolding = type === 'folding';
     const isGuillotine = type === 'guillotine';
@@ -3725,7 +3787,8 @@
     const glassColors = GLASS_COLOR_OPTIONS;
 
     setDoorFieldsHidden(true);
-    setHidden(ids.productFoldingPassageWrap, true);
+    setHidden(ids.productFoldingViewWrap, true);
+    setHidden(ids.productFoldingOpenDirectionWrap, true);
     setHidden(ids.foldingCollectionSection, true);
     if ($(ids.productDirection)) $(ids.productDirection).disabled = false;
     if ($(ids.productDoorTypeCards)) $(ids.productDoorTypeCards).innerHTML = '';
@@ -3918,12 +3981,14 @@
       fillSelect($(ids.productSubtype), series === 'K SERIES' ? PRODUCT_OPTIONS.folding.subtypesK : PRODUCT_OPTIONS.folding.subtypesA, draft.subtype);
       fillSelect($(ids.productDirection), PRODUCT_OPTIONS.folding.directions, foldingDirectionForPanels(selectedPanels, draft.openingDirection));
       fillSelect($(ids.productGlassThickness), series === 'K SERIES' ? PRODUCT_OPTIONS.folding.thicknessK : PRODUCT_OPTIONS.folding.thicknessA, compatibleGlassThickness('folding', series, draft.glassThickness, draft.glassColor));
-      fillSelect($(ids.productFoldingPassage), PRODUCT_OPTIONS.folding.passageDoors, draft.passageDoor);
+      fillSelect($(ids.productFoldingView), PRODUCT_OPTIONS.folding.views, draft.foldingView === 'OUTSIDE VIEW' ? 'OUTSIDE VIEW' : 'INSIDE VIEW');
+      fillSelect($(ids.productFoldingOpenDirection), PRODUCT_OPTIONS.folding.openDirections, foldingOpenDirectionValue(draft.foldingOpenDirection));
       setHidden(ids.productMechanismWrap, true);
       setHidden(ids.productOpeningWrap, true);
       setHidden(ids.productDirectionWrap, false);
       setHidden(ids.productPanelsWrap, false);
-      setHidden(ids.productFoldingPassageWrap, false);
+      setHidden(ids.productFoldingViewWrap, false);
+      setHidden(ids.productFoldingOpenDirectionWrap, false);
       setHidden(ids.productPanelTypeWrap, true);
       setHidden(ids.productMotorDirectionWrap, true);
       setHidden(ids.productViewWrap, true);
@@ -4113,7 +4178,8 @@
       if (!Number.isInteger(draft.panels) || draft.panels < 2) return 'Katlanır cam panel sayısı en az 2 ve tam sayı olmalıdır.';
       if (!['LEFT', 'RIGHT', 'BOTH'].includes(draft.openingDirection)) return 'Katlanma yönünü seçin.';
       if (draft.panels > 8 && draft.openingDirection !== 'BOTH') draft.openingDirection = 'BOTH';
-      if (!['YES', 'NO'].includes(draft.passageDoor)) return 'Geçiş kapısı seçimini yapın.';
+      if (!['INSIDE VIEW', 'OUTSIDE VIEW'].includes(draft.foldingView)) return 'Bakış yönünü seçin.';
+      if (!['INWARD', 'OUTWARD'].includes(draft.foldingOpenDirection)) return 'Panellerin açılma yönünü seçin.';
       if (draft.glassColor === 'OTHER' && !String(draft.customGlassColor || '').trim()) return 'Diğer cam rengi seçildiğinde özel cam rengini yazın.';
       if (draft.glassColor === 'LOW-E GLASS' && draft.glassThickness !== 'INSULATED GLASS') return 'Low-e Cam yalnızca Yalıtımlı Cam ile kullanılabilir.';
     } else if (draft.type !== 'zip') {
@@ -4204,6 +4270,7 @@
       delete draft.verticalDivisions;
       delete draft.horizontalDivisions;
       delete draft.horizontalHeights;
+      delete draft.foldingOpenDirection;
       draft.doorType = DOOR_TYPE_VALUES.includes(draft.doorType) ? draft.doorType : 'SINGLE';
       draft.hingeDirection = draft.hingeDirection === 'RIGHT' ? 'RIGHT' : 'LEFT';
       draft.activeLeaf = draft.activeLeaf === 'LEFT' ? 'LEFT' : 'RIGHT';
@@ -4254,7 +4321,9 @@
       delete draft.horizontalHeights;
       draft.openingType = 'FOLDING';
       draft.openingDirection = foldingDirectionForPanels(draft.panels, draft.openingDirection);
-      draft.passageDoor = draft.passageDoor === 'YES' ? 'YES' : 'NO';
+      draft.foldingView = draft.foldingView === 'OUTSIDE VIEW' ? 'OUTSIDE VIEW' : 'INSIDE VIEW';
+      draft.foldingOpenDirection = foldingOpenDirectionValue(draft.foldingOpenDirection);
+      delete draft.passageDoor;
       draft.collectionState = draft.collectionState === 'COLLECTED' ? 'COLLECTED' : 'NORMAL';
       draft.thresholdProfile = 70;
     } else if (draft.type === 'sliding') {
@@ -5385,11 +5454,12 @@ function createFixedClosureLamel(name,length,color,targetDepth,narrowBy){
   return mesh;
 }
 
-function createOpenedLamel(name,length,color,angleDeg,narrowBy){
+function createOpenedLamel(name,length,color,angleDeg,narrowBy,flipProfile){
   const geo=new THREE.ExtrudeGeometry(lamelShape(narrowBy),{depth:length,bevelEnabled:false,steps:1});
   geo.rotateY(Math.PI/2);
-  // Açık lamel kesitini, uzun ekseni çevresinde bulunduğu yeri değiştirmeden 180° aynala.
-  geo.rotateX(Math.PI);
+  if(flipProfile){
+    geo.rotateX(Math.PI);
+  }
   geo.computeBoundingBox();
   const bbox=geo.boundingBox.clone();
   const pivot=new THREE.Group();
@@ -5577,6 +5647,146 @@ function addFacadeText(zone,cfg){
   return mesh;
 }
 
+function drawCurvedTurnArrow(ctx,direction,fillHex){
+  const right=direction!=='LEFT';
+  ctx.save();
+  ctx.translate(256,256);
+  if(!right)ctx.scale(-1,1);
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(15,23,42,.9)';
+  ctx.fillStyle=fillHex;
+  ctx.lineWidth=28;
+  ctx.beginPath();
+  ctx.arc(-8,8,132,Math.PI*1.18,Math.PI*0.08,false);
+  ctx.stroke();
+  const tipX=120;
+  const tipY=42;
+  ctx.beginPath();
+  ctx.moveTo(tipX,tipY);
+  ctx.lineTo(tipX-64,tipY-18);
+  ctx.lineTo(tipX-34,tipY+46);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-8,8,132,Math.PI*1.18,Math.PI*0.08,false);
+  ctx.strokeStyle=fillHex;
+  ctx.lineWidth=18;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function createPanelSymbolPlane(text,width,height,fontSize,color,opacity,turnDirection){
+  const canvas=document.createElement('canvas');
+  canvas.width=512;
+  canvas.height=512;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const alpha=Math.max(.12,Math.min(1,Number(opacity)||1));
+  const numericColor=Number.isFinite(Number(color))?Number(color):0xf97316;
+  const fillHex='#'+Math.max(0,Math.min(0xffffff,numericColor)).toString(16).padStart(6,'0');
+  if(text==='↻' && turnDirection){
+    drawCurvedTurnArrow(ctx,turnDirection,fillHex);
+  }else{
+    ctx.font='bold '+Math.max(72,Number(fontSize)||120)+'px Segoe UI Symbol, Segoe UI, Arial, sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.globalAlpha=1;
+    ctx.lineWidth=18;
+    ctx.strokeStyle='rgba(15,23,42,.9)';
+    ctx.strokeText(text||'',256,260);
+    ctx.fillStyle=fillHex;
+    ctx.fillText(text||'',256,260);
+    ctx.globalAlpha=1;
+  }
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.needsUpdate=true;
+  const material=new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:alpha,side:THREE.DoubleSide,depthTest:true});
+  return new THREE.Mesh(new THREE.PlaneGeometry(width,height),material);
+}
+
+function foldingPositiveUAppearsRight(zone,foldingView){
+  const outside=foldingView==='OUTSIDE VIEW';
+  const inwardSign=Number(zone&&zone.inward)===-1?-1:1;
+  const forwardSign=(outside?1:-1)*inwardSign;
+  return (zone&&zone.axis)==='z'?forwardSign:-forwardSign;
+}
+
+function foldingMirrorSideByView(side,zone,foldingView){
+  if(side==='BOTH')return 'BOTH';
+  const mirror=foldingPositiveUAppearsRight(zone,foldingView)<0;
+  return mirror?(side==='LEFT'?'RIGHT':'LEFT'):side;
+}
+
+function foldingPhysicalSideFromView(side,zone,foldingView){
+  return foldingMirrorSideByView(side,zone,foldingView);
+}
+
+function foldingViewSideFromPhysical(side,zone,foldingView){
+  return foldingMirrorSideByView(side,zone,foldingView);
+}
+
+function foldingFoldV(zone,foldingOpenDirection){
+  return foldingOpenDirection==='INWARD'?zone.inward:-zone.inward;
+}
+
+function foldingTowardViewer(foldingView,foldingOpenDirection){
+  return (foldingView==='INSIDE VIEW' && foldingOpenDirection==='INWARD')
+    || (foldingView==='OUTSIDE VIEW' && foldingOpenDirection==='OUTWARD');
+}
+
+function foldingFirstTurnDirection(physicalSide,zone,foldingView,foldingOpenDirection){
+  const towardViewer=foldingTowardViewer(foldingView,foldingOpenDirection);
+  const viewSide=foldingViewSideFromPhysical(physicalSide,zone,foldingView);
+  if(towardViewer)return viewSide==='LEFT'?'RIGHT':'LEFT';
+  return viewSide==='LEFT'?'LEFT':'RIGHT';
+}
+
+function doorTurnDirection(hingeDirection,doorOpenDirection){
+  const hingeLeft=hingeDirection==='LEFT';
+  const towardViewer=String(doorOpenDirection||'OUTWARD')!=='INWARD';
+  if(towardViewer)return hingeLeft?'RIGHT':'LEFT';
+  return hingeLeft?'LEFT':'RIGHT';
+}
+
+function addFacadePanelSymbol(zone,cfg){
+  const mesh=createPanelSymbolPlane(cfg.text,cfg.w,cfg.h,cfg.fontSize,cfg.color,cfg.opacity,cfg.turnDirection);
+  const insideFace=cfg.face==='inside';
+  if(zone.axis==='x')mesh.rotation.y=(zone.inward===1?Math.PI:0)+(insideFace?Math.PI:0);
+  else mesh.rotation.y=-zone.inward*Math.PI/2+(insideFace?Math.PI:0);
+  mesh.rotation.z=Number(cfg.rotationZ)||0;
+  const x=zone.axis==='x'?zone.cx+(cfg.u||0):zone.cx+(cfg.v||0);
+  const z=zone.axis==='x'?zone.cz+(cfg.v||0):zone.cz+(cfg.u||0);
+  mesh.position.set(x,cfg.y,z);
+  mesh.userData={name:cfg.name||'Panel Symbol',isProduct:true,zoneId:zone.id};
+  mesh.visible=false;
+  group.add(mesh);
+  parts.push(mesh);
+  return mesh;
+}
+
+function addDoorPivotSymbol(zone,pivot,cfg,hingeU,hingeV,productOpen){
+  const mesh=createPanelSymbolPlane(cfg.text,cfg.w,cfg.h,cfg.fontSize,cfg.color,cfg.opacity,cfg.turnDirection);
+  const du=cfg.u-hingeU;
+  const dv=cfg.v-hingeV;
+  const insideFace=cfg.face==='inside';
+  const faceOffset=(insideFace?1:-1)*zone.inward*4;
+  if(zone.axis==='x'){
+    mesh.rotation.y=insideFace?Math.PI:0;
+    mesh.position.set(du,cfg.y,dv+faceOffset);
+  }else{
+    mesh.rotation.y=-Math.PI/2+(insideFace?Math.PI:0);
+    mesh.position.set(dv+faceOffset,cfg.y,du);
+  }
+  mesh.rotation.z=Number(cfg.rotationZ)||0;
+  mesh.userData={name:cfg.name||'Pivot Symbol',isProduct:true,zoneId:zone.id};
+  mesh.visible=false;
+  pivot.add(mesh);
+  parts.push(mesh);
+  markTogglePanel(mesh,zone,productOpen,zone.id);
+  return mesh;
+}
+
 function glassVisualColor(placement){
   const color=String(placement.glassColor||'TRANSPARENT').toUpperCase();
   if(color==='FUME' || color==='GREY')return 0x6b7280;
@@ -5759,7 +5969,7 @@ function addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen){
   }
 }
 
-function addMovingDoorLeaf(zone,cfg,placement,label,withHandle){
+function addMovingDoorLeaf(zone,cfg,placement,label,isActiveLeaf){
   const face=50;
   const depth=55;
   const glazing=glazingSectionSpec(placement);
@@ -5772,7 +5982,8 @@ function addMovingDoorLeaf(zone,cfg,placement,label,withHandle){
   const leafDirection=hingeLeft?1:-1;
   const openV=String(placement.doorOpenDirection||'OUTWARD')==='INWARD'?zone.inward:-zone.inward;
   const axisSign=zone.axis==='x'?-1:1;
-  const angle=productOpen?axisSign*openV*leafDirection*Math.PI/4:0;
+  const plannedAngle=axisSign*openV*leafDirection*Math.PI/4;
+  const angle=productOpen?plannedAngle:0;
   const pivot=createDoorPivot(zone,hingeU,hingeV,angle);
   const part=(partCfg,color,opacity)=>addDoorPivotPart(zone,pivot,partCfg,color,opacity,hingeU,hingeV,productOpen);
   part({name:label+' Left Stile',u:cfg.centerU-cfg.width/2+face/2,y:cfg.bottomY+cfg.height/2,v:hingeV,w:face,h:cfg.height,t:depth},frameColor,1);
@@ -5782,7 +5993,23 @@ function addMovingDoorLeaf(zone,cfg,placement,label,withHandle){
   const glassV=productDepthCenter(zone,glazing.glassDepth,(depth-glazing.glassDepth)/2);
   part({name:label+' Glass',u:cfg.centerU,y:cfg.bottomY+cfg.height/2,v:glassV,w:Math.max(80,cfg.width-face*2-8),h:Math.max(100,cfg.height-face*2-8),t:glazing.glassDepth},glassColor,.34);
   addDoorHingeParts(zone,pivot,cfg,hingeU,hingeV,productOpen);
-  if(withHandle)addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen);
+  const active=Boolean(isActiveLeaf);
+  addDoorPivotSymbol(zone,pivot,{
+    name:label+(active?' Active':' Passive')+' Opening Symbol',
+    text:'↻',
+    u:cfg.centerU,
+    y:cfg.bottomY+cfg.height/2,
+    v:hingeV,
+    w:Math.max(190,cfg.width*.62),
+    h:Math.max(190,cfg.height*.30),
+    fontSize:154,
+    color:0xf97316,
+    opacity:active?1:.42,
+    rotationZ:0,
+    turnDirection:doorTurnDirection(cfg.hingeDirection,String(placement.doorOpenDirection||'OUTWARD')),
+    face:'outside'
+  },hingeU,hingeV,productOpen);
+  if(active)addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen);
 }
 
 function addDoorTopFixedDimensions(zone,bottom,leafTop,leafHeight){
@@ -6068,14 +6295,26 @@ function buildFoldingProduct(zone,placement){
   const innerTop=zone.topY-frameFace;
   const innerH=Math.max(180,innerTop-innerBottom);
   const panels=Math.max(2,Math.round(Number(placement.panels)||Math.ceil(innerW/600)));
-  const direction=panels>8?'BOTH':(['LEFT','RIGHT','BOTH'].includes(String(placement.openingDirection))?String(placement.openingDirection):'RIGHT');
-  const passageDoor=String(placement.passageDoor||'NO')==='YES';
+  const selectedDirection=panels>8?'BOTH':(['LEFT','RIGHT','BOTH'].includes(String(placement.openingDirection))?String(placement.openingDirection):'RIGHT');
+  const foldingView=String(placement.foldingView||'INSIDE VIEW')==='OUTSIDE VIEW'?'OUTSIDE VIEW':'INSIDE VIEW';
+  const foldingOpenDirection=String(placement.foldingOpenDirection||'INWARD')==='OUTWARD'?'OUTWARD':'INWARD';
+  const physicalDirection=foldingPhysicalSideFromView(selectedDirection,zone,foldingView);
+  const viewSideFromPhysical=(side)=>foldingViewSideFromPhysical(side,zone,foldingView);
   const panelW=Math.max(80,innerW/panels);
   const stile=Math.max(24,Math.min(34,panelW*.075));
   const panelH=Math.max(160,innerH-8);
   const panelY=innerBottom+innerH/2;
   const glassV=productDepthCenter(zone,glazing.glassDepth,(frameDepth-glazing.glassDepth)/2);
   const productOpen=productIsOpen(zone.id);
+  const symbolFace=foldingView==='INSIDE VIEW'?'inside':'outside';
+  const symbolV=v+(foldingView==='INSIDE VIEW'?1:-1)*zone.inward*(frameDepth/2-2.5);
+  const foldV=foldingFoldV(zone,foldingOpenDirection);
+  const axisSign=zone.axis==='x'?-1:1;
+
+  function foldAngleForPhysicalSide(side){
+    const leafDirection=side==='LEFT'?1:-1;
+    return axisSign*foldV*leafDirection*Math.PI/2;
+  }
 
   function addClosedLeaf(index,u){
     markTogglePanel(addProductBox(zone,{name:'Folding Glass '+(index+1),u,y:panelY,v:glassV,w:Math.max(50,panelW-stile*2),h:Math.max(80,panelH-stile*2),t:glazing.glassDepth},glassColor,.34),zone,productOpen);
@@ -6085,52 +6324,81 @@ function buildFoldingProduct(zone,placement){
     markTogglePanel(addProductBox(zone,{name:'Folding Bottom Rail '+(index+1),u,y:innerBottom+stile/2,v,w:panelW,h:stile,t:glazing.frameDepth},panelColor,1),zone,productOpen);
   }
 
-  function addFoldedLeaf(index,side,stackIndex){
-    const leftSide=side==='LEFT';
-    const hingeU=leftSide?-innerW/2:innerW/2;
+  const foldedPanelGap=33;
+  const foldedPanelPitch=glazing.frameDepth+foldedPanelGap;
+
+  function firstPanelForPhysicalSide(index,side){
+    return side==='LEFT'?index===0:index===panels-1;
+  }
+
+  function addFoldedLeaf(index,physicalSide,stackIndex){
+    const leftSide=physicalSide==='LEFT';
+    const stackOffset=stackIndex*foldedPanelPitch;
+    const hingeU=leftSide?-innerW/2+stackOffset:innerW/2-stackOffset;
     const centerU=leftSide?hingeU+panelW/2:hingeU-panelW/2;
-    const outward=-zone.inward;
-    const hingeV=v+outward*stackIndex*(glazing.frameDepth+8);
-    const axisSign=zone.axis==='x'?-1:1;
-    const leafDirection=leftSide?1:-1;
-    const angle=axisSign*outward*leafDirection*Math.PI/2;
-    const pivot=createDoorPivot(zone,hingeU,hingeV,angle);
+    const hingeV=v;
+    const plannedAngle=foldAngleForPhysicalSide(physicalSide);
+    const pivot=createDoorPivot(zone,hingeU,hingeV,plannedAngle);
     const part=(cfg,color,opacity)=>addDoorPivotPart(zone,pivot,cfg,color,opacity,hingeU,hingeV,productOpen);
     part({name:'Folded Glass '+(index+1),u:centerU,y:panelY,v:hingeV,w:Math.max(50,panelW-stile*2),h:Math.max(80,panelH-stile*2),t:glazing.glassDepth},glassColor,.34);
     part({name:'Folded Left Stile '+(index+1),u:centerU-panelW/2+stile/2,y:panelY,v:hingeV,w:stile,h:panelH,t:glazing.frameDepth},panelColor,1);
     part({name:'Folded Right Stile '+(index+1),u:centerU+panelW/2-stile/2,y:panelY,v:hingeV,w:stile,h:panelH,t:glazing.frameDepth},panelColor,1);
     part({name:'Folded Top Rail '+(index+1),u:centerU,y:innerTop-stile/2,v:hingeV,w:panelW,h:stile,t:glazing.frameDepth},panelColor,1);
     part({name:'Folded Bottom Rail '+(index+1),u:centerU,y:innerBottom+stile/2,v:hingeV,w:panelW,h:stile,t:glazing.frameDepth},panelColor,1);
+    const viewSide=viewSideFromPhysical(physicalSide);
+    const first=stackIndex===0;
+    addDoorPivotSymbol(zone,pivot,{
+      name:'Folding Leaf Symbol '+(index+1),
+      text:first?'↻':(viewSide==='LEFT'?'←':'→'),
+      u:centerU,
+      y:panelY,
+      v:hingeV,
+      w:Math.max(180,panelW*.62),
+      h:Math.max(180,panelH*.30),
+      fontSize:first?150:112,
+      color:0xf97316,
+      opacity:1,
+      rotationZ:0,
+      turnDirection:first?foldingFirstTurnDirection(physicalSide,zone,foldingView,foldingOpenDirection):null,
+      face:symbolFace
+    },hingeU,hingeV,productOpen);
   }
 
   if(productOpen){
     let leftCount=0;
     let rightCount=0;
-    if(direction==='LEFT')leftCount=panels;
-    else if(direction==='RIGHT')rightCount=panels;
+    if(physicalDirection==='LEFT')leftCount=panels;
+    else if(physicalDirection==='RIGHT')rightCount=panels;
     else{
       leftCount=Math.floor(panels/2);
       rightCount=panels-leftCount;
     }
     for(let i=0;i<leftCount;i++)addFoldedLeaf(i,'LEFT',i);
-    for(let i=0;i<rightCount;i++)addFoldedLeaf(leftCount+i,'RIGHT',i);
+    for(let i=0;i<rightCount;i++)addFoldedLeaf(panels-1-i,'RIGHT',i);
   }else{
     for(let i=0;i<panels;i++){
       const u=-innerW/2+panelW/2+i*panelW;
       addClosedLeaf(i,u);
+      const physicalSide=physicalDirection==='BOTH'?(i<Math.floor(panels/2)?'LEFT':'RIGHT'):physicalDirection;
+      const viewSide=viewSideFromPhysical(physicalSide);
+      const first=firstPanelForPhysicalSide(i,physicalSide);
+      const plannedAngle=foldAngleForPhysicalSide(physicalSide);
+      addFacadePanelSymbol(zone,{
+        name:'Folding Leaf Symbol '+(i+1),
+        text:first?'↻':(viewSide==='LEFT'?'←':'→'),
+        u,
+        y:panelY,
+        v:symbolV,
+        w:Math.max(180,panelW*.62),
+        h:Math.max(180,panelH*.30),
+        fontSize:first?150:112,
+        color:0xf97316,
+        opacity:1,
+        rotationZ:0,
+        turnDirection:first?foldingFirstTurnDirection(physicalSide,zone,foldingView,foldingOpenDirection):null,
+        face:symbolFace
+      });
     }
-  }
-
-  const arrowV=productSurfaceCenter(zone,v,frameDepth,5);
-  if(direction==='BOTH'){
-    addFacadeArrow(zone,{name:'Folding Left Direction Arrow',u:-panelW/2,y:panelY,v:arrowV,length:Math.min(420,Math.max(120,panelW*1.4)),maxLength:Math.max(120,innerW/2-30),direction:-1,vertical:false,thick:true});
-    addFacadeArrow(zone,{name:'Folding Right Direction Arrow',u:panelW/2,y:panelY,v:arrowV,length:Math.min(420,Math.max(120,panelW*1.4)),maxLength:Math.max(120,innerW/2-30),direction:1,vertical:false,thick:true});
-  }else{
-    addFacadeArrow(zone,{name:'Folding Direction Arrow',u:0,y:panelY,v:arrowV,length:Math.min(520,Math.max(140,innerW*.35)),maxLength:Math.max(140,innerW-60),direction:direction==='LEFT'?-1:1,vertical:false,thick:true});
-  }
-  if(passageDoor){
-    const doorU=direction==='LEFT'?-innerW/2+panelW/2:innerW/2-panelW/2;
-    addFacadeArrow(zone,{name:'Folding Passage Door Arrow',u:doorU,y:panelY-panelH*.22,v:arrowV,length:Math.min(260,Math.max(100,panelW*.55)),maxLength:Math.max(100,panelW-stile*2-10),direction:direction==='LEFT'?1:-1,vertical:false,thick:false});
   }
 }
 
@@ -6975,8 +7243,8 @@ function buildFacadeProducts(p,beamBottomY){
   const leftFaceDepth=Math.max(p[0].x,p[2].x);
   const rightFaceDepth=Math.max(p[1].x,p[3].x);
   const facades=[
-    {id:'front',label:'Ön Cephe',axis:'x',cx:(frontStart+frontEnd)/2,cz:-D/2+frontFaceDepth/2,width:frontEnd-frontStart,height,bottomY,topY,beamBottomY,inward:1,outerFaceV:-frontFaceDepth/2,startBoundaryWidth:p[0].x,endBoundaryWidth:p[1].x},
-    {id:'back',label:'Arka Cephe',axis:'x',cx:(backStart+backEnd)/2,cz:D/2-backFaceDepth/2,width:backEnd-backStart,height,bottomY,topY,beamBottomY,inward:-1,outerFaceV:backFaceDepth/2,startBoundaryWidth:p[2].x,endBoundaryWidth:p[3].x},
+    {id:'front',label:'Arka Cephe',axis:'x',cx:(frontStart+frontEnd)/2,cz:-D/2+frontFaceDepth/2,width:frontEnd-frontStart,height,bottomY,topY,beamBottomY,inward:1,outerFaceV:-frontFaceDepth/2,startBoundaryWidth:p[0].x,endBoundaryWidth:p[1].x},
+    {id:'back',label:'Ön Cephe',axis:'x',cx:(backStart+backEnd)/2,cz:D/2-backFaceDepth/2,width:backEnd-backStart,height,bottomY,topY,beamBottomY,inward:-1,outerFaceV:backFaceDepth/2,startBoundaryWidth:p[2].x,endBoundaryWidth:p[3].x},
     {id:'left',label:'Sol Cephe',axis:'z',cx:-W/2+leftFaceDepth/2,cz:(leftStart+leftEnd)/2,width:leftEnd-leftStart,height,bottomY,topY,beamBottomY,inward:1,outerFaceV:-leftFaceDepth/2,startBoundaryWidth:p[0].z,endBoundaryWidth:p[2].z},
     {id:'right',label:'Sağ Cephe',axis:'z',cx:W/2-rightFaceDepth/2,cz:(rightStart+rightEnd)/2,width:rightEnd-rightStart,height,bottomY,topY,beamBottomY,inward:-1,outerFaceV:rightFaceDepth/2,startBoundaryWidth:p[1].z,endBoundaryWidth:p[3].z}
   ];
@@ -7086,8 +7354,12 @@ function buildModel(showAll){
   const lamelBottomY=beamBottomY+61;
   const bioRiseInnerWidth=Math.max(200,bioRightGutterInnerX-bioLeftGutterInnerX);
   const lamelLength=IS_BIO_RISE?bioRiseInnerWidth:W-385;
-  // legacy token preserved for regression: const lamelOpenAngle=-80;
-const lamelOpenAngle=IS_BIO_RISE?-80:-100;
+  // Açık lamel kesiti 180° aynalandığı için -80° pivot dönüşü net 100° efektif açıklık verir.
+  const freedomEffectiveOpenAngle=100;
+  const bioRiseEffectiveOpenAngle=100;
+  const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;
+  const bioRiseLamelOpenAngle=bioRiseEffectiveOpenAngle-180;
+  const lamelOpenAngle=IS_BIO_RISE?bioRiseLamelOpenAngle:freedomLamelOpenAngle;
   const lamelCount=Math.max(0,Math.floor(LC||0));
   const lamelNarrowBy=IS_BIO_RISE?16:0;
 
@@ -7114,7 +7386,7 @@ const lamelOpenAngle=IS_BIO_RISE?-80:-100;
 
     if(lamellaOpenMode){
       for(let i=0;i<lamelCount;i++){
-        const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle,lamelNarrowBy);
+        const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle,lamelNarrowBy,true);
         const rearStackMaxZ=rearFirstPanelMaxZ-(lamelCount-1-i)*bioPanelSpacing;
         setObjectByBounds(opened.pivot,{centerX:0,maxZ:rearStackMaxZ,bottomY:lamelBottomY});
       }
@@ -7128,19 +7400,26 @@ const lamelOpenAngle=IS_BIO_RISE?-80:-100;
   }else{
     const lamelInsetFrom151=50;
     const lamelStartZ=(-RD/2+railTop+railOffsetFrom151)+lamelInsetFrom151;
+    const lamelRearMaxZ=(RD/2-railBottom+railOffsetFrom151)-lamelInsetFrom151;
+    const freedomMotorFacade='front';
+    const freedomMotorFacadeLabel='Arka Cephe';
+    const freedomBackMotorBoxMinZ=lamelStartZ;
     const lamelSpacing=216;
     const lamelOpenSpacing=65;
     if(lamellaOpenMode){
-      const lamelRearMaxZ=(RD/2-railBottom+railOffsetFrom151)-50;
       for(let i=0;i<lamelCount;i++){
-        const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle,lamelNarrowBy);
-        const rearStackMaxZ=lamelRearMaxZ-(lamelCount-1-i)*lamelOpenSpacing;
-        setObjectByBounds(opened.pivot,{centerX:0,maxZ:rearStackMaxZ,bottomY:lamelBottomY});
+        const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle,lamelNarrowBy,false);
+        const backStackMinZ=freedomBackMotorBoxMinZ+(lamelCount-1-i)*lamelOpenSpacing;
+        opened.pivot.rotation.y=Math.PI;
+        opened.pivot.userData={...(opened.pivot.userData||{}),motorFacade:freedomMotorFacade,motorFacadeLabel:freedomMotorFacadeLabel};
+        setObjectByBounds(opened.pivot,{centerX:0,minZ:backStackMinZ,bottomY:lamelBottomY});
       }
     }else{
       for(let i=0;i<lamelCount;i++){
         const lamel=createLamel('Lamella '+(i+1),lamelLength,grass,lamelNarrowBy);
-        setMeshByBounds(lamel,{centerX:0,minZ:lamelStartZ+i*lamelSpacing,bottomY:lamelBottomY});
+        lamel.rotation.y=Math.PI;
+        const mirroredRearMaxZ=-lamelStartZ-i*lamelSpacing;
+        setMeshByBounds(lamel,{centerX:0,maxZ:mirroredRearMaxZ,bottomY:lamelBottomY});
       }
     }
   }
@@ -7425,6 +7704,21 @@ renderer.setAnimationLoop(animate);
       if (event.target === $(ids.colorFinishDialog)) closeColorFinishDialog();
     });
     $(ids.freedomPanelCount).addEventListener('input', syncProjectionFromPanelCount);
+    projectionPresetSelect().addEventListener('change', () => {
+      const preset = projectionPresetSelect();
+      const custom = $(ids.freedomDepth);
+      custom.hidden = true;
+      custom.value = preset.value;
+      syncPanelCountFromProjection();
+    });
+    $(ids.projectionCustomToggle).addEventListener('click', () => {
+      const custom = $(ids.freedomDepth);
+      projectionPresetSelect().value = '';
+      custom.hidden = false;
+      if (!custom.value) custom.value = '';
+      custom.focus();
+      setFreedomValidation('Özel açılım değerini mm olarak girin.', 'warning');
+    });
     $(ids.freedomDepth).addEventListener('input', syncPanelCountFromProjection);
     $(ids.freedomWidth).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
     $(ids.freedomHeight).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
@@ -7498,7 +7792,8 @@ renderer.setAnimationLoop(animate);
     $(ids.productFixedHorizontalHeights).addEventListener('input', () => { $(ids.productValidation).textContent = ''; });
     $(ids.slidingCollectionState).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
     $(ids.foldingCollectionState).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
-    $(ids.productFoldingPassage).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
+    $(ids.productFoldingView).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
+    $(ids.productFoldingOpenDirection).addEventListener('change', () => { $(ids.productValidation).textContent = ''; });
     $(ids.productDirection).addEventListener('change', () => {
       $(ids.productValidation).textContent = '';
       if ($(ids.productType).value === 'folding') updateFoldingFormAdvisory();
