@@ -245,6 +245,7 @@
   const $ = (id) => document.getElementById(id);
   const modelState = JSON.parse(JSON.stringify(defaults));
   let viewerCameraState = null;
+  let viewerLiveProductStateReady = false;
   let selectedZone = null;
   let selectedZoneId = null;
   let dimensionVisibility = { intermediate: false, main: true };
@@ -1102,6 +1103,7 @@
   }
 
   function renderViewer() {
+    viewerLiveProductStateReady = false;
     pruneProductStates();
     const model = updateReadouts();
     const arButton = $(ids.mobileAr);
@@ -1377,6 +1379,25 @@
     return zone ? (primaryPlacement(zone.id) || zipPlacement(zone.id) || null) : null;
   }
 
+  function postLiveProductOpenState() {
+    const frame = $(ids.frame);
+    const frameWindow = frame && frame.contentWindow;
+    if (!viewerLiveProductStateReady || !frameWindow) return false;
+    frameWindow.postMessage({
+      source: 'product-3d-parent',
+      type: 'set-product-open-state',
+      productsOpen: Boolean(modelState.productsOpen),
+      productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})),
+      panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {}))
+    }, '*');
+    return true;
+  }
+
+  function applyProductOpenStateLive() {
+    updateToolbox();
+    if (!postLiveProductOpenState()) renderViewer();
+  }
+
   const TOOLBOX_SELECTION_CONFIG = {
     'multi-product': { title: 'Çoklu Ürün Ekleme', hint: 'Uygun alanları seçin. Zip Perde dolu alanlara da ön katman olarak eklenebilir. Enter veya sağ tıkla tamamlayın.', buttonId: ids.multiProduct },
     'multi-delete': { title: 'Çoklu Ürün Silme', hint: 'Ürün bulunan alanları seçin. Enter veya sağ tıkla tamamlayın.', buttonId: ids.multiDelete },
@@ -1404,8 +1425,7 @@
       input.addEventListener('change', () => {
         modelState.productOpenStates[key] = Boolean(input.checked);
         if (placement && placement.type === 'zip') modelState.panelStates[key] = Boolean(input.checked);
-        updateToolbox();
-        renderViewer();
+        applyProductOpenStateLive();
       });
       const text = document.createElement('span');
       text.textContent = productZoneLabel(zoneId, placement, index);
@@ -1977,9 +1997,13 @@
   }
 
   function toggleProductsOpen() {
-    modelState.productsOpen = !modelState.productsOpen;
-    updateToolbox();
-    renderViewer();
+    const nextOpen = !modelState.productsOpen;
+    modelState.productsOpen = nextOpen;
+    allProductEntries().forEach(({ key, zoneId, placement }) => {
+      modelState.productOpenStates[key] = nextOpen;
+      if (placement && placement.type === 'zip') modelState.panelStates[key] = nextOpen;
+    });
+    applyProductOpenStateLive();
   }
 
   let activeZone = null;
@@ -4446,6 +4470,9 @@
 
   window.addEventListener('message', (event) => {
     if (!event.data || event.data.source !== 'product-3d-viewer') return;
+    if (event.data.type === 'viewer-ready') {
+      viewerLiveProductStateReady = Boolean(event.data.liveProductState);
+    }
     if (event.data.type === 'ar-status') {
       setMobileArStatus(event.data.message || 'AR durumu güncellendi.', event.data.tone || '');
     }
@@ -4479,8 +4506,7 @@
       const key = String(event.data.productKey || event.data.panelKey || zoneId);
       modelState.productOpenStates[key] = Boolean(event.data.open);
       if (key === zipProductKey(zoneId)) modelState.panelStates[key] = Boolean(event.data.open);
-      updateToolbox();
-      renderViewer();
+      applyProductOpenStateLive();
     }
   });
 
@@ -4647,7 +4673,7 @@ let zipPlacements=${zipPlacementsJson};
 let facadeProfiles=${facadeProfilesJson};
 let selectedZoneId=${selectedZoneIdJson};
 let dimensionVisibility=${dimensionVisibilityJson};
-const productsOpen=${productsOpenJson};
+let productsOpen=${productsOpenJson};
 let productOpenStates=${productOpenStatesJson};
 let panelStates=${panelStatesJson};
 const panelMasterOpen=${panelMasterOpenJson};
@@ -4745,7 +4771,7 @@ const box=new THREE.LineSegments(
 );
 scene.add(box);
 
-const group=new THREE.Group();
+let group=new THREE.Group();
 scene.add(group);
 const raycaster=new THREE.Raycaster();
 const mouse=new THREE.Vector2();
@@ -7279,8 +7305,30 @@ function buildFacadeProducts(p,beamBottomY){
   setDimensionVisibility(dimensionVisibility);
 }
 
-function buildModel(showAll){
-  while(group.children.length)group.remove(group.children[0]);
+function disposeModelGroup(root){
+  if(!root)return;
+  root.traverse(obj=>{
+    if(obj.geometry&&typeof obj.geometry.dispose==='function')obj.geometry.dispose();
+    const materials=Array.isArray(obj.material)?obj.material:[obj.material];
+    materials.filter(Boolean).forEach(material=>{
+      if(typeof material.dispose==='function')material.dispose();
+    });
+  });
+}
+
+function buildModel(showAll,options){
+  const atomicSwap=Boolean(options&&options.atomicSwap);
+  const previousGroup=atomicSwap?group:null;
+  const previousParent=previousGroup&&previousGroup.parent?previousGroup.parent:scene;
+  const previousPosition=previousGroup?previousGroup.position.clone():null;
+  const previousRotation=previousGroup?previousGroup.rotation.clone():null;
+  const previousScale=previousGroup?previousGroup.scale.clone():null;
+  const previousVisible=previousGroup?previousGroup.visible:true;
+  if(atomicSwap){
+    group=new THREE.Group();
+  }else{
+    while(group.children.length)group.remove(group.children[0]);
+  }
   parts=[];
   intermediateDimensionObjects=[];
   mainDimensionObjects=[];
@@ -7432,6 +7480,27 @@ function buildModel(showAll){
   }else{
     window.replayAnimation();
   }
+
+  if(atomicSwap){
+    group.position.copy(previousPosition);
+    group.rotation.copy(previousRotation);
+    group.scale.copy(previousScale);
+    group.visible=previousVisible;
+    previousParent.add(group);
+    if(arSession){
+      intermediateDimensionObjects.forEach(item=>item.visible=false);
+      mainDimensionObjects.forEach(item=>item.visible=false);
+      zonePickers.forEach(item=>item.visible=false);
+      setArGhostMode(true);
+    }
+    if(previousGroup.parent)previousGroup.parent.remove(previousGroup);
+    setTimeout(()=>disposeModelGroup(previousGroup),0);
+  }
+}
+
+function rebuildModelWithoutFrameReload(){
+  if(timer)clearInterval(timer);
+  buildModel(true,{atomicSwap:true});
 }
 
 window.replayAnimation=function replayAnimation(){
@@ -7613,6 +7682,13 @@ window.addEventListener('dblclick',event=>{
 
 window.addEventListener('message',event=>{
   if(!event.data||event.data.source!=='product-3d-parent')return;
+  if(event.data.type==='set-product-open-state'){
+    productsOpen=Boolean(event.data.productsOpen);
+    productOpenStates=event.data.productOpenStates&&typeof event.data.productOpenStates==='object'?{...event.data.productOpenStates}:{};
+    panelStates=event.data.panelStates&&typeof event.data.panelStates==='object'?{...event.data.panelStates}:{};
+    rebuildModelWithoutFrameReload();
+    parent.postMessage({source:'product-3d-viewer',type:'product-open-state-applied'},'*');
+  }
   if(event.data.type==='replay-animation')window.replayAnimation();
   if(event.data.type==='set-dimension-visibility')setDimensionVisibility(event.data.visibility);
   if(event.data.type==='set-dimensions-visible')setDimensionVisibility({intermediate:Boolean(event.data.visible),main:Boolean(event.data.visible)});
@@ -7680,6 +7756,7 @@ function animate(time,frame){
 
 buildModel(true);
 renderer.setAnimationLoop(animate);
+parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductState:true},'*');
 })();
 </scr` + `ipt>
 </body>

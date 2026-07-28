@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.41**
+Current package: **p3dv.v3.42**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -475,3 +475,15 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Katlanır Cam form sırası: Bakış Yönü -> Panellerin Açılma Yönü -> Katlanma Yönü.
 - Gerçek Chromium testinde `Dış Bakış + Dışarı + Sağ` kaydedilmiş, ürün yeniden açıldığında üç değer de korunmuştur.
 - Dört cephe ve 12 temel bakış/açılma/toplanma kombinasyonu sözleşme testleriyle doğrulanmıştır.
+
+## P3DV V3.42 Kesintisiz Ürün Aç/Kapat
+
+- Ürünlerin açık/kapalı durumu değiştirilirken 3D iframe artık yeniden yüklenmez.
+- Ana uygulama yeni durumu viewer'a `postMessage` ile gönderir.
+- Viewer yeni modeli görünmeyen bir grupta senkron olarak hazırlar ve eski grupla tek işlemde değiştirir; boş veya karanlık ara kare oluşturmaz.
+- Kamera konumu, OrbitControls hedefi, zoom, pan ve seçili görünüş aynı iframe oturumunda korunur.
+- Bireysel ürün checkbox'ları, 3D modelde çift tıklama ve genel `Ürünler Açık/Kapalı` düğmesi aynı canlı güncelleme hattını kullanır.
+- Genel aç/kapat düğmesi tüm yerleştirilmiş ürünlerin bireysel durumlarını da aynı değere getirir.
+- AR oturumu sırasında grup konumu, dönüşü, 1:1 ölçeği ve yarı saydam yerleştirme görünümü korunur.
+- Viewer henüz hazır değilse güvenli geriye uyumluluk olarak normal render akışı kullanılır.
+

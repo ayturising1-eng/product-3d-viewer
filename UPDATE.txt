@@ -1,74 +1,59 @@
-P3DV.V3.41 UPDATE
+P3DV.V3.42 UPDATE
 =================
-
-BASELINE
---------
-- Temiz geliştirme tabanı: `p3dv.v3.39`
-- Hatalı V3.40 paketi baseline olarak kullanılmadı.
 
 KULLANICI TALEBİ
 ----------------
-1. Freedom açık panel paketi kullanıcı terminolojisindeki Arka Cephe tarafında kalmalı.
-2. Panel paketi taşınırken panel duruşu, kesit yönü, alt/üst yönü, 100 derece efektif açı ve aralıklar bozulmamalı.
-3. Cephe terminolojisi:
-   - eski fiziksel `front` tarafı kullanıcıya `Arka Cephe`
-   - eski fiziksel `back` tarafı kullanıcıya `Ön Cephe`
-4. Katlanır Cam form sırası:
-   - Bakış Yönü
-   - Panellerin Açılma Yönü
-   - Katlanma Yönü
-5. Sol/Sağ seçimi kullanıcının seçtiği bakıştan karşıdan görünüşe göre yorumlanmalı.
-6. İçeri/Dışarı bakıştan bağımsız olarak daima sistemin içine ve dışına göre çalışmalı.
-7. `Dışarı` seçimi kaydetme sonrasında kaybolmamalı.
+Ürünler açılıp kapatılırken ekranın kararması ve 3D modelin yeniden oluşması engellenecek. Aç/kapat işlemi sırasında kamera, zoom ve mevcut sahne korunacak.
 
 YAPILANLAR
 ----------
-1. Freedom panel paketi
-- V3.39'daki açık lamel paketinin fiziksel `minZ` konumu korundu.
-- Bu fiziksel taraf yeni kullanıcı terminolojisinde `Arka Cephe` olarak adlandırıldı.
-- Açık panel paketinin `rotation.y`, açık kesit yönü, alt/üst yönü, 100 derece efektif açısı ve 65 mm paket aralığı değiştirilmedi.
-- Dahili motor cephesi `front`, kullanıcı etiketi `Arka Cephe` olarak kaydedilir.
+1. Iframe yenilemesi kaldırıldı
+- Bireysel ürün açık/kapalı checkbox'ları artık `renderViewer()` çağırmaz.
+- 3D model üzerinde çift tıklamayla yapılan ürün aç/kapat işlemi artık `renderViewer()` çağırmaz.
+- Genel `Ürünler Açık / Ürünler Kapalı` düğmesi artık iframe'i yeniden yüklemez.
+- Ana uygulama açık/kapalı durumunu viewer'a `set-product-open-state` mesajıyla gönderir.
 
-2. Cephe adlandırması
-- Ürün alanı, ürün listesi ve 3D viewer cephe etiketleri güncellendi:
-  - `front` -> `Arka Cephe`
-  - `back` -> `Ön Cephe`
-- PDF görünüş başlıkları da aynı terminolojiye geçirildi.
-- Geometri eksenleri ve kayıt anahtarları değiştirilmedi; yalnız kullanıcıya görünen isimler değiştirildi.
+2. Viewer hazır olma sözleşmesi
+- Viewer ilk modelini kurduğunda parent'a `viewer-ready` mesajı gönderir.
+- Parent yalnız viewer canlı güncellemeye hazır olduğunda postMessage yolunu kullanır.
+- Viewer henüz hazır değilse geriye uyumlu güvenli fallback olarak normal render yapılır.
 
-3. Dinamik Katlanır Cam bakış yönü
-- Önceki tüm cepheler için tek bir global ayna kuralı kaldırıldı.
-- Sol/Sağ eşlemesi artık seçili cephenin `axis` ve `inward` değerleri ile Bakış Yönünden hesaplanır.
-- Böylece Ön, Arka, Sol ve Sağ cephelerin her birinde İç Bakış / Dış Bakış gerçek kullanıcı bakışına göre çalışır.
-- İki yana toplama `BOTH` olarak korunur.
+3. Atomik sahne grup değişimi
+- Viewer içindeki `group` değiştirilebilir hale getirildi.
+- Yeni açık/kapalı geometri önce görünmeyen yeni bir THREE.Group içinde tamamen hazırlanır.
+- Yeni grup hazırlandıktan sonra eski grupla aynı JavaScript turunda değiştirilir.
+- Böylece render döngüsü boş grup veya karanlık ara ekran görmez.
+- Eski grubun geometri ve materyalleri değişimden sonra dispose edilir.
 
-4. Sistem içi / dışı açılma
-- Yeni `foldingFoldV` kuralı ile:
-  - `İçeri` = daima `zone.inward`
-  - `Dışarı` = daima `-zone.inward`
-- Bakış yönü İçeri/Dışarı fiziksel anlamını değiştirmez.
+4. Kamera ve kullanıcı görünümü korunur
+- Iframe aynı kaldığı için PerspectiveCamera ve OrbitControls yeniden oluşturulmaz.
+- Kamera konumu, hedef, zoom, pan ve dönüş açısı korunur.
+- Yeni model grubu eski grubun position, rotation, scale ve visible değerlerini devralır.
 
-5. `Dışarı` seçim kaybı düzeltmesi
-- Katlanır Cam kayıt akışındaki `delete draft.foldingOpenDirection` hatası kaldırıldı.
-- `OUTWARD` değeri form gönderimi, model kaydı ve yeniden açma sonrasında korunur.
-- Geçersiz / boş değerlerde güvenli varsayılan `INWARD` olur.
+5. AR uyumluluğu
+- Aç/kapat işlemi AR oturumu sırasında yapılırsa yeni grup mevcut `arRoot` altında kalır.
+- 1:1 ölçek, manuel konum, dönüş ve zemin kotu korunur.
+- Boyutlar ve seçim alanları AR'da gizli kalır; ghost materyal davranışı yeni gruba tekrar uygulanır.
 
-6. Katlanır Cam form sırası
-- Ürün form grid alanına sabit kimlik eklendi.
-- Katlanır Cam formu açılır açılmaz alanlar gerçek DOM üzerinde yeniden sıralanır.
-- Görsel okuma sırası:
-  1. Bakış Yönü
-  2. Panellerin Açılma Yönü
-  3. Katlanma Yönü
-- Diğer ürünlere geçildiğinde ortak Katlanma/Açılım alanı normal yerine geri döner.
+6. Genel aç/kapat davranışı
+- Genel düğme yalnız global fallback değerini değil, tüm yerleştirilmiş ürünlerin bireysel durumlarını da günceller.
+- Zip Perde panel state verisi aynı değerle senkron tutulur.
 
 KORUNANLAR
 ----------
-- Freedom efektif panel açısı: 100 derece.
-- Freedom açık panel kesit/orientasyon düzeltmesi.
-- Bio-Rise geometrisi.
-- Katlanır Cam 33 mm net paket boşluğu.
-- Katlanır Cam 70 mm alt profil.
-- 8 panel üzeri otomatik iki yana toplama.
-- Kapı `↻` işaretleri.
-- PDF ve manuel AR altyapısı.
+- P3DV V3.41 kanonik cephe ve Katlanır Cam bakış kuralları.
+- Freedom panel konumu, yönü ve 100 derece efektif açısı.
+- Kapı, Katlanır Cam, Sürme, Giyotin, Sabit Doğrama ve Zip Perde geometrileri.
+- PDF, AR, renk, profil, ölçü ve Test 1-Test 10 akışları.
+
+DEĞİŞTİRİLEN DOSYALAR
+----------------------
+- app.js
+- index.html
+- README.md
+- VERSION.txt
+- UPDATE.txt
+- TEST_RESULTS.txt
+- tests/p3dv-v3.13-door-tests.js
+- tests/p3dv-v3.42-live-toggle-tests.js
+- diğer test dosyalarındaki sürüm tokenları
