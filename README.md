@@ -118,7 +118,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.42**
+Current package: **p3dv.v3.43**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -486,4 +486,14 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Genel aç/kapat düğmesi tüm yerleştirilmiş ürünlerin bireysel durumlarını da aynı değere getirir.
 - AR oturumu sırasında grup konumu, dönüşü, 1:1 ölçeği ve yarı saydam yerleştirme görünümü korunur.
 - Viewer henüz hazır değilse güvenli geriye uyumluluk olarak normal render akışı kullanılır.
+## P3DV V3.43 Kesintisiz Çatı Paneli Aç/Kapat
+
+- Toolbox içindeki `Paneller Açık / Kapalı` kontrolü artık 3D iframe'i yeniden yüklemez.
+- Ana uygulama panel ana durumunu viewer'a `set-panel-master-open` mesajıyla gönderir.
+- Viewer içindeki `panelMasterOpen` ve `lamellaOpenMode` değerleri canlı olarak güncellenir.
+- Freedom ve Bio-Rise çatı panel geometrisi mevcut iframe içinde atomik `THREE.Group` değişimiyle yeniden hazırlanır.
+- Eski grup, yeni grup tamamen hazır olana kadar sahnede kaldığı için boş veya karanlık ara kare oluşmaz.
+- Kamera konumu, OrbitControls hedefi, zoom, pan, görünüş ve AR yerleşimi korunur.
+- Viewer canlı panel güncellemesini desteklemiyorsa güvenli fallback olarak normal render akışı kullanılır.
+- Gerçek Chromium testinde panel kontrolü kapalı ve tekrar açık yapılmış; iframe `srcdoc`, child window ve kamera marker verisi değişmeden iki canlı mesaj alınmıştır.
 

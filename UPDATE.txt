@@ -1,50 +1,49 @@
-P3DV.V3.42 UPDATE
+P3DV.V3.43 UPDATE
 =================
 
 KULLANICI TALEBİ
 ----------------
-Ürünler açılıp kapatılırken ekranın kararması ve 3D modelin yeniden oluşması engellenecek. Aç/kapat işlemi sırasında kamera, zoom ve mevcut sahne korunacak.
+Ürün aç/kapat sırasında giderilen ekran kararması, çatı panellerinin `Açık / Kapalı` kontrolünde de giderilecek. Panel kontrolüne basıldığında iframe, kamera ve sahne yeniden oluşturulmayacak.
 
 YAPILANLAR
 ----------
-1. Iframe yenilemesi kaldırıldı
-- Bireysel ürün açık/kapalı checkbox'ları artık `renderViewer()` çağırmaz.
-- 3D model üzerinde çift tıklamayla yapılan ürün aç/kapat işlemi artık `renderViewer()` çağırmaz.
-- Genel `Ürünler Açık / Ürünler Kapalı` düğmesi artık iframe'i yeniden yüklemez.
-- Ana uygulama açık/kapalı durumunu viewer'a `set-product-open-state` mesajıyla gönderir.
+1. Panel ana kontrolünde iframe yenilemesi kaldırıldı
+- `toolboxPanelMasterInput` değişiminde doğrudan `renderViewer()` çağrısı kaldırıldı.
+- Panel durumu önce `modelState.panelMasterOpen` içine kaydedilir.
+- Ardından `applyPanelMasterOpenLive()` üzerinden canlı viewer güncellemesi yapılır.
 
-2. Viewer hazır olma sözleşmesi
-- Viewer ilk modelini kurduğunda parent'a `viewer-ready` mesajı gönderir.
-- Parent yalnız viewer canlı güncellemeye hazır olduğunda postMessage yolunu kullanır.
-- Viewer henüz hazır değilse geriye uyumlu güvenli fallback olarak normal render yapılır.
+2. Parent -> viewer canlı panel mesajı
+- Yeni mesaj türü: `set-panel-master-open`.
+- Mesaj yalnız viewer `livePanelMaster` desteğini bildirdikten sonra gönderilir.
+- Viewer henüz hazır değilse güvenli geriye uyumluluk olarak normal `renderViewer()` fallback'i korunur.
 
-3. Atomik sahne grup değişimi
-- Viewer içindeki `group` değiştirilebilir hale getirildi.
-- Yeni açık/kapalı geometri önce görünmeyen yeni bir THREE.Group içinde tamamen hazırlanır.
-- Yeni grup hazırlandıktan sonra eski grupla aynı JavaScript turunda değiştirilir.
-- Böylece render döngüsü boş grup veya karanlık ara ekran görmez.
-- Eski grubun geometri ve materyalleri değişimden sonra dispose edilir.
+3. Viewer içindeki panel durumu değiştirilebilir hale getirildi
+- `panelMasterOpen` sabit değer yerine canlı güncellenebilir `let` değişkenine çevrildi.
+- `lamellaOpenMode` da canlı güncellenebilir hale getirildi.
+- Mesaj alındığında iki değer birlikte güncellenir.
 
-4. Kamera ve kullanıcı görünümü korunur
-- Iframe aynı kaldığı için PerspectiveCamera ve OrbitControls yeniden oluşturulmaz.
-- Kamera konumu, hedef, zoom, pan ve dönüş açısı korunur.
-- Yeni model grubu eski grubun position, rotation, scale ve visible değerlerini devralır.
+4. Ekran kararmadan atomik geometri değişimi
+- Panel açık/kapalı geometrisi mevcut iframe içinde `rebuildModelWithoutFrameReload()` ile hazırlanır.
+- Yeni model grubu arka planda tamamen oluşturulur.
+- Yeni grup sahneye eklendikten sonra eski grup kaldırılır.
+- Renderer, PerspectiveCamera ve OrbitControls yeniden oluşturulmaz.
 
-5. AR uyumluluğu
-- Aç/kapat işlemi AR oturumu sırasında yapılırsa yeni grup mevcut `arRoot` altında kalır.
-- 1:1 ölçek, manuel konum, dönüş ve zemin kotu korunur.
-- Boyutlar ve seçim alanları AR'da gizli kalır; ghost materyal davranışı yeni gruba tekrar uygulanır.
+5. Kamera ve AR durumunun korunması
+- Kamera konumu, hedefi, zoom ve pan aynı kalır.
+- Grup position, rotation, scale ve visible değerleri korunur.
+- AR oturumunda mevcut 1:1 ölçek, manuel konum, dönüş ve ghost görünümü korunur.
 
-6. Genel aç/kapat davranışı
-- Genel düğme yalnız global fallback değerini değil, tüm yerleştirilmiş ürünlerin bireysel durumlarını da günceller.
-- Zip Perde panel state verisi aynı değerle senkron tutulur.
+6. Viewer hazır olma sözleşmesi
+- `viewer-ready` mesajına `livePanelMaster:true` özelliği eklendi.
+- Viewer işlem sonrası `panel-master-open-applied` mesajı gönderir.
 
 KORUNANLAR
 ----------
-- P3DV V3.41 kanonik cephe ve Katlanır Cam bakış kuralları.
-- Freedom panel konumu, yönü ve 100 derece efektif açısı.
-- Kapı, Katlanır Cam, Sürme, Giyotin, Sabit Doğrama ve Zip Perde geometrileri.
-- PDF, AR, renk, profil, ölçü ve Test 1-Test 10 akışları.
+- P3DV V3.42 kesintisiz ürün aç/kapat akışı.
+- P3DV V3.41 kanonik cephe ve Katlanır Cam yön kuralları.
+- Freedom panel konumu, alt/üst yönü ve 100 derece efektif açısı.
+- Bio-Rise panel geometrisi.
+- PDF, AR, renk, ölçü, profil ve Test 1-Test 10 akışları.
 
 DEĞİŞTİRİLEN DOSYALAR
 ----------------------
@@ -54,6 +53,7 @@ DEĞİŞTİRİLEN DOSYALAR
 - VERSION.txt
 - UPDATE.txt
 - TEST_RESULTS.txt
+- tests/p3dv-v3.13-regression-b.js
 - tests/p3dv-v3.13-door-tests.js
-- tests/p3dv-v3.42-live-toggle-tests.js
+- tests/p3dv-v3.43-live-panel-toggle-tests.js
 - diğer test dosyalarındaki sürüm tokenları

@@ -246,6 +246,7 @@
   const modelState = JSON.parse(JSON.stringify(defaults));
   let viewerCameraState = null;
   let viewerLiveProductStateReady = false;
+  let viewerLivePanelMasterReady = false;
   let selectedZone = null;
   let selectedZoneId = null;
   let dimensionVisibility = { intermediate: false, main: true };
@@ -1104,6 +1105,7 @@
 
   function renderViewer() {
     viewerLiveProductStateReady = false;
+    viewerLivePanelMasterReady = false;
     pruneProductStates();
     const model = updateReadouts();
     const arButton = $(ids.mobileAr);
@@ -1396,6 +1398,23 @@
   function applyProductOpenStateLive() {
     updateToolbox();
     if (!postLiveProductOpenState()) renderViewer();
+  }
+
+  function postLivePanelMasterOpen() {
+    const frame = $(ids.frame);
+    const frameWindow = frame && frame.contentWindow;
+    if (!viewerLivePanelMasterReady || !frameWindow) return false;
+    frameWindow.postMessage({
+      source: 'product-3d-parent',
+      type: 'set-panel-master-open',
+      open: Boolean(modelState.panelMasterOpen)
+    }, '*');
+    return true;
+  }
+
+  function applyPanelMasterOpenLive() {
+    updateToolbox();
+    if (!postLivePanelMasterOpen()) renderViewer();
   }
 
   const TOOLBOX_SELECTION_CONFIG = {
@@ -4472,6 +4491,7 @@
     if (!event.data || event.data.source !== 'product-3d-viewer') return;
     if (event.data.type === 'viewer-ready') {
       viewerLiveProductStateReady = Boolean(event.data.liveProductState);
+      viewerLivePanelMasterReady = Boolean(event.data.livePanelMaster);
     }
     if (event.data.type === 'ar-status') {
       setMobileArStatus(event.data.message || 'AR durumu güncellendi.', event.data.tone || '');
@@ -4676,7 +4696,7 @@ let dimensionVisibility=${dimensionVisibilityJson};
 let productsOpen=${productsOpenJson};
 let productOpenStates=${productOpenStatesJson};
 let panelStates=${panelStatesJson};
-const panelMasterOpen=${panelMasterOpenJson};
+let panelMasterOpen=${panelMasterOpenJson};
 const SYSTEM_COLOR=${systemColorValue};
 const PANEL_COLOR=${panelColorValue};
 const DEFAULT_COLOR_MODE=${JSON.stringify(colorMode !== 'ral')};
@@ -4687,7 +4707,7 @@ const DOOR_TOP_FIXED_TYPES=new Set(['TOP_FIXED','LEFT_FIXED_TOP','RIGHT_FIXED_TO
 let toolboxSelectionMode=${toolboxSelectionModeJson};
 let toolboxSelectionKeys=new Set(${toolboxSelectionKeysJson});
 const initialCameraState=${cameraStateJson};
-const lamellaOpenMode=panelMasterOpen;
+let lamellaOpenMode=panelMasterOpen;
 function productIsOpen(productKey){
   return Object.prototype.hasOwnProperty.call(productOpenStates||{},productKey)?Boolean(productOpenStates[productKey]):Boolean(productsOpen);
 }
@@ -7689,6 +7709,12 @@ window.addEventListener('message',event=>{
     rebuildModelWithoutFrameReload();
     parent.postMessage({source:'product-3d-viewer',type:'product-open-state-applied'},'*');
   }
+  if(event.data.type==='set-panel-master-open'){
+    panelMasterOpen=Boolean(event.data.open);
+    lamellaOpenMode=panelMasterOpen;
+    rebuildModelWithoutFrameReload();
+    parent.postMessage({source:'product-3d-viewer',type:'panel-master-open-applied',open:panelMasterOpen},'*');
+  }
   if(event.data.type==='replay-animation')window.replayAnimation();
   if(event.data.type==='set-dimension-visibility')setDimensionVisibility(event.data.visibility);
   if(event.data.type==='set-dimensions-visible')setDimensionVisibility({intermediate:Boolean(event.data.visible),main:Boolean(event.data.visible)});
@@ -7756,7 +7782,7 @@ function animate(time,frame){
 
 buildModel(true);
 renderer.setAnimationLoop(animate);
-parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductState:true},'*');
+parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductState:true,livePanelMaster:true},'*');
 })();
 </scr` + `ipt>
 </body>
@@ -7914,8 +7940,7 @@ parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductSt
     }
     $(ids.panelMaster).addEventListener('change', (event) => {
       modelState.panelMasterOpen = Boolean(event.target.checked);
-      updateToolbox();
-      renderViewer();
+      applyPanelMasterOpenLive();
     });
     $(ids.multiProduct).addEventListener('click', () => startToolboxSelection('multi-product'));
     $(ids.multiDelete).addEventListener('click', () => startToolboxSelection('multi-delete'));
