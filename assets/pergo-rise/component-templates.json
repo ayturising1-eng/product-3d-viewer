@@ -1,0 +1,274 @@
+{
+  "schema": "p3dv-pergo-rise-component-templates-v1",
+  "units": "mm",
+  "sourceGlb": "../models/pergo-rise.glb",
+  "sourceGlbSha256": "b68cca77d439f17a18bbe3cf3365c9884daadc516b85628bfa6417e5b262eded",
+  "geometryPolicy": "World-baked GLB node geometry, centered; only longest source axis may scale for linear instances. Cross-section axes remain 1:1.",
+  "templates": {
+    "pillar-profile": {
+      "sourceNode": "PergoRise_Pillar",
+      "sourceGeometry": "PergoRise_Pillar",
+      "confidence": "HIGH",
+      "role": "Front post profile",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "y",
+      "sourceAxisIndex": 1,
+      "sourceSizeMm": [
+        100.003168,
+        1453.241385,
+        100.000475
+      ],
+      "sourceCenterWorldMm": [
+        -336.777974,
+        803.12334,
+        50.407724
+      ],
+      "vertexCount": 2304,
+      "triangleCount": 2304,
+      "indexCount": 6912,
+      "positionOffsetBytes": 0,
+      "normalOffsetBytes": 27648,
+      "indexOffsetBytes": 55296,
+      "positionLengthBytes": 27648,
+      "normalLengthBytes": 27648,
+      "indexLengthBytes": 27648,
+      "sourceVertexCount": 2304,
+      "sourceTriangleCount": 2304,
+      "simplification": null
+    },
+    "foot-accessory": {
+      "sourceNode": "PergoRise_Foot",
+      "sourceGeometry": "PergoRise_Foot",
+      "confidence": "HIGH",
+      "role": "Front post foot accessory",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "z",
+      "sourceAxisIndex": 2,
+      "sourceSizeMm": [
+        106.999994,
+        84.49991,
+        124.400014
+      ],
+      "sourceCenterWorldMm": [
+        -336.776143,
+        42.252397,
+        58.457055
+      ],
+      "vertexCount": 24681,
+      "triangleCount": 50145,
+      "indexCount": 150435,
+      "positionOffsetBytes": 82944,
+      "normalOffsetBytes": 379116,
+      "indexOffsetBytes": 675288,
+      "positionLengthBytes": 296172,
+      "normalLengthBytes": 296172,
+      "indexLengthBytes": 601740,
+      "sourceVertexCount": 135762,
+      "sourceTriangleCount": 266874,
+      "simplification": {
+        "method": "vertex-cluster",
+        "cellMm": 2.0,
+        "reason": "Browser rendering optimization for accessory mesh; source GLB remains packaged unchanged."
+      }
+    },
+    "gutter-profile": {
+      "sourceNode": "PergoRise_Gutter",
+      "sourceGeometry": "PergoRise_Gutter",
+      "confidence": "HIGH",
+      "role": "Front gutter profile sample",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "x",
+      "sourceAxisIndex": 0,
+      "sourceSizeMm": [
+        479.350802,
+        135.000058,
+        145.000713
+      ],
+      "sourceCenterWorldMm": [
+        -192.10136,
+        1600.244089,
+        27.907445
+      ],
+      "vertexCount": 8091,
+      "triangleCount": 4200,
+      "indexCount": 12600,
+      "positionOffsetBytes": 1277028,
+      "normalOffsetBytes": 1374120,
+      "indexOffsetBytes": 1471212,
+      "positionLengthBytes": 97092,
+      "normalLengthBytes": 97092,
+      "indexLengthBytes": 50400,
+      "sourceVertexCount": 8091,
+      "sourceTriangleCount": 4200,
+      "simplification": null
+    },
+    "rail-profile": {
+      "sourceNode": "Shape274",
+      "sourceGeometry": "Shape274",
+      "confidence": "MEDIUM",
+      "role": "Sloped rail profile selected by dimensional signature",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "x",
+      "sourceAxisIndex": 0,
+      "sourceSizeMm": [
+        3700.566649,
+        54.609627,
+        83.347576
+      ],
+      "sourceCenterWorldMm": [
+        -3268.299079,
+        -28.040821,
+        -1252.370559
+      ],
+      "vertexCount": 2048,
+      "triangleCount": 2048,
+      "indexCount": 6144,
+      "positionOffsetBytes": 1521612,
+      "normalOffsetBytes": 1546188,
+      "indexOffsetBytes": 1570764,
+      "positionLengthBytes": 24576,
+      "normalLengthBytes": 24576,
+      "indexLengthBytes": 24576,
+      "sourceVertexCount": 2048,
+      "sourceTriangleCount": 2048,
+      "simplification": null
+    },
+    "rear-profile": {
+      "sourceNode": "Shape254",
+      "sourceGeometry": "Shape254",
+      "confidence": "MEDIUM",
+      "role": "Rear/opposite transverse profile selected by dimensional signature",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "x",
+      "sourceAxisIndex": 0,
+      "sourceSizeMm": [
+        3700.566349,
+        54.609192,
+        83.348517
+      ],
+      "sourceCenterWorldMm": [
+        -3268.298929,
+        -29.112346,
+        3313.525063
+      ],
+      "vertexCount": 2048,
+      "triangleCount": 2048,
+      "indexCount": 6144,
+      "positionOffsetBytes": 1595340,
+      "normalOffsetBytes": 1619916,
+      "indexOffsetBytes": 1644492,
+      "positionLengthBytes": 24576,
+      "normalLengthBytes": 24576,
+      "indexLengthBytes": 24576,
+      "sourceVertexCount": 2048,
+      "sourceTriangleCount": 2048,
+      "simplification": null
+    },
+    "fabric-profile": {
+      "sourceNode": "Shape117",
+      "sourceGeometry": "Shape117",
+      "confidence": "MEDIUM",
+      "role": "Fabric registration profile selected by dimensional signature",
+      "productionGeometry": true,
+      "reviewRequired": false,
+      "sourceAxis": "x",
+      "sourceAxisIndex": 0,
+      "sourceSizeMm": [
+        3693.948812,
+        58.603551,
+        47.811507
+      ],
+      "sourceCenterWorldMm": [
+        -11189.697647,
+        -30.578403,
+        -919.29425
+      ],
+      "vertexCount": 5004,
+      "triangleCount": 4980,
+      "indexCount": 14940,
+      "positionOffsetBytes": 1669068,
+      "normalOffsetBytes": 1729116,
+      "indexOffsetBytes": 1789164,
+      "positionLengthBytes": 60048,
+      "normalLengthBytes": 60048,
+      "indexLengthBytes": 59760,
+      "sourceVertexCount": 5004,
+      "sourceTriangleCount": 4980,
+      "simplification": null
+    },
+    "fabric-stack": {
+      "sourceNode": "Motor Yuvası Kapalı Kumaş002",
+      "sourceGeometry": "Motor Yuvası Kapalı Kumaş002",
+      "confidence": "HIGH_VISUAL_ONLY",
+      "role": "Rear-stacked static fabric visual",
+      "productionGeometry": false,
+      "reviewRequired": false,
+      "sourceAxis": "x",
+      "sourceAxisIndex": 0,
+      "sourceSizeMm": [
+        3694.04645,
+        250.892447,
+        781.010967
+      ],
+      "sourceCenterWorldMm": [
+        -11189.752028,
+        -125.626258,
+        -1065.855266
+      ],
+      "vertexCount": 3740,
+      "triangleCount": 3588,
+      "indexCount": 10764,
+      "positionOffsetBytes": 1848924,
+      "normalOffsetBytes": 1893804,
+      "indexOffsetBytes": 1938684,
+      "positionLengthBytes": 44880,
+      "normalLengthBytes": 44880,
+      "indexLengthBytes": 43056,
+      "sourceVertexCount": 3740,
+      "sourceTriangleCount": 3588,
+      "simplification": null
+    },
+    "wall-connection-accessory": {
+      "sourceNode": "Shape005",
+      "sourceGeometry": "Shape005",
+      "confidence": "LOW_REVIEW_REQUIRED",
+      "role": "Candidate rear wall/rail connection accessory",
+      "productionGeometry": false,
+      "reviewRequired": true,
+      "sourceAxis": "z",
+      "sourceAxisIndex": 2,
+      "sourceSizeMm": [
+        80.07065,
+        131.041572,
+        392.769585
+      ],
+      "sourceCenterWorldMm": [
+        0.00116,
+        65.649481,
+        -221.358774
+      ],
+      "vertexCount": 4326,
+      "triangleCount": 4308,
+      "indexCount": 12924,
+      "positionOffsetBytes": 1981740,
+      "normalOffsetBytes": 2033652,
+      "indexOffsetBytes": 2085564,
+      "positionLengthBytes": 51912,
+      "normalLengthBytes": 51912,
+      "indexLengthBytes": 51696,
+      "sourceVertexCount": 4326,
+      "sourceTriangleCount": 4308,
+      "simplification": null
+    }
+  },
+  "binary": {
+    "file": "component-templates.bin",
+    "byteLength": 2137260,
+    "sha256": "c0560813d51ed07da32cb992d4b84a504b31f2b15eea333cf952e9b958dff83d"
+  }
+}
