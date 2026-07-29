@@ -1,72 +1,11 @@
-P3DV V3.46 TEST RESULTS
-=======================
+P3DV V3.52 TEST RESULTS
 
-NODE / SÖZLEŞME TESTLERİ - PASS
--------------------------------
-- `node --check app.js`
-- `node --check p3dv-pdf.js`
-- `node --check ral-colors.js`
-- `node --check zip-fabric-textures.js`
-- `node --check assets/models/freedom-louver-data.js`
-- `node tests/p3dv-v3.13-regression-a.js`: 73 PASS
-- `node tests/p3dv-v3.13-regression-b.js`: 78 PASS
-- `node tests/p3dv-v3.13-door-tests.js`: 423 PASS
-- `node tests/p3dv-v3.31-quick-pdf-tests.js`: 43 PASS
-- `node tests/p3dv-v3.31-folding-tests.js`: 68 PASS
-- `node tests/p3dv-v3.32-ar-tests.js`: 52 PASS
-- `node tests/p3dv-v3.33-manual-ar-tests.js`: 41 PASS
-- `node tests/p3dv-v3.35-freedom-angle-tests.js`: 9 PASS
-- `node tests/p3dv-v3.36-tests.js`: 31 PASS
-- `node tests/p3dv-v3.37-view-symbol-tests.js`: 32 PASS
-- `node tests/p3dv-v3.39-position-view-tests.js`: 24 PASS
-- `node tests/p3dv-v3.41-tests.js`: 85 PASS
-- `node tests/p3dv-v3.42-live-toggle-tests.js`: 41 PASS
-- `node tests/p3dv-v3.43-live-panel-toggle-tests.js`: 40 PASS
-- `node tests/p3dv-v3.44-stabilization-tests.js`: 64 PASS
-- `node tests/p3dv-v3.45-plmr-interface-tests.js`: 60 PASS
-- `node tests/p3dv-v3.46-freedom-glb-louver-tests.js`: 49 PASS
-
-V3.46 GLB DOĞRULAMALARI - PASS
-------------------------------
-- Kaynak dosya GLB 2.0 başlığı doğrulandı.
-- GLB header toplam uzunluğu gerçek dosya boyutuyla eşleşiyor.
-- GLB içindeki mesh adedi: 15.
-- Kaynak GLB ve gömülü Base64 veri birebir aynı.
-- SHA-256 doğrulandı: `0f4635f3f41d8a0ee420475988ae622f69eef240abd56544eb748e0242b1d4c1`.
-- GLB kaynak ölçüsü programatik olarak doğrulandı:
-  - profil genişliği: yaklaşık 255,658 mm
-  - profil yüksekliği: yaklaşık 56,513 mm
-  - kaynak panel uzunluğu: yaklaşık 3709,762 mm
-- Freedom kapalı ve açık panel üretiminin GLB clone yolunu kullandığı doğrulandı.
-- Bio-Rise'ın mevcut prosedürel lamel yolunu koruduğu doğrulandı.
-- Freedom 216 mm kapalı aralık, 65 mm açık paket aralığı, Arka Cephe konumu ve 100 derece efektif açı sözleşmeleri değişmedi.
-- GLB yüklenemezse kapalı/açık prosedürel fallback yolları doğrulandı.
-- Paylaşılan GLB geometry/material kaynaklarının canlı rebuild temizliğinde dispose edilmediği doğrulandı.
-
-GERÇEK CHROMIUM PDF İNDİRME TESTİ - PASS
----------------------------------------
-- Uygulama yerel CSS ve JavaScript dosyaları inline edilerek gerçek Chromium içinde çalıştırıldı.
-- Hızlı Test 1 uygulandı.
-- `Ürün Listesi PDF` düğmesine gerçek Chromium ortamında tıklandı.
-- Gerçek browser download olayı oluştu.
-- Önerilen dosya adı: `B-Cube-Freedom-4000x5980x2700-urun-listesi.pdf`.
-- Test çıktısı: `P3DV.V3.46.Browser-PDF-Test.pdf`.
-- Dosya boyutu: 315.065 bayt.
-- PDF sürümü: 1.4.
-- Sayfa sayısı: 7.
-- Sayfa boyutu: A4 (595 x 842 pt).
-- Yedi sayfanın tamamı 140 DPI ile render edilip görsel olarak kontrol edildi.
-- Kırpılma, taşma, siyah kare veya bozuk karakter görülmedi.
-- Page error: 0.
-
-GERÇEK WEBGL / GLB GÖRSEL TEST SINIRI
-------------------------------------
-- İzole Chromium ortamında Three.js, OrbitControls ve GLTFLoader CDN alan adları çözümlenemedi (`ERR_NAME_NOT_RESOLVED`).
-- Bu nedenle Freedom GLB panelinin canlı WebGL içindeki son piksel görünümü bu ortamda doğrulanamadı.
-- Viewer bu koşulda mevcut prosedürel lamel fallback'ini kullanacak şekilde tasarlanmıştır.
-- GLB dosya bütünlüğü, ölçüleri, eksen dönüşümü, yalnız uzunluk ölçeği, panel clone yolu, konum/açı sözleşmeleri ve fallback akışı kaynak + Node testleriyle doğrulanmıştır.
-
-ZIP
----
-- Paket kökü: `p3dv.v3.46/`.
-- ZIP bütünlük testi: PASS.
+- Node regression: 21/21 test package, 1570 checks PASS.
+- JavaScript syntax: pending final package sweep.
+- Chromium/WebGL2/input/product-state/live-color/PDF acceptance: 56/56 PASS.
+- Pergo Rise WebGL2 component instances: 15; missing: 0.
+- Page errors: 0; console errors: 0; request failures: 0.
+- PDF: real browser download and 4-page parse PASS.
+- AR: isolated snapshot/source-state contract PASS; physical Android/ARCore session NOT RUN.
+- Raw GLB in package: 0.
+- Final manifest/ZIP CRC/clean reextract gates are recorded after package creation.

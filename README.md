@@ -1,8 +1,76 @@
 # Product 3d Viewer
 
-## P3DV V3.46 Freedom GLB Louver Profile
+## P3DV V3.52 — Freedom/Bio-Rise Girişleri, Ürün Durumları ve AR İzolasyonu
 
-V3.46 preserves the successful V3.45 PLMR interface and all V3.44 stabilization work while replacing only the B-Cube Freedom louver drawing with the supplied binary glTF panel model. The model is loaded once, cloned for all Freedom panels, scaled only along its length axis, and uses the existing panel positions, spacing, rear-facade package location and 100-degree effective opening. Bio-Rise keeps its existing procedural louver geometry. A procedural Freedom fallback remains available if GLTFLoader or the GLB model cannot be loaded.
+V3.52, kanonik `p3dv.v3.51.zip` paketi üzerinden geliştirilmiştir. Bu sürümde Freedom ve Bio-Rise veri hücreleri PLMR’nin düzenlenebilir Excel-hücresi mantığına geçirilmiş, büyük önizleme toolbarı tamamlanmış, ürün açık/kapalı yönetimi sağ toolbox’a taşınmış ve AR sırasında parçaların dağılmasına yol açabilen canlı sahne re-parent işlemi kaldırılmıştır.
+
+### V3.52 ana değişiklikleri
+
+- Proje Kodu geçici olarak `-` gösterir.
+- Sistem Adedi yalnız rakam; Genişlik yalnız rakam, `;`, `:` ve sıralı `NO`; Açılım/Yükseklik yalnız rakam ve `;` kabul eder.
+- Açılım hücresi hem elle yazılabilir hem de 2038–7060 mm arasında 216 mm artan, panel sayısı yazılı açılır listeden seçilebilir.
+- Freedom/Bio-Rise Ray Sayısı ve Dikme Sayısı satırları kaldırılmadan gizlenir; kart ölçüsü boş spacer ile sabit kalır.
+- Panel Rengi, Sistem Rengine bağlı veya bağımsız çalışır. Panel Dolgusu, motor, motora bağlı kumanda, düzenlenebilir LED, dimmer ve not hücreleri eklendi/düzenlendi.
+- Büyük önizlemede Yakınlaştır, Uzaklaştır, Sığdır ve AR Gerçek Alan kontrolleri geçmiş butonlarının sağına yerleştirildi.
+- Sağ toolbox sadeleştirildi ve kırmızı/yeşil global + ürün bazlı `Ürün Durumları` kontrolü eklendi.
+- AR, canlı `group` nesnesini sahneden koparmak yerine izole bir snapshot clone kullanır. Böylece parent/transform/visibility sözleşmesi bozulmaz.
+- İşlevi tanımlanmamış görünür kontroller natively disabled durumundadır.
+- Ham GLB dosyaları pakette yoktur; doğrulanmış gömülü runtime kaynakları korunur.
+
+### V3.52 test özeti
+
+- Node regresyonu: 21/21 test paketi, 1570 kontrol PASS
+- Gerçek Chromium/WebGL2/PDF: 56/56 kabul kontrolü PASS
+- Pergo Rise component instance: 15, eksik component: 0
+- Page error / console error / request failure: 0 / 0 / 0
+- PDF: gerçek tarayıcı indirmesi, 4 sayfa PASS
+- Fiziksel Android/ARCore oturumu: geliştirme ortamında NOT RUN
+
+## P3DV V3.51 — Büyük Önizleme, Canlı Renk ve Development Protocol
+
+V3.51, kanonik `p3dv.v3.50.zip` paketi üzerinde geliştirilmiştir. PLMR çalışma mantığındaki büyütülmüş çizim ekranı P3DV’ye taşınmış; mevcut 3D iframe, WebGL context, kamera ve OrbitControls korunarak tam viewport görünümüne dönüştürülmüştür.
+
+### V3.51 ana değişiklikleri
+
+- Normal Çizim Ön İzleme alanında `Önizlemeyi Yenile` ve `Önizlemeyi Büyüt` sola alındı; kontrol ve dışa aktarma butonları aynı yatay aksta sağa hizalandı.
+- `Önizlemeyi Büyüt`, aynı viewer iframe’ini koruyarak `100vw × 100vh` PLMR tipi çalışma alanı açar.
+- Büyütülmüş görünüşte üst toolbar, geri/ileri yer tutucuları ve sağ çizim toolbox’ı bulunur.
+- Sağ toolbox, PLMR’deki ölçü, opsiyon ve toplu düzenleme butonlarını görsel olarak taşır. Kullanıcının henüz işlevini tanımlamadığı komutlar güvenli placeholder olarak kalır.
+- Sistem ve panel RAL/yüzey değişiklikleri `set-color-state` canlı mesajıyla uygulanır. Renk değişiminde iframe `srcdoc`, viewer session, kamera veya Pergo Rise derived geometry yeniden oluşturulmaz.
+- `P3DV Development Protocol/` klasörü; project state, changelog, kararlar, TODO, bilinen sorunlar, regresyon, test ve release kapılarıyla eklendi.
+- Ham `pergo-rise.glb` ve `freedom-louver.glb` teslim paketinden çıkarıldı. Runtime, doğrulanmış gömülü component/template kaynaklarıyla çalışır.
+
+### Kanonik veri akışı
+
+`PLMR Project Model → Derived Geometry → Component Instance Listesi → Gömülü Profil/Aksesuar Şablonları → Static WebGL Assembly → Viewer / PDF / AR`
+
+### Geliştirme başlangıç noktası
+
+Yeni çalışmalar `P3DV Development Protocol/00_START_HERE.md` ve `PROJECT_STATE.md` okunarak başlatılmalıdır. Hücrelerin seçenek ve davranışları kullanıcı tarafından açıkça tarif edilmeden tahmin edilmez.
+
+## P3DV V3.50 - PLMR Studio 3D Çizim Arayüzü
+
+V3.50, kanonik `p3dv.v3.49` paketi üzerinde arayüz yenilemesidir. PLMR.V.13.92(1) içindeki çalışan PLMR Studio arayüzü; üst başlık, Proje Kontrol Merkezi, kartlar, hücreler, butonlar ve sağ Çizim Ön İzleme düzeniyle P3DV'ye aktarılmıştır. Mevcut Pergo Rise parametrik WebGL assembly, PDF, AR, kamera ve canlı güncelleme motoru korunmuştur.
+
+Bu sürümde arayüz iskeleti ve görsel dil oluşturulmuştur. Hücrelerin gerçek veri anlamları, açılır liste seçenekleri, bağımlılıkları ve hesap kuralları sonraki aşamada kullanıcı tariflerine göre hücre bazında tanımlanacaktır.
+
+### V3.50 arayüz yapısı
+
+- PLMR logolu koyu üst bar; Ürün, Modül, Çizim Motoru, Dil ve kullanıcı alanları
+- Sol Proje Kontrol Merkezi ve proje işlem butonları
+- Proje Bilgileri, Sistem Ölçüleri, Opsiyonlar ve Ek Opsiyonlar kartları
+- Sağda geniş Çizim Ön İzleme alanı ve PLMR biçimli işlem butonları
+- PLMR kaynak ölçüleri, renkleri, gölgeleri, border-radius değerleri, hücre yükseklikleri ve masaüstü oranları
+- Aynı P3DV DOM ID'leri sayesinde mevcut 3D/PDF/AR işlevlerinin korunması
+- Görünür başlangıç ürünü Pergo Rise; geçmiş B-Cube/Bio-Rise ürün sözleşmelerinin korunması
+
+### Pergo Rise veri akışı
+
+`PLMR Project Model -> PLMR normalize/derived geometry -> Component Instance Listesi -> GLB Profil/Aksesuar Şablonları -> Static WebGL Assembly -> Viewer / PDF / AR`
+
+### V3.49'dan korunan yerel dosya açılışı
+
+Pergo Rise WebGL viewer component şablonlarını önce `assets/pergo-rise/component-templates-data.js` içindeki kayıpsız gömülü veriden okur. Böylece `index.html` Windows Explorer'dan doğrudan (`file://`) açıldığında yerel `fetch()` kısıtlamasına takılmaz. JSON/BIN fetch yolu yalnız HTTP/HTTPS fallback'idir.
 
 ## Features
 
@@ -119,7 +187,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.46**
+Current package: **p3dv.v3.52**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -506,3 +574,8 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Normal çalışma düzeni solda veri kartları, sağda 3D çizim / ön izleme biçimindedir.
 - `Önizlemeyi Büyüt` modunda veri paneli gizlenir ve P3DV toolbox sağ tarafta sabit çalışma paneli olarak açılır.
 - Henüz veri modeli bulunmayan PLMR araçları ve ek opsiyonlar pasif olarak gösterilir; mevcut P3DV motoruna müdahale etmez.
+
+
+## P3DV V3.50 — Pergo Rise Parametrik Assembly
+
+PLMR.V.13.92(1) Pergo Rise Project Model ve `peri01Geometry.js` kuralları tek parametrik veri kaynağıdır. Gerçek GLB profil/aksesuar meshleri component şablonu olarak kullanılır; bütün GLB tek parça ölçeklenmez. Ayrıntılı eşleme, assembly sözleşmesi ve test kanıtları `docs/pergo-rise/` altındadır.

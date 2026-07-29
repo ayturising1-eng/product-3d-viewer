@@ -1,0 +1,1613 @@
+{
+  "schema": "p3dv-package-manifest-v3",
+  "version": "p3dv.v3.52",
+  "rootFolder": "p3dv.v3.52",
+  "generatedAtUtc": "2026-07-29T15:34:45Z",
+  "canonicalBaseline": {
+    "name": "p3dv.v3.51.zip",
+    "sha256": "12cf1942246acc284ce43b4751dc7928be265e82f5702a3c0b7bd7332cfaf6d3"
+  },
+  "uiReference": {
+    "name": "PLMR.V.13.92(1).zip",
+    "sha256": "9dda502e47a9679d443227b10b873dca08a6e57545234b2587a367d01a710ed2"
+  },
+  "visualReferences": [
+    {
+      "name": "image(77).png",
+      "sha256": "f6e91d67028aca4e9aeb045afea4a79caa9c52ce5de6e32b8cc6c9d5c6ac23a2"
+    },
+    {
+      "name": "image(78).png",
+      "sha256": "aec5aea92a12f3ac4f629e88a503aefd1cbcc9a12b7c823ae400cad75fbb397e"
+    }
+  ],
+  "implementation": {
+    "phase": "Freedom/Bio-Rise input contracts / product-state toolbox / AR snapshot isolation",
+    "visibleStartProduct": "pergo-rise",
+    "rawGlbIncluded": false,
+    "preserved": [
+      "Pergo Rise parametric WebGL",
+      "B-Cube Freedom",
+      "Bio-Rise",
+      "PDF",
+      "AR",
+      "save/load",
+      "live camera/session",
+      "live colors",
+      "product and panel live toggles",
+      "large preview"
+    ]
+  },
+  "runtimeAssets": {
+    "pergoRiseTemplates": {
+      "jsonSha256": "f3df0b703edf63fb92cd11aea126ccd09f0eb282c840d933430067dc0e4490e6",
+      "binSha256": "c0560813d51ed07da32cb992d4b84a504b31f2b15eea333cf952e9b958dff83d",
+      "embeddedDataSha256": "c38d7ec9f7e13426c1bf4a2c769fbf36b6d811089135a91df0e3c535266660d6"
+    },
+    "freedomEmbeddedDataSha256": "fa9b4639580542a3d255b960cdb41baae43a48fd5eea2aab150e699f8e3bb923"
+  },
+  "verification": {
+    "node": {
+      "pass": true,
+      "suites": "21/21",
+      "checks": 1568,
+      "syntax": "34/34"
+    },
+    "headedChromiumWebGL2": {
+      "pass": true,
+      "checks": "56/56",
+      "instances": 15,
+      "missingComponents": 0,
+      "iframeReloadsOnProductStateOrColor": 0,
+      "pageErrors": 0,
+      "consoleErrors": 0,
+      "requestFailures": 0
+    },
+    "pdf": {
+      "pass": true,
+      "pages": 4,
+      "bytes": 46612
+    },
+    "ar": {
+      "snapshotIsolation": true,
+      "metersPerMillimeter": 0.001,
+      "physicalImmersiveAr": "NOT_RUN"
+    }
+  },
+  "entryCount": 306,
+  "totalContentBytes": 17043334,
+  "contentTreeSha256": "06204dbe859c11869ba176a21aaa7ecd046e568bc438e9636aeecb1ce47d6894",
+  "manifestSelfExcluded": true,
+  "entries": [
+    {
+      "path": "AR_GUIDE.md",
+      "bytes": 4135,
+      "sha256": "04cadec471ca8d53e8b67a46a07c281171c742d9f6f84abaf4505c7c60fddd39"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1056,
+      "sha256": "1126322e2cc8d165adc4c792eeb195717de2bcc7b39be1ce77959d78e87ef685"
+    },
+    {
+      "path": "P3DV Development Protocol/00_START_HERE.md",
+      "bytes": 1153,
+      "sha256": "92da1927ad0723a41eddd647e73242120ce392b3fe6dfc39d17b1466ef0aaf7f"
+    },
+    {
+      "path": "P3DV Development Protocol/AI_HANDOVER.md",
+      "bytes": 1530,
+      "sha256": "57119c2a64e433ad385f909f79e555b7a38f04d4ada8f19612a62313f11d20bb"
+    },
+    {
+      "path": "P3DV Development Protocol/CHANGELOG.md",
+      "bytes": 3158,
+      "sha256": "3fa2cff1111e6502d2319f834ef907c2a966aacaf84dca0701492b9b46ca828e"
+    },
+    {
+      "path": "P3DV Development Protocol/DECISIONS.md",
+      "bytes": 2200,
+      "sha256": "57766961943ecae7c5b5f6eed8c9ca973e8dcc3e4cc12b55633f9d81004aadcb"
+    },
+    {
+      "path": "P3DV Development Protocol/KNOWN_ISSUES.md",
+      "bytes": 629,
+      "sha256": "614973be59333c682715dcf4cba244598322d87d96fff7675f471c998522652a"
+    },
+    {
+      "path": "P3DV Development Protocol/PROJECT_STATE.md",
+      "bytes": 2080,
+      "sha256": "ee9057cf8052fbf9ba745a40bf8b41da000723d462b892a92d88218d562e337f"
+    },
+    {
+      "path": "P3DV Development Protocol/REGRESSION_RULES.md",
+      "bytes": 1190,
+      "sha256": "51b1a02dbf269601e5ec5612d2c40f212eb56a5b8a1467972bacd119f446fc49"
+    },
+    {
+      "path": "P3DV Development Protocol/RELEASE_PROTOCOL.md",
+      "bytes": 784,
+      "sha256": "6cd049c67d1a5d22305eabff4c0f920e46af979eabaf4b08e69f9bf65ba3065d"
+    },
+    {
+      "path": "P3DV Development Protocol/REMOVED_FILES.md",
+      "bytes": 600,
+      "sha256": "29aadac28c6934159df2ef0c9372de1ebbe9872aa634d2500b74883eda975a6a"
+    },
+    {
+      "path": "P3DV Development Protocol/TEST_PROTOCOL.md",
+      "bytes": 1173,
+      "sha256": "2e0511c7681cc66bd0dcc178c02a89949373e6006f29321d45384c08fb7b28bc"
+    },
+    {
+      "path": "P3DV Development Protocol/TEST_RESULTS.md",
+      "bytes": 1353,
+      "sha256": "09af527e8e612749a4ddc69e0323023c13d7593bed3efad33e0f3740adda9a55"
+    },
+    {
+      "path": "P3DV Development Protocol/TODO.md",
+      "bytes": 720,
+      "sha256": "b54e35719797063a9725377aa1ba2e3f741937cb6a5ac1f6064cfcc694439d69"
+    },
+    {
+      "path": "README.md",
+      "bytes": 41233,
+      "sha256": "f1bc044e4b46af5d31f3395e94030357aebb78b2bb15b218f0f8ef4e1c8bf9c5"
+    },
+    {
+      "path": "TEST_RESULTS.txt",
+      "bytes": 578,
+      "sha256": "f495b40373eb75af903185bec08dd2b77478a9cb9f0fea388a3fe2d3f1337ef0"
+    },
+    {
+      "path": "UPDATE.txt",
+      "bytes": 1968,
+      "sha256": "8ff5481f88b5e4281ee24d5c1c31c0c1ccb519cfe1abdd77373210fcc912e0ac"
+    },
+    {
+      "path": "VERSION.txt",
+      "bytes": 11,
+      "sha256": "34fc169ff3d8ee88959dae3d11f35fc8c96aa6e680a8d8c99cd3476c607a75f8"
+    },
+    {
+      "path": "app.js",
+      "bytes": 468410,
+      "sha256": "70beb85ebf2e850f38d491169585ff204acbe86a1307551742b08045a0800e4d"
+    },
+    {
+      "path": "assets/branding/apple-touch-icon.png",
+      "bytes": 5063,
+      "sha256": "02d64f894df1c86d5a89acbb0373d18be670b23e693c143fb5e318c3b50c839a"
+    },
+    {
+      "path": "assets/branding/favicon-32.png",
+      "bytes": 713,
+      "sha256": "be805193e5b46eb65a080753c2b2bbf463766c5b334fff3e804558c83f571a44"
+    },
+    {
+      "path": "assets/branding/favicon-48.png",
+      "bytes": 1196,
+      "sha256": "a1ad6e6e25ef10c1a17b8f6153975c78add441701ca208fcec70c22d4cc45620"
+    },
+    {
+      "path": "assets/branding/favicon.ico",
+      "bytes": 4281,
+      "sha256": "e504df1457227e361fa85b737c01cb189f6078951bd255aec06097b9711d722b"
+    },
+    {
+      "path": "assets/branding/icon-192.png",
+      "bytes": 5522,
+      "sha256": "b901fd0dca34b8f07493ad4d9cd7e86f5c561bcfc3e0301efb051e8b3197af82"
+    },
+    {
+      "path": "assets/branding/icon-512.png",
+      "bytes": 15969,
+      "sha256": "75c387a4d3dc5d901a6e0cfdb2de7f2b2efdc4dc73857d6bd462f41fecbae7cb"
+    },
+    {
+      "path": "assets/branding/plmr-logo-header.png",
+      "bytes": 5991,
+      "sha256": "df4b13af483de712c6d6d5640d48ec0c4cd0fd80121406e51056eacf6c6edb29"
+    },
+    {
+      "path": "assets/branding/plmr-logo-white.jpg",
+      "bytes": 35046,
+      "sha256": "7387fc97d1f33f094ab7caf9c502a9cea8c002e218de264c533e7cd60a814941"
+    },
+    {
+      "path": "assets/branding/plmr-logo.png",
+      "bytes": 55671,
+      "sha256": "ee07e6986ae3574af799d2d759ef13489436b97813035f16553c8ba1bf27b213"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/sun-store-hotspots.json",
+      "bytes": 4367,
+      "sha256": "5b88fcf4f492a72d4e71ea56d15a7aca5508359505cd6214c230433ea580860a"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/sun-store-page-1.jpg",
+      "bytes": 221417,
+      "sha256": "a2cdb469e53497212f1c864ee1417ceca65c3c5e0bc89f7d7dcc7d5afc93f262"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/sun-store-page-2.jpg",
+      "bytes": 175309,
+      "sha256": "b5bb70bac78356f913d6635eb8240c98d13c2157f7e2af121f4c9ade82da8bfc"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52101.png",
+      "bytes": 131476,
+      "sha256": "5f70ad1770da180fb893f2836f8043055735cc3375c4e60a207b242be8e811b9"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52102.png",
+      "bytes": 152190,
+      "sha256": "0f69b44cd47c9a69f91296b5ad62e17548c4f745eabb6fb944ac700fb230d35d"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52103.png",
+      "bytes": 146061,
+      "sha256": "81b580808d86da701f9bd7ec155441aa2e765d56a25b0517a9cd56f88ad5f9b5"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52105.png",
+      "bytes": 135537,
+      "sha256": "0e81322e0a413368909b84218d2a9f82166c1c3851db0ba2e88d79360a8ae813"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52106.png",
+      "bytes": 139866,
+      "sha256": "060d5d4b44e14ef8a0d05c4353468f7558a56686d25ae57168c6612d1a0aae5d"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52107.png",
+      "bytes": 135082,
+      "sha256": "efe296ce4cb6c7482438634f4c9e812edc0c7d6c2c86f66ddf35bafa5e5474d5"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52142.png",
+      "bytes": 134864,
+      "sha256": "1ec5a6c4e5ca82691e76b474a82f3985efd33e885b01ec2374649b6020d07c38"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52144.png",
+      "bytes": 80828,
+      "sha256": "2d0b24b97609021bbb5209a65a7b3dda277688ae2fead3cdc04614b870861871"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52173.png",
+      "bytes": 168137,
+      "sha256": "b6d3dc86ae644d8e1d71daf8e352bcd3e60333e692f44a23780fefe13a7a06e8"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52174.png",
+      "bytes": 141455,
+      "sha256": "9274b5d25f822c057fcc5ed68a999d77b163f607d0a014fa677475da4de99d80"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/7635-52176.png",
+      "bytes": 157860,
+      "sha256": "4ebb858648fe991302541c3cb24f8885937bf5d9aa96ecfa6cee37e8f73ce96a"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/86-2043.png",
+      "bytes": 144159,
+      "sha256": "be5893e54c410cae9ccc84abccbdd0b15c878ad5c293d2b2dca87e8864681bf8"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/86-2044.png",
+      "bytes": 102284,
+      "sha256": "d36d917e19fda8d877607f542defda2b74f43722a44bb44f4b6a1c84dfad65b1"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/86-2047.png",
+      "bytes": 84147,
+      "sha256": "ade9f98fcaccf978a08e640095c390cc0ffdd8a6f614f46adffaf1f05a9a60e6"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/86-2135.png",
+      "bytes": 102341,
+      "sha256": "42a130744ecc394abe6fcb4aeac598f68fcd9a17d3204b999c3407968ee32fe1"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/86-2171.png",
+      "bytes": 70413,
+      "sha256": "55663fbb1be011d81699bf09f4bbe64a29de8261a00f6d426fc7138bf9e31493"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/92-2043.png",
+      "bytes": 57098,
+      "sha256": "d223af22a06cf35b562e37da93bb8e831192ab2dc52de2a221102a2935bb5d6d"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/92-2044.png",
+      "bytes": 82625,
+      "sha256": "74acff6a4755ee8bb4bda970ad766bd30f807b3adb87bda16718df41a0426c96"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/92-2047.png",
+      "bytes": 30305,
+      "sha256": "0d79f7c018beedea4c757ce241ea23292672039b0f9d6c7b410600497227753d"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/92-2135.png",
+      "bytes": 73484,
+      "sha256": "80c3b13a2174a8b4d967d01c3cc60144e88af80f4d7ac7bd60e729496e53a8ea"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/92-2171.png",
+      "bytes": 79101,
+      "sha256": "b6aff907ab1629feb075d6d533bf2e07bfc6a6e5f0a455c64de398f1a7e98c72"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/W88-2047.png",
+      "bytes": 84762,
+      "sha256": "cb7d9fd9f57f78bff9ccb7e1977d3c6153093e0d08f848e86d27b94f962d810f"
+    },
+    {
+      "path": "assets/fabric-pages/sun-store/textures/W88-8102.png",
+      "bytes": 59186,
+      "sha256": "7a2adc14fc0cdc9d03bcb48a270be3df2060d615b50cade13be802de884609c3"
+    },
+    {
+      "path": "assets/models/freedom-louver-data.js",
+      "bytes": 5720922,
+      "sha256": "fa9b4639580542a3d255b960cdb41baae43a48fd5eea2aab150e699f8e3bb923"
+    },
+    {
+      "path": "assets/pergo-rise/component-templates-data.js",
+      "bytes": 2950636,
+      "sha256": "c38d7ec9f7e13426c1bf4a2c769fbf36b6d811089135a91df0e3c535266660d6"
+    },
+    {
+      "path": "assets/pergo-rise/component-templates.bin",
+      "bytes": 2137260,
+      "sha256": "c0560813d51ed07da32cb992d4b84a504b31f2b15eea333cf952e9b958dff83d"
+    },
+    {
+      "path": "assets/pergo-rise/component-templates.json",
+      "bytes": 7941,
+      "sha256": "f3df0b703edf63fb92cd11aea126ccd09f0eb282c840d933430067dc0e4490e6"
+    },
+    {
+      "path": "assets/ral-colors/ral-1000.jpg",
+      "bytes": 7197,
+      "sha256": "1d2c2f3ac444d981ed9b935b548f39f074954d95f848c7b8d340fa5868b4f927"
+    },
+    {
+      "path": "assets/ral-colors/ral-1001.jpg",
+      "bytes": 7291,
+      "sha256": "11167057806b836bafef5f3540b390f2852a5e660fcfe502c7ef011d27030044"
+    },
+    {
+      "path": "assets/ral-colors/ral-1002.jpg",
+      "bytes": 7421,
+      "sha256": "cef76a00a01d8786c1371f0c5e7170a161796cad2606cdd4f9ad9518be52cc56"
+    },
+    {
+      "path": "assets/ral-colors/ral-1003.jpg",
+      "bytes": 7911,
+      "sha256": "0284c9280dec22df6ea8b22ad3b6509378cf4993ed03d0d4b26dfe88e32a6901"
+    },
+    {
+      "path": "assets/ral-colors/ral-1004.jpg",
+      "bytes": 7897,
+      "sha256": "98db9cd00950382b5a9c8976745d62483dd8802e994cbe4a9cf064ec6f91def6"
+    },
+    {
+      "path": "assets/ral-colors/ral-1005.jpg",
+      "bytes": 7755,
+      "sha256": "a69fb1fe558f5b8e12415d7a562b1a2a03fa8e369fd2bb2fc109a836cc4542fa"
+    },
+    {
+      "path": "assets/ral-colors/ral-1006.jpg",
+      "bytes": 7814,
+      "sha256": "84ee927cac99a8fee930d8d63ced3734ad50ab207c11d349ea929d7ec8c26ed9"
+    },
+    {
+      "path": "assets/ral-colors/ral-1007.jpg",
+      "bytes": 7828,
+      "sha256": "570340f98d4bf54f1c538345b1cf8f952d0e30fec6fb8e4224bfa80c472ea0a2"
+    },
+    {
+      "path": "assets/ral-colors/ral-1011.jpg",
+      "bytes": 7453,
+      "sha256": "fb8e5d15349232ef5a45a7860de5c437d4a14c5fcd13fbec4a243c67ad3b29e9"
+    },
+    {
+      "path": "assets/ral-colors/ral-1012.jpg",
+      "bytes": 7808,
+      "sha256": "7060bd2b0ac6617ded8b4e8aa25520846ca0c40e3b3b707ff6f5eb146df1a72d"
+    },
+    {
+      "path": "assets/ral-colors/ral-1013.jpg",
+      "bytes": 5715,
+      "sha256": "824d67b4a6cd50d3d4eac750fc6e80af897dca5d9444f6be258063e51c53e916"
+    },
+    {
+      "path": "assets/ral-colors/ral-1014.jpg",
+      "bytes": 7207,
+      "sha256": "16890369e38a21f57fb0bd3fcfd93816d471083b086ee1dc385aa4d7be4517ec"
+    },
+    {
+      "path": "assets/ral-colors/ral-1015.jpg",
+      "bytes": 7066,
+      "sha256": "8c20604fcb24c72b6ae36c7cb7ddcad3ab5874924c919d301309f69228c5a092"
+    },
+    {
+      "path": "assets/ral-colors/ral-1016.jpg",
+      "bytes": 7607,
+      "sha256": "a64f969cac1040901d961e6bbe82ba027ecc996bbed30aca7fb9c1be954fcd93"
+    },
+    {
+      "path": "assets/ral-colors/ral-1017.jpg",
+      "bytes": 7727,
+      "sha256": "05f3ecad22e2af756cb4919414098bf03f040bd6db97db7fd1842cefd6d3cffd"
+    },
+    {
+      "path": "assets/ral-colors/ral-1018.jpg",
+      "bytes": 7754,
+      "sha256": "1fd2d38f5cd68acac5c13032244ae8da2377edace603314f1c5324b27986cb39"
+    },
+    {
+      "path": "assets/ral-colors/ral-1019.jpg",
+      "bytes": 7091,
+      "sha256": "27c19fb66611bb17a87967e12ee33c2975a750020962f05f14f033bc1f26687a"
+    },
+    {
+      "path": "assets/ral-colors/ral-1020.jpg",
+      "bytes": 7232,
+      "sha256": "3b80a47f5d5277980b75aa82e01374bce3ac15d0f49cb00ca948c688632f5794"
+    },
+    {
+      "path": "assets/ral-colors/ral-1021.jpg",
+      "bytes": 7910,
+      "sha256": "22468819262a056828a148b5b00c215c983a6636ebee5f6c5e817d4c6da39b02"
+    },
+    {
+      "path": "assets/ral-colors/ral-1023.jpg",
+      "bytes": 7910,
+      "sha256": "22468819262a056828a148b5b00c215c983a6636ebee5f6c5e817d4c6da39b02"
+    },
+    {
+      "path": "assets/ral-colors/ral-1024.jpg",
+      "bytes": 7456,
+      "sha256": "2500ac54e5cf0def1b72f5bedebbc3e5828f84de92c43cafb8983438f0271f30"
+    },
+    {
+      "path": "assets/ral-colors/ral-1027.jpg",
+      "bytes": 7589,
+      "sha256": "0686be62ce2c776fa8392e21949b61c16d5dde4850b7a0b5ca3a805cae20eefa"
+    },
+    {
+      "path": "assets/ral-colors/ral-1028.jpg",
+      "bytes": 7833,
+      "sha256": "324d013a9a2131a98176b0a736f2155e0be3c2556161747bbd0b8d890b83760b"
+    },
+    {
+      "path": "assets/ral-colors/ral-1032.jpg",
+      "bytes": 7880,
+      "sha256": "383a09ec97cbebd635afc9892fd2c56babc6f6fdafd67664d50023ef86209771"
+    },
+    {
+      "path": "assets/ral-colors/ral-1033.jpg",
+      "bytes": 7815,
+      "sha256": "721817996d1a179f2392f028bc348f4e6277511956b82daeddbc40897cd3a324"
+    },
+    {
+      "path": "assets/ral-colors/ral-1034.jpg",
+      "bytes": 7694,
+      "sha256": "c1477a6fb804494f9370ab8d7067391678b2e19f34c92596209ab02b48e54a14"
+    },
+    {
+      "path": "assets/ral-colors/ral-1035.jpg",
+      "bytes": 6250,
+      "sha256": "874f42a424c8df374427610a745c4a80a636e91380c5d311bd474b7bdbf5b21b"
+    },
+    {
+      "path": "assets/ral-colors/ral-1313.jpg",
+      "bytes": 6179,
+      "sha256": "84eb61b8ab711453003ce089a0f34ce300a5a35c7ce205746291c588a4972df2"
+    },
+    {
+      "path": "assets/ral-colors/ral-2000.jpg",
+      "bytes": 7889,
+      "sha256": "aae7aafa621ac2c7f14a389702a00b8fa75bdf795d80452670f18d9aa7c299c6"
+    },
+    {
+      "path": "assets/ral-colors/ral-2001.jpg",
+      "bytes": 7808,
+      "sha256": "2a3c97f7d07272bcad9676f3d8c68d10d2ee74adcd912d3a340c69a7f887a9fc"
+    },
+    {
+      "path": "assets/ral-colors/ral-2002.jpg",
+      "bytes": 7833,
+      "sha256": "03c97e3ceb0caadff5157f2741921492554f227c3fb26987731405c04cf8f799"
+    },
+    {
+      "path": "assets/ral-colors/ral-2003.jpg",
+      "bytes": 7892,
+      "sha256": "3837c61406f7c2bdd335cf155500dfeac44ef294cd02b8c661a9fcdfe1e600c6"
+    },
+    {
+      "path": "assets/ral-colors/ral-2004.jpg",
+      "bytes": 7909,
+      "sha256": "663a6c3efab869169826a3313a02bf93cbf194b8ba8438e417fa35b2364b60f5"
+    },
+    {
+      "path": "assets/ral-colors/ral-2008.jpg",
+      "bytes": 7904,
+      "sha256": "9f577b527dc0102d7aaa360bafdfc38677ac95efdcef28305382a45979928fd7"
+    },
+    {
+      "path": "assets/ral-colors/ral-2009.jpg",
+      "bytes": 7930,
+      "sha256": "c1e2c7df1fa9c049854469b6330058c4f14a8d203c492aeb0b535314a891c117"
+    },
+    {
+      "path": "assets/ral-colors/ral-2010.jpg",
+      "bytes": 7836,
+      "sha256": "ec16a4e9d49c04cfb0737bb92918491bdf656cc7bcb2d51e94a02aa9f408b591"
+    },
+    {
+      "path": "assets/ral-colors/ral-2011.jpg",
+      "bytes": 7897,
+      "sha256": "f7fd0697b545d846c90195f009920ca27b98ff3e890a59a1c4372d20714d5767"
+    },
+    {
+      "path": "assets/ral-colors/ral-2012.jpg",
+      "bytes": 7729,
+      "sha256": "bedc777129c5b7014947417c5142b3b890641950366cbb336fe8048cebe71e5f"
+    },
+    {
+      "path": "assets/ral-colors/ral-3000.jpg",
+      "bytes": 7765,
+      "sha256": "ab1f2aaf98009679f61008593a1ddd86cc28d0ea4ebe815b147618dc1bfa5171"
+    },
+    {
+      "path": "assets/ral-colors/ral-3001.jpg",
+      "bytes": 7714,
+      "sha256": "4ac4598020b0212e5f16a3b458409f7765741304c208f8a235d64fb2725aec4a"
+    },
+    {
+      "path": "assets/ral-colors/ral-3002.jpg",
+      "bytes": 7716,
+      "sha256": "f27c0a172a9a682309bfd9c80b3d1fb029f80c22781daa0cfc1e4fa119fdf04f"
+    },
+    {
+      "path": "assets/ral-colors/ral-3003.jpg",
+      "bytes": 7594,
+      "sha256": "0b71cfbdfc8a1f43099489c7013e79ce868f5801426db1ef3ec6f03511534323"
+    },
+    {
+      "path": "assets/ral-colors/ral-3004.jpg",
+      "bytes": 7445,
+      "sha256": "037a76a55c139628b1cef2d055f9d11a63cb150b1e163d3f3d4254f448b379b6"
+    },
+    {
+      "path": "assets/ral-colors/ral-3005.jpg",
+      "bytes": 7379,
+      "sha256": "79a607bfdd6bf9c06c3856f402ae51e35fd984538dd7eb424192110d7ed9c088"
+    },
+    {
+      "path": "assets/ral-colors/ral-3007.jpg",
+      "bytes": 7187,
+      "sha256": "2b1a55a2b8ada71f81be7d0035c2fc895562e1e8fec11bc4e8ba967346b0a1fa"
+    },
+    {
+      "path": "assets/ral-colors/ral-3009.jpg",
+      "bytes": 7381,
+      "sha256": "e82a4157b58e0fca83c18978f2ef83c68fd961a16bf3cd6ddf04884fdf0da4f2"
+    },
+    {
+      "path": "assets/ral-colors/ral-3011.jpg",
+      "bytes": 7504,
+      "sha256": "7a6db890b07c84f12de2d506e00c8be35971a6332cce5d1986c0a5c69f170a7f"
+    },
+    {
+      "path": "assets/ral-colors/ral-3012.jpg",
+      "bytes": 7451,
+      "sha256": "01ff38e85eb67c4d48e87d562a340db477c122cab35efee46e84bd994e08972d"
+    },
+    {
+      "path": "assets/ral-colors/ral-3013.jpg",
+      "bytes": 7638,
+      "sha256": "2ae32cc4983d7f25cf062b84ce88583ebd021b16e24c44d42384a1219a9ff2e0"
+    },
+    {
+      "path": "assets/ral-colors/ral-3014.jpg",
+      "bytes": 7468,
+      "sha256": "658792dabef78826c60d097f3e09d42929e14c2e8ea66fa262126c8d96eef4e8"
+    },
+    {
+      "path": "assets/ral-colors/ral-3015.jpg",
+      "bytes": 7226,
+      "sha256": "124993c5f261e36f3da5448a9ea01d231d60f23974dc743846c18ef93d3a10f4"
+    },
+    {
+      "path": "assets/ral-colors/ral-3016.jpg",
+      "bytes": 7698,
+      "sha256": "cdf45659503d4e5883e866081616d14e0f4b97618f3895adfd3d9bdb97564344"
+    },
+    {
+      "path": "assets/ral-colors/ral-3017.jpg",
+      "bytes": 7607,
+      "sha256": "bab66e3ff1bb5f3063f6495d07b2896eabc327a36428c2b912ec09969a364107"
+    },
+    {
+      "path": "assets/ral-colors/ral-3018.jpg",
+      "bytes": 7676,
+      "sha256": "9d224ef63c1ad292bc2bcd0fc64c2793b1a169ca8b7c655216699cd49512c51d"
+    },
+    {
+      "path": "assets/ral-colors/ral-3020.jpg",
+      "bytes": 7881,
+      "sha256": "f36cca9ce0c3b6eb8b3d33004a8a81759a989e7c5609b75ff6de83083e56d7b6"
+    },
+    {
+      "path": "assets/ral-colors/ral-3022.jpg",
+      "bytes": 7682,
+      "sha256": "c0b5b304af9efdc16a30a13e516e00125eb41a1397c42b1ebb41451aaff725b3"
+    },
+    {
+      "path": "assets/ral-colors/ral-3027.jpg",
+      "bytes": 7717,
+      "sha256": "9ce8259ef1adc246ee68c5aed2e7ad97a6115278da170265713e25e78d3419d8"
+    },
+    {
+      "path": "assets/ral-colors/ral-3031.jpg",
+      "bytes": 7660,
+      "sha256": "3af5941a3d3c009b5427562029473b29bee419b08f975c8d8f98a3bba755d7d9"
+    },
+    {
+      "path": "assets/ral-colors/ral-4001.jpg",
+      "bytes": 7287,
+      "sha256": "e5bcfab06a971cbcb53a341d6e119a41e7d197d1dac65a9c3a225a41d99f2b27"
+    },
+    {
+      "path": "assets/ral-colors/ral-4002.jpg",
+      "bytes": 7420,
+      "sha256": "263c51969dee1ee5d1943ba40bdf4e52cfa0633d548674268fb17b542c2c988c"
+    },
+    {
+      "path": "assets/ral-colors/ral-4003.jpg",
+      "bytes": 7426,
+      "sha256": "3f2a2b7d33ab3d75ebff8d9c833769aea155f788f75560c752028fec9af256c5"
+    },
+    {
+      "path": "assets/ral-colors/ral-4004.jpg",
+      "bytes": 7391,
+      "sha256": "aac79689541387f4f4d4e5547b64792e25c1861d67fa37cdd185c2da594eeaf4"
+    },
+    {
+      "path": "assets/ral-colors/ral-4005.jpg",
+      "bytes": 7253,
+      "sha256": "4cc0a5439c22bbb2a57a4b7b94977b56fcdc9fbf9d105083afebef55b1ec8d7f"
+    },
+    {
+      "path": "assets/ral-colors/ral-4006.jpg",
+      "bytes": 7571,
+      "sha256": "f2eaaf2b74f676b56b22e6b69fe6e437d79247ced097eb1b4738a1568d3f6ccd"
+    },
+    {
+      "path": "assets/ral-colors/ral-4007.jpg",
+      "bytes": 7229,
+      "sha256": "59f9b48fae844470535e0052b8b3c5eb1231ae35da64559359f229b1a646e145"
+    },
+    {
+      "path": "assets/ral-colors/ral-4008.jpg",
+      "bytes": 7469,
+      "sha256": "7a3625e4da159e98b265fded74ee834af293d90d21a103d5a3e8390dc8cba927"
+    },
+    {
+      "path": "assets/ral-colors/ral-4009.jpg",
+      "bytes": 7027,
+      "sha256": "ce7cee4ebe6ef27da53ae43825de188f13b0de85446b41a0d973cdcef212163e"
+    },
+    {
+      "path": "assets/ral-colors/ral-4010.jpg",
+      "bytes": 7580,
+      "sha256": "047868b5313ec0a148184cbd409408f3f2db8c80c6f4c1ce35c89971710b7933"
+    },
+    {
+      "path": "assets/ral-colors/ral-5000.jpg",
+      "bytes": 7323,
+      "sha256": "935d76b7b8d0c08532694b335327c8954d620ed74309782e3c2d940db9eac92e"
+    },
+    {
+      "path": "assets/ral-colors/ral-5001.jpg",
+      "bytes": 7408,
+      "sha256": "ad15fb0ad294531902ab64dfd5b28f018481d3f47f85036308bce074b37a0c97"
+    },
+    {
+      "path": "assets/ral-colors/ral-5002.jpg",
+      "bytes": 7440,
+      "sha256": "531971b62ba3b62fece0f050468ab96920460cf5f062cfd7348ac8b73c222b2c"
+    },
+    {
+      "path": "assets/ral-colors/ral-5003.jpg",
+      "bytes": 7257,
+      "sha256": "03ca5be3d831d28cd44189eb210502a8e708afb525be33d951f53857c2256c6d"
+    },
+    {
+      "path": "assets/ral-colors/ral-5004.jpg",
+      "bytes": 7074,
+      "sha256": "d4339dbe9d741b4d6d4b0436d5ed00054ae7a6255770f6b8fa3dd7e036f9a1a3"
+    },
+    {
+      "path": "assets/ral-colors/ral-5005.jpg",
+      "bytes": 7651,
+      "sha256": "171090ad857320a87b7727707a7d51827297a768dd5760898837efdf088699bc"
+    },
+    {
+      "path": "assets/ral-colors/ral-5007.jpg",
+      "bytes": 7490,
+      "sha256": "637bdbb59f5fe1c3bccc092b28c69daa5e7835d8f03d05fd10b53725a0a36b6a"
+    },
+    {
+      "path": "assets/ral-colors/ral-5008.jpg",
+      "bytes": 7181,
+      "sha256": "37d52a5533ee648476168161485ffb3fcbc288c3f21a88a61f6cc2b647021986"
+    },
+    {
+      "path": "assets/ral-colors/ral-5009.jpg",
+      "bytes": 7439,
+      "sha256": "228b3ead83124a1375551555213a056fd82b22a6b2a51566b4905abb08e2060c"
+    },
+    {
+      "path": "assets/ral-colors/ral-5010.jpg",
+      "bytes": 7598,
+      "sha256": "8c6dd27df49c95617336a06f333fa9aa095d7b68c54e706a5702789786178c42"
+    },
+    {
+      "path": "assets/ral-colors/ral-5011.jpg",
+      "bytes": 7179,
+      "sha256": "8bc0b8665bced42848c6031dd9ad36eec46e233d4aa2842acdf4861f4258b6aa"
+    },
+    {
+      "path": "assets/ral-colors/ral-5012.jpg",
+      "bytes": 7771,
+      "sha256": "9b4406e7092c0dd4a418c7a10e90381221f85596b921a9b99325f2f84ead1aa7"
+    },
+    {
+      "path": "assets/ral-colors/ral-5013.jpg",
+      "bytes": 7267,
+      "sha256": "f47517611deba4b4b448f7d0d27bc39424be5c66d44b2cbef7eb7cec85391b07"
+    },
+    {
+      "path": "assets/ral-colors/ral-5014.jpg",
+      "bytes": 7220,
+      "sha256": "b87544830f47c41e466d8ae309a20e3545b2613dbf9900bee18b5775f7fd144e"
+    },
+    {
+      "path": "assets/ral-colors/ral-5015.jpg",
+      "bytes": 7818,
+      "sha256": "9797fad51824d585cb9257432985d1db8b83feb1073b37d96192918d12bd79a2"
+    },
+    {
+      "path": "assets/ral-colors/ral-5017.jpg",
+      "bytes": 7680,
+      "sha256": "252d5f27b618c8247af485aa990a8b2e43b5da7fe5e64bc466ab8a56932e17a8"
+    },
+    {
+      "path": "assets/ral-colors/ral-5018.jpg",
+      "bytes": 7642,
+      "sha256": "a54841e9d2f23e6791ce7086705f7ce7e98ff67b527721d819d2560110e17443"
+    },
+    {
+      "path": "assets/ral-colors/ral-5019.jpg",
+      "bytes": 7650,
+      "sha256": "412a027a6e2e14cd5155857140069fce95340ffd375b72bba3e494a937764bba"
+    },
+    {
+      "path": "assets/ral-colors/ral-5020.jpg",
+      "bytes": 7406,
+      "sha256": "6c4a5b139606d022715beee18faa662fc014e6d5eb341c1b9ba4da87e42e20d1"
+    },
+    {
+      "path": "assets/ral-colors/ral-5021.jpg",
+      "bytes": 7609,
+      "sha256": "819898bfb86cb5d0a493d2eb05cf1b28f4bde35ddc942f60f05751aebe0f9bcd"
+    },
+    {
+      "path": "assets/ral-colors/ral-5022.jpg",
+      "bytes": 7249,
+      "sha256": "22034841457c08185d5caec4060448dd0ed4894fa2543064db07907bafb9bfaa"
+    },
+    {
+      "path": "assets/ral-colors/ral-5023.jpg",
+      "bytes": 7402,
+      "sha256": "6f93a89aed280ef70a598c7b3a59de987a594b01211fbea37ba80c7027486267"
+    },
+    {
+      "path": "assets/ral-colors/ral-5024.jpg",
+      "bytes": 7392,
+      "sha256": "87f1aa959b0bc027c737299c58525443105f730125b57fe27bf2770f16ec08eb"
+    },
+    {
+      "path": "assets/ral-colors/ral-6000.jpg",
+      "bytes": 7308,
+      "sha256": "e61ad08d3d9e017a40c5cf12c0f5c9b96a833f53389a3ddbd8c74dc0ba707630"
+    },
+    {
+      "path": "assets/ral-colors/ral-6001.jpg",
+      "bytes": 7414,
+      "sha256": "eb649c5ca7e2efa7393f38aeb8451b1d8757620239e11fef587b486511ad5c5f"
+    },
+    {
+      "path": "assets/ral-colors/ral-6002.jpg",
+      "bytes": 7359,
+      "sha256": "20494b0440301bd3b020634a04b152604ca9d36067f0e54e0f7f64c373f1209c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6003.jpg",
+      "bytes": 7127,
+      "sha256": "8894c290aa40b30919e7850973ac07fbd97d475068c5713fb623effc13a70373"
+    },
+    {
+      "path": "assets/ral-colors/ral-6004.jpg",
+      "bytes": 7312,
+      "sha256": "cee03a0c6d5e6f0501f0e29a6a60fafb0559827eff607a46b0e680c93bbf3245"
+    },
+    {
+      "path": "assets/ral-colors/ral-6005.jpg",
+      "bytes": 7219,
+      "sha256": "733a749b8011cc46c79f1b71e9e49bc2b74ca35ddfa76a1a41677afc4c28f97c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6006.jpg",
+      "bytes": 7059,
+      "sha256": "33a465a789b348eb626e0b296103671a0377470528e4dec6f203ed67c743bd9e"
+    },
+    {
+      "path": "assets/ral-colors/ral-6007.jpg",
+      "bytes": 7110,
+      "sha256": "d1c49586490a78e7e8d047d4a0b1cceda33d17eab4264ee57e7c949fd3ee47d2"
+    },
+    {
+      "path": "assets/ral-colors/ral-6008.jpg",
+      "bytes": 7054,
+      "sha256": "d622246f4a7e7cf7b1ceed60b74db471f047eaf462df176d22e58c9376cc0d2a"
+    },
+    {
+      "path": "assets/ral-colors/ral-6009.jpg",
+      "bytes": 7108,
+      "sha256": "e1f310db7d6a6133e9896df112cfbb9c158e2c7996d45106e53f50695fb9674e"
+    },
+    {
+      "path": "assets/ral-colors/ral-6010.jpg",
+      "bytes": 7380,
+      "sha256": "8b56fd8eba6abcc784431fd1b96f0af1944dca727df246906d2a7a2ee72a65b2"
+    },
+    {
+      "path": "assets/ral-colors/ral-6011.jpg",
+      "bytes": 7191,
+      "sha256": "b2bc7e3e168a226c249775a41a87e5d2f007607291225c7d5be4641231cf208d"
+    },
+    {
+      "path": "assets/ral-colors/ral-6012.jpg",
+      "bytes": 7114,
+      "sha256": "2e337d02a141d048940e2ce77590a66cc9726e6d6e92aa7ccfaf565bc848fd14"
+    },
+    {
+      "path": "assets/ral-colors/ral-6013.jpg",
+      "bytes": 7088,
+      "sha256": "e6fed38fde53a2cb768b5afd04b3f60b5cf39116c5279f9d544a735b27f4e25f"
+    },
+    {
+      "path": "assets/ral-colors/ral-6014.jpg",
+      "bytes": 7054,
+      "sha256": "bddc92f34cad32d89392b72a0e2e4be48d1bcc7d85da28748826618a70f8f396"
+    },
+    {
+      "path": "assets/ral-colors/ral-6015.jpg",
+      "bytes": 7047,
+      "sha256": "bfa80d80e24e578604311155b00cbfc6809659b4fb1b29c2426b9b0a3c4c851c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6016.jpg",
+      "bytes": 7439,
+      "sha256": "ec42876f9da40bd10621753910bbb75c04768d2f59f51bf67a4fe8ca8cd8959f"
+    },
+    {
+      "path": "assets/ral-colors/ral-6017.jpg",
+      "bytes": 7458,
+      "sha256": "03a22054f79fded9cb8c384e74afcd8f815c790e10c569e14219eb0f745b6697"
+    },
+    {
+      "path": "assets/ral-colors/ral-6018.jpg",
+      "bytes": 7621,
+      "sha256": "bc4065bacebebb027648e64bf33900e9da34fb9dc7309e213189d76a3b6b129a"
+    },
+    {
+      "path": "assets/ral-colors/ral-6019.jpg",
+      "bytes": 7101,
+      "sha256": "e0cbfe4fcd4c101b95fc0077c9ce37fb193ba14d72c21fedbcea9c022ae4b768"
+    },
+    {
+      "path": "assets/ral-colors/ral-6020.jpg",
+      "bytes": 7134,
+      "sha256": "86facdeaad9da9b81e1347b59a9e0de51b40b320a88dffeb543bcb08805f245c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6021.jpg",
+      "bytes": 7128,
+      "sha256": "0ad87596d53609e01695ea1e44e4d8255d15898e62bc9be174b7d460e7bada38"
+    },
+    {
+      "path": "assets/ral-colors/ral-6022.jpg",
+      "bytes": 7054,
+      "sha256": "20e15a5e5c21e6a385597c343d3d250cf787a420e28267348940d74580b3920c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6024.jpg",
+      "bytes": 7532,
+      "sha256": "9ad16d8cd094b4cd3acc03665b463d2e1a859316cff83b478068605fb5a28ab6"
+    },
+    {
+      "path": "assets/ral-colors/ral-6025.jpg",
+      "bytes": 7292,
+      "sha256": "1914fce8ce9d4adc5028a7e363c732307dadb41d4212cf9580a6279d70f6b4ec"
+    },
+    {
+      "path": "assets/ral-colors/ral-6026.jpg",
+      "bytes": 7465,
+      "sha256": "4c409eaef581eede67bc900ed4b04f0e34be9a37ac1e64ab201748076ee4b4e2"
+    },
+    {
+      "path": "assets/ral-colors/ral-6027.jpg",
+      "bytes": 7279,
+      "sha256": "bd645870d1158d3e498f133685d79f573f559d192ee9a0601fc4a198afad669c"
+    },
+    {
+      "path": "assets/ral-colors/ral-6028.jpg",
+      "bytes": 7192,
+      "sha256": "5c7783e4417405caa323328a0eab8b4f7d15840b864b12b00336b2c649f57a30"
+    },
+    {
+      "path": "assets/ral-colors/ral-6029.jpg",
+      "bytes": 7470,
+      "sha256": "6c98d5d01bd8b2e12c30dce7e694ef7622380d97a37b832316bf7c7812562517"
+    },
+    {
+      "path": "assets/ral-colors/ral-6032.jpg",
+      "bytes": 7497,
+      "sha256": "d38ddea133f22de73eed4e12337a0e04d254e38cff035a68c51dfb2dd20b80f5"
+    },
+    {
+      "path": "assets/ral-colors/ral-6033.jpg",
+      "bytes": 7362,
+      "sha256": "5fdac5dcf2b872a8f6dce5e7d3c7af851dc32704f1834aa12a34dcd4e8b8e567"
+    },
+    {
+      "path": "assets/ral-colors/ral-6034.jpg",
+      "bytes": 7240,
+      "sha256": "50449f074594b29222035a4072acf50c8c5d170ee16259de7a74c6b01d773db8"
+    },
+    {
+      "path": "assets/ral-colors/ral-7000.jpg",
+      "bytes": 7063,
+      "sha256": "963e53913d6eccbffc1d07ef6812459da7befb72bc5319493555aa031249fddc"
+    },
+    {
+      "path": "assets/ral-colors/ral-7001.jpg",
+      "bytes": 7021,
+      "sha256": "b81b5f2fb5836a6d22b9e91665abdb9fccb298e8b000e4bae521fad3d6651a8a"
+    },
+    {
+      "path": "assets/ral-colors/ral-7002.jpg",
+      "bytes": 7057,
+      "sha256": "b9fdd3e1c76837d240ec5e1eef8938db806e353520e244240e24b8b3c5533bda"
+    },
+    {
+      "path": "assets/ral-colors/ral-7003.jpg",
+      "bytes": 7019,
+      "sha256": "563f03efe1ef9816aff96231aeb52f1d35e3a518a2928e87679f9c58a827fce5"
+    },
+    {
+      "path": "assets/ral-colors/ral-7004.jpg",
+      "bytes": 6943,
+      "sha256": "9ff86c847f6f0f00a4da2ca9d28210e9cbc4865961b2c81f3e15acf239c7c217"
+    },
+    {
+      "path": "assets/ral-colors/ral-7005.jpg",
+      "bytes": 7043,
+      "sha256": "229643fab244b16eca7358fc68ddd341babee61cdfcda74eec2fd51e61b50223"
+    },
+    {
+      "path": "assets/ral-colors/ral-7006.jpg",
+      "bytes": 7022,
+      "sha256": "27b44f4da10c34e13a6291b1e1fa346f06a71504c87ae1b73e93b7391ada504c"
+    },
+    {
+      "path": "assets/ral-colors/ral-7008.jpg",
+      "bytes": 7247,
+      "sha256": "e44da95da1fcd31f41f1de909bb3352be7a851c14b5f2fa59de974d86f47da02"
+    },
+    {
+      "path": "assets/ral-colors/ral-7009.jpg",
+      "bytes": 7056,
+      "sha256": "c15343317a042d34a720b5ec9ae7961e97eaded01dfd126f08f926d3c54d265c"
+    },
+    {
+      "path": "assets/ral-colors/ral-7010.jpg",
+      "bytes": 7030,
+      "sha256": "8fc7661e98d4a772f304b6a408912d722998f62530beff4931c0e15177fefa64"
+    },
+    {
+      "path": "assets/ral-colors/ral-7011.jpg",
+      "bytes": 7088,
+      "sha256": "d8545254f627af7b35b46d53a4f09b092517b7769bed2831a36df7c1e8bf0bc3"
+    },
+    {
+      "path": "assets/ral-colors/ral-7012.jpg",
+      "bytes": 7084,
+      "sha256": "e3e28cd10a6253404d34b9de644cb42767b75948c1fe29009b8c706a2a9694cc"
+    },
+    {
+      "path": "assets/ral-colors/ral-7013.jpg",
+      "bytes": 7044,
+      "sha256": "79c42362e14223ade54b007aeef92b242fd43da6739dfdf9ad5f4f6b0f6ff270"
+    },
+    {
+      "path": "assets/ral-colors/ral-7015.jpg",
+      "bytes": 7099,
+      "sha256": "b2a837a1190204518e2d231d84bd09ebb5b837c871c67c32df0169ad71474901"
+    },
+    {
+      "path": "assets/ral-colors/ral-7016.jpg",
+      "bytes": 7102,
+      "sha256": "93696da73c624d97e833ff5259de5d87ed33a8280781ce816476afcd391c9536"
+    },
+    {
+      "path": "assets/ral-colors/ral-7021.jpg",
+      "bytes": 7063,
+      "sha256": "aba03e6a4e555350c39ac5daa4910358f4d3288e4d1f3455a0ede6fe734e4601"
+    },
+    {
+      "path": "assets/ral-colors/ral-7022.jpg",
+      "bytes": 7048,
+      "sha256": "0b9e44a21134c5227e6c4a5230a3410af0f6e2851ea4fb9d7406eb38e4e27e03"
+    },
+    {
+      "path": "assets/ral-colors/ral-7023.jpg",
+      "bytes": 6995,
+      "sha256": "7d6bb2ee17d6dbdead3872350c2b22925c3f8b44b2775b7a46a261ffffa494ff"
+    },
+    {
+      "path": "assets/ral-colors/ral-7024.jpg",
+      "bytes": 7096,
+      "sha256": "f68e207ef4a6537ee5cf0162456a3b6d79e20b679f34b92afbbbe0ef1353bd99"
+    },
+    {
+      "path": "assets/ral-colors/ral-7026.jpg",
+      "bytes": 7134,
+      "sha256": "d3ec3c5f2c15bdbc5d55a3c3b9e67062623c36abfda9570e7fccb9e7197878f2"
+    },
+    {
+      "path": "assets/ral-colors/ral-7030.jpg",
+      "bytes": 6946,
+      "sha256": "a846dea84bcc224b50e929bf434cb19f9d04dfc7f53170b50d91b011e5051709"
+    },
+    {
+      "path": "assets/ral-colors/ral-7031.jpg",
+      "bytes": 7134,
+      "sha256": "44a280a2b15c8e8801e2a3fd759e4a8f2a16d430f84ed93580ae32037f4a5212"
+    },
+    {
+      "path": "assets/ral-colors/ral-7032.jpg",
+      "bytes": 6972,
+      "sha256": "1f256ed405b64a32d31decb1c56bd8867d56148395d62ab1b815e5d4b713cb8e"
+    },
+    {
+      "path": "assets/ral-colors/ral-7033.jpg",
+      "bytes": 7015,
+      "sha256": "18b1f39485f71f3f9dc4f6ac1dd3716f6bd977d50bd9d07803874f1d63d98bd0"
+    },
+    {
+      "path": "assets/ral-colors/ral-7034.jpg",
+      "bytes": 6905,
+      "sha256": "8aa8355d51c6e89420339a0832a85188ef57820ba1eb60906ebdf310ac130f2c"
+    },
+    {
+      "path": "assets/ral-colors/ral-7035.jpg",
+      "bytes": 6885,
+      "sha256": "39c873df7f4b427841427f38d6519a63c1cda55a67f82fbe808e08648fba7388"
+    },
+    {
+      "path": "assets/ral-colors/ral-7036.jpg",
+      "bytes": 6921,
+      "sha256": "0b7393a9e139136fbccff437dfd7b42022a88d670583c131f4b73a16d717fb7a"
+    },
+    {
+      "path": "assets/ral-colors/ral-7037.jpg",
+      "bytes": 7016,
+      "sha256": "de9b3efca856eb0cd3e5bc5c7daed0b1773fbcc01c17c514c1ca22c72b673b90"
+    },
+    {
+      "path": "assets/ral-colors/ral-7038.jpg",
+      "bytes": 6929,
+      "sha256": "9de706410d7f14bb3fec8954fbecf6202f62a0f6fecda8616bf20c20b7f9ae1d"
+    },
+    {
+      "path": "assets/ral-colors/ral-7039.jpg",
+      "bytes": 7014,
+      "sha256": "b0b6f7bf907fddcdad308e2905fb07318949b44178e7c870125cec318f5134b2"
+    },
+    {
+      "path": "assets/ral-colors/ral-7040.jpg",
+      "bytes": 6969,
+      "sha256": "396aa28a83a0b328a83712b96ed3ca7d32e62c9775a018e126f43e71435efa56"
+    },
+    {
+      "path": "assets/ral-colors/ral-7042.jpg",
+      "bytes": 6959,
+      "sha256": "a8126d9559c92d2a58d41cdf66f8fc2c28deec06b60d63222124d22a92df0d93"
+    },
+    {
+      "path": "assets/ral-colors/ral-7043.jpg",
+      "bytes": 7095,
+      "sha256": "7451cecdb89e450a0f20e77dda9efd2d02fa34269a52b5cd48d0203c98d4bdc9"
+    },
+    {
+      "path": "assets/ral-colors/ral-7044.jpg",
+      "bytes": 6937,
+      "sha256": "4b4c29b794c0027c06bab8809f557161771b14da90772c338c2056c9b68cf602"
+    },
+    {
+      "path": "assets/ral-colors/ral-7045.jpg",
+      "bytes": 7009,
+      "sha256": "71c1677f369139231d77fca83390f3fa199b582f8ca96b4374d94eda32f7660f"
+    },
+    {
+      "path": "assets/ral-colors/ral-7046.jpg",
+      "bytes": 7087,
+      "sha256": "c2166133d9a9cf6ab78c47fecc65de20f5fcb0f050d0190abf497610f8ea361e"
+    },
+    {
+      "path": "assets/ral-colors/ral-7047.jpg",
+      "bytes": 6861,
+      "sha256": "d23576e5ad72baf718bf5658003d24ffe166509f507457d269833afaff9ab5ab"
+    },
+    {
+      "path": "assets/ral-colors/ral-7106.jpg",
+      "bytes": 7210,
+      "sha256": "9cdba05db1fdd929cc37041e53155e19924595829744ff04809b0cd53f25ad69"
+    },
+    {
+      "path": "assets/ral-colors/ral-7421.jpg",
+      "bytes": 8994,
+      "sha256": "a44a845f406595a8f9971148b623eea668cf2255ed6b083a7de54ce5d4e9f8a7"
+    },
+    {
+      "path": "assets/ral-colors/ral-8000.jpg",
+      "bytes": 7379,
+      "sha256": "d909b202400547b1b0d6453635af0754514585e24205f1f153041904e3d76d56"
+    },
+    {
+      "path": "assets/ral-colors/ral-8001.jpg",
+      "bytes": 7598,
+      "sha256": "0ecc8e35928176df569e30f3b5596df274a94c9192ae902cc5725c9a304aa72b"
+    },
+    {
+      "path": "assets/ral-colors/ral-8002.jpg",
+      "bytes": 7308,
+      "sha256": "9552f48da01de52b79a269cfd5697aa58ed68735e7c48b92c42ed46a68a9c5dd"
+    },
+    {
+      "path": "assets/ral-colors/ral-8003.jpg",
+      "bytes": 7488,
+      "sha256": "b65bc05722da0d5e3defc760fdc8400aa25bd71d099c93d6a6669d80ffb5e345"
+    },
+    {
+      "path": "assets/ral-colors/ral-8004.jpg",
+      "bytes": 7538,
+      "sha256": "cdd51251cdf4efd5b5c3546f39a9a4f9e5d85bee3fd44cd4a56310ce9387466c"
+    },
+    {
+      "path": "assets/ral-colors/ral-8007.jpg",
+      "bytes": 7375,
+      "sha256": "654f931a6d595e25a7c7f2fc28bef8c876b00dc73f19111def2e50049f26bb26"
+    },
+    {
+      "path": "assets/ral-colors/ral-8008.jpg",
+      "bytes": 7363,
+      "sha256": "6a9aa80df865ad1790fd0da3b1be5f5fb32a8825376ae6ff6a41a66f8c713a7a"
+    },
+    {
+      "path": "assets/ral-colors/ral-8011.jpg",
+      "bytes": 7268,
+      "sha256": "878c8434505c4c853f997ff4268573ad76cb2f91dfdf13543e4966a5437b7b69"
+    },
+    {
+      "path": "assets/ral-colors/ral-8012.jpg",
+      "bytes": 7335,
+      "sha256": "0cc4acebde4a1737eeed7565ccdaca98d8b35ed1c8a69969f395c4c15b6c1f8f"
+    },
+    {
+      "path": "assets/ral-colors/ral-8014.jpg",
+      "bytes": 7153,
+      "sha256": "c1d9df9b79db65bda5ac3dd866de8ce12db0a0e0b8e41c2ad07b015c74d9e224"
+    },
+    {
+      "path": "assets/ral-colors/ral-8015.jpg",
+      "bytes": 7289,
+      "sha256": "f8e8d3afb961cc3a01356356eae462facdc9436c03792aac11712adfee6a1dbc"
+    },
+    {
+      "path": "assets/ral-colors/ral-8016.jpg",
+      "bytes": 7228,
+      "sha256": "022c628a3490a08107d51e8f177420083fe39f532017a0d9952e684065ba7c3a"
+    },
+    {
+      "path": "assets/ral-colors/ral-8017.jpg",
+      "bytes": 7110,
+      "sha256": "b66d97815d959564325421819ae06b30aee511826e2ffcd3c397ad2721df0bea"
+    },
+    {
+      "path": "assets/ral-colors/ral-8019.jpg",
+      "bytes": 7033,
+      "sha256": "448baae11ee676429579cc741cf3cb7a6ae5c6853b812fe2834c621d53fba6a5"
+    },
+    {
+      "path": "assets/ral-colors/ral-8022.jpg",
+      "bytes": 7030,
+      "sha256": "8d5c06d501e24abb5d1355ce10af0f429390e14e86a0fa4c2601b0568777b2ec"
+    },
+    {
+      "path": "assets/ral-colors/ral-8023.jpg",
+      "bytes": 7677,
+      "sha256": "e6c6bfffa25c0c1edc261e70243fe4a07f29fb563b8c04467f3a04667feddff4"
+    },
+    {
+      "path": "assets/ral-colors/ral-8024.jpg",
+      "bytes": 7328,
+      "sha256": "ac4a97eefb4946051304a7806871aae69cf29efdd7fdf380b62897a03636a885"
+    },
+    {
+      "path": "assets/ral-colors/ral-8025.jpg",
+      "bytes": 7214,
+      "sha256": "ecf332314b5ca99d4c34264552571a1cf225e15ca72dee703c2b24ed2b7e0577"
+    },
+    {
+      "path": "assets/ral-colors/ral-8028.jpg",
+      "bytes": 7193,
+      "sha256": "e4e3d023219d0a9771dab43b27ccb68660eecad13fd5e6240497883e55c44761"
+    },
+    {
+      "path": "assets/ral-colors/ral-9001.jpg",
+      "bytes": 6880,
+      "sha256": "da2d01e728381738653e90fcfe63c3a1a3c751e59e837d024f38b9893b0dc7fc"
+    },
+    {
+      "path": "assets/ral-colors/ral-9002.jpg",
+      "bytes": 6864,
+      "sha256": "fe26d5972342598cf2cc924b4eaeca653de5e705f5756e7882844f5c340d764e"
+    },
+    {
+      "path": "assets/ral-colors/ral-9003.jpg",
+      "bytes": 6205,
+      "sha256": "49795ae390ee3c4417d2cdfd3d8e644d6f8bbf57f306b491f281070283647e3a"
+    },
+    {
+      "path": "assets/ral-colors/ral-9004.jpg",
+      "bytes": 7063,
+      "sha256": "aba03e6a4e555350c39ac5daa4910358f4d3288e4d1f3455a0ede6fe734e4601"
+    },
+    {
+      "path": "assets/ral-colors/ral-9005.jpg",
+      "bytes": 6765,
+      "sha256": "401e6e9ff9bb663b4bd0a742224f130b8a9462ceab8cfbb4c92c3dd544ca5a5b"
+    },
+    {
+      "path": "assets/ral-colors/ral-9006.jpg",
+      "bytes": 6943,
+      "sha256": "9086be32ee44a5009e8a675c4192cbb465b187fc93b92346b42589a06f64f236"
+    },
+    {
+      "path": "assets/ral-colors/ral-9007.jpg",
+      "bytes": 6931,
+      "sha256": "d4025a732c3d21ea6ff6ea9d8e132a1f5daca4bd5a1f8e95e333094877e1291d"
+    },
+    {
+      "path": "assets/ral-colors/ral-9010.jpg",
+      "bytes": 6205,
+      "sha256": "49795ae390ee3c4417d2cdfd3d8e644d6f8bbf57f306b491f281070283647e3a"
+    },
+    {
+      "path": "assets/ral-colors/ral-9011.jpg",
+      "bytes": 7078,
+      "sha256": "85ffa3cf13cb49c585cd3ddade207a9871ac66c226fb7308c91edfa93d0371c5"
+    },
+    {
+      "path": "assets/ral-colors/ral-9016.jpg",
+      "bytes": 6105,
+      "sha256": "61aa7633e7a33281ac4a382e2009aa11f192eccf3021e8567e29f1987d697798"
+    },
+    {
+      "path": "assets/ral-colors/ral-9017.jpg",
+      "bytes": 7076,
+      "sha256": "20a2957055e60440ea83558339f164035156f63dbb14f0f13ffd405eb92bb113"
+    },
+    {
+      "path": "assets/ral-colors/ral-9018.jpg",
+      "bytes": 6883,
+      "sha256": "fcce898500d451e195e4d1e2df995dac3533a134e60ca5c6250ffe7e5788e38f"
+    },
+    {
+      "path": "docs/pergo-rise/00_IMPLEMENTATION_SUMMARY.md",
+      "bytes": 1846,
+      "sha256": "2afdb831374f82ed3c29fa25ad356894d2cda612a71092feef1ead7d098a1bb4"
+    },
+    {
+      "path": "docs/pergo-rise/01_PLMR_FIELD_RULE_MAPPING.md",
+      "bytes": 1518,
+      "sha256": "cc4f440894d2dfbd93a5d6bb629240b4b8fe3f1c23023c53e42489839f1cf5d3"
+    },
+    {
+      "path": "docs/pergo-rise/02_GLB_NODE_COMPONENT_MAPPING.md",
+      "bytes": 1246,
+      "sha256": "b6f4cddd496dbee285ae7b56bed7a9eee1cd71ef1b1241af281c3b5eaa9e23cb"
+    },
+    {
+      "path": "docs/pergo-rise/03_STATIC_ASSEMBLY_CONTRACT.md",
+      "bytes": 1025,
+      "sha256": "d22ad9b962416255577ab79ef045127bd255a6829acc7bf69c9d8c266cef7a71"
+    },
+    {
+      "path": "docs/pergo-rise/04_TEST_PROTOCOL_AND_RESULTS.md",
+      "bytes": 2726,
+      "sha256": "0f57d452e1e1a89a9d9db795d0840475dfc0b1f8c71ee67a40e31e4659110869"
+    },
+    {
+      "path": "docs/pergo-rise/05_KNOWN_ISSUES_AND_DECISIONS.md",
+      "bytes": 1120,
+      "sha256": "1a735498d77462216d895f3163372bb7945857e8a6c5d1fab83a613412d4bf21"
+    },
+    {
+      "path": "docs/pergo-rise/AI_HANDOVER.md",
+      "bytes": 1920,
+      "sha256": "cd51fad65c9397213b2362be56eb66362c4b221ee8aa8cb4d94bd3a8b3887845"
+    },
+    {
+      "path": "docs/pergo-rise/BASELINE_HASHES.txt",
+      "bytes": 475,
+      "sha256": "375f35fedb226cda8eba547974e9b92f885aaf55896a1194b60aa3f2e6f72ff1"
+    },
+    {
+      "path": "docs/pergo-rise/DECISIONS.md",
+      "bytes": 867,
+      "sha256": "d9e305cdafbfa0a8c83d5a7f9f36636d8c7d2e284574560325cf269ea4a06366"
+    },
+    {
+      "path": "docs/pergo-rise/PROJECT_STATE.md",
+      "bytes": 802,
+      "sha256": "430b8575a1c859dea64d82f50f45defe92e49eac36483655226fddebb8ca42e4"
+    },
+    {
+      "path": "docs/pergo-rise/REGRESSION_RULES.md",
+      "bytes": 730,
+      "sha256": "93e8bdbe2c7794332066c6ae52c79b73771490bb3025e391825f9ccb4370a0d8"
+    },
+    {
+      "path": "docs/pergo-rise/TODO.md",
+      "bytes": 564,
+      "sha256": "15825ec18e93266079b90d53ee7f5b8c8f3b8a05e2ff08e23c826badf3198b59"
+    },
+    {
+      "path": "index.html",
+      "bytes": 42004,
+      "sha256": "5a6efcdbd5445492bfee63f921eaca700b041c6497b7f799ac2a7b44cb7c57a6"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 581,
+      "sha256": "4cc3c4ffef93f9b72df1e429739efcdc8b143f5c0fc1507695833f8fd8e932d1"
+    },
+    {
+      "path": "p3dv-pdf.js",
+      "bytes": 11496,
+      "sha256": "c37f8cc439606b100eae62a3a7e817cccfccf929e32a4c55c26f44d2b61a12dd"
+    },
+    {
+      "path": "products/pergo-rise/pergo-rise-derived-geometry.js",
+      "bytes": 13172,
+      "sha256": "0e9f8e84d31c2870ec54625874abc91f8f2472383f99079d89c4db4f91b635a6"
+    },
+    {
+      "path": "products/pergo-rise/pergo-rise-product.js",
+      "bytes": 4986,
+      "sha256": "5c89dc8c8e22b9628dacbfe20898efbb947a4d93db07910498e5381230b9d324"
+    },
+    {
+      "path": "products/pergo-rise/pergo-rise-viewer.js",
+      "bytes": 10364,
+      "sha256": "1eb9bef3c173d0a945ccea0f66fd23633630b18a7611b04eb9f43335e78789b4"
+    },
+    {
+      "path": "products/pergo-rise/pergo-rise-webgl-viewer.js",
+      "bytes": 39815,
+      "sha256": "c72bf94edef7c95e585b5efd75aa00850535208363e7dfa028f9e2da3a3656f6"
+    },
+    {
+      "path": "products/pergo-rise/plmr-runtime/multiPositionRules.js",
+      "bytes": 25859,
+      "sha256": "8a4515c8d56db2fa0b4a4b717f07be2ab1ca1c59e18a78523052ded831f786d1"
+    },
+    {
+      "path": "products/pergo-rise/plmr-runtime/peri01ExcelBridge.js",
+      "bytes": 23568,
+      "sha256": "7134dd6f2b3d3ce0d73fc7e7202d08bb479cb67a8e27dd161f2b37f345ee5729"
+    },
+    {
+      "path": "products/pergo-rise/plmr-runtime/peri01Geometry.js",
+      "bytes": 346274,
+      "sha256": "6167e04e43f7f07a669bb8f3a50fbe795667f0a9b7114d83c7f5ec5391a4de29"
+    },
+    {
+      "path": "ral-colors.js",
+      "bytes": 15043,
+      "sha256": "6ead7f72c8d8eecd5e3762e4411d1a69c852688d0b82d288b78fe98865bac69b"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 85932,
+      "sha256": "62f546bb2c209ac778287d19b80a6a96cdd7e5127058aaee35040de66558dcf2"
+    },
+    {
+      "path": "tests/P3DV.V3.49.Node-Acceptance.json",
+      "bytes": 941,
+      "sha256": "3a3047c2c22b7320f3c6e92c0018010e24749fd4d36ea72a2451647f65341d49"
+    },
+    {
+      "path": "tests/P3DV.V3.51.Node-Acceptance.json",
+      "bytes": 8902,
+      "sha256": "8654ccc2bb8f29cc14ba383926ff31ebd64e7ffb1c1c7a75d0a03f1f9cfe7d7f"
+    },
+    {
+      "path": "tests/P3DV.V3.52.Node-Acceptance.json",
+      "bytes": 6609,
+      "sha256": "6a5bc6fd54abbb363e54d39f0eb6f391874a74521d763b80ced7c910b55214fe"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.49.Browser-Acceptance.json",
+      "bytes": 3248,
+      "sha256": "676d613a4c2a15354997debbe69a2ec9000dd3f8cea3e8f2ceaca4f381772bf6"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.49.FileMode-WebGL-Acceptance.json",
+      "bytes": 1002,
+      "sha256": "f6b1bf7c9ee1ef425fa4d40bd7b421bf51bd9a1ac1dd78284824fb5a2d279fbe"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.49.PDF-Acceptance.json",
+      "bytes": 545,
+      "sha256": "506a9d4ffb2f3c68cfaca3418850648bdbe63105aefae744684ebb7f9054f046"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.50.PDF-Acceptance.json",
+      "bytes": 331,
+      "sha256": "dc5949ec4091c6cc1d08b7766685c724d47a39659cd8b84eeb8633dfecfc2feb"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.51.Browser-Acceptance.json",
+      "bytes": 7203,
+      "sha256": "2597f257b20482dee0a3c85df7ca502831b15981545954fafcce0eac5a432df2"
+    },
+    {
+      "path": "tests/browser/P3DV.V3.52.Browser-Acceptance.json",
+      "bytes": 5354,
+      "sha256": "d8452404700a04f92936bd309b7cdddbcfa718d2481f61b6952a981676fcb830"
+    },
+    {
+      "path": "tests/p3dv-v3.13-door-tests.js",
+      "bytes": 54531,
+      "sha256": "e58c0501c9c748693683705fa09dce68a9ab02d13237ad3b2af277518fe0c8c1"
+    },
+    {
+      "path": "tests/p3dv-v3.13-regression-a.js",
+      "bytes": 18095,
+      "sha256": "33d9a6079678ff5c827864a71ad4fc6652505e7455c5cf725dcdbe2dfb9b918f"
+    },
+    {
+      "path": "tests/p3dv-v3.13-regression-b.js",
+      "bytes": 17958,
+      "sha256": "bcf7c45576d24d211cb6c0a3110e3b9c9461043804fd53972f38d0efb84b7325"
+    },
+    {
+      "path": "tests/p3dv-v3.31-folding-tests.js",
+      "bytes": 5507,
+      "sha256": "644f61d72abbdec3d00e5170d0b17198bb304a8c1c0dd0c5bb27953a7b4b776e"
+    },
+    {
+      "path": "tests/p3dv-v3.31-quick-pdf-tests.js",
+      "bytes": 2293,
+      "sha256": "cd56ed978cb09241c4a1a096ffbb258ca8fd227d58c3f92e1beedf213eabc419"
+    },
+    {
+      "path": "tests/p3dv-v3.32-ar-tests.js",
+      "bytes": 3953,
+      "sha256": "fc14361288341e760267cc23e6d20b22fa00fecd5946e5feac65b5f935c42181"
+    },
+    {
+      "path": "tests/p3dv-v3.33-manual-ar-tests.js",
+      "bytes": 2362,
+      "sha256": "ff0ca20714dd0b79937d08dba900cffb19e2ae7e4c4f20422f6f6b3fc07cb8c2"
+    },
+    {
+      "path": "tests/p3dv-v3.35-freedom-angle-tests.js",
+      "bytes": 1707,
+      "sha256": "b9046fd54851d6e45c8bf9bbce305e73ceadae197f50d82ae4d8b0e150730d80"
+    },
+    {
+      "path": "tests/p3dv-v3.36-tests.js",
+      "bytes": 2464,
+      "sha256": "84546ec555589f2b2d945de67352762844eb0d43fa60d5dc23188aa67738821c"
+    },
+    {
+      "path": "tests/p3dv-v3.37-view-symbol-tests.js",
+      "bytes": 2567,
+      "sha256": "a4340792723f511b59c66dded9918a49c66ed404d495941cdc74c652cb5a17ee"
+    },
+    {
+      "path": "tests/p3dv-v3.39-position-view-tests.js",
+      "bytes": 2046,
+      "sha256": "e8f7f22d105cb768ad60e2f17ea33dc3541986e4a482cf2d6becdbe0ab809aab"
+    },
+    {
+      "path": "tests/p3dv-v3.41-tests.js",
+      "bytes": 5293,
+      "sha256": "a2479fc54387282c51926365321470894926071ad53ed4f077d4e8c4339ee5fb"
+    },
+    {
+      "path": "tests/p3dv-v3.42-live-toggle-tests.js",
+      "bytes": 4425,
+      "sha256": "55d7b263a4a4cd0f6b666a0aded739e06662121b2c39d20fb076de91338867e9"
+    },
+    {
+      "path": "tests/p3dv-v3.43-live-panel-toggle-tests.js",
+      "bytes": 4668,
+      "sha256": "2e4c14fbb345f183131aab6c051d51426c030649ccf80bd2d2f7e10250799bad"
+    },
+    {
+      "path": "tests/p3dv-v3.44-stabilization-tests.js",
+      "bytes": 10986,
+      "sha256": "ecc99b137c3b390af7fdfe9ed0d536d0ebf7fac4c5ad0866ae94ef21dad5f155"
+    },
+    {
+      "path": "tests/p3dv-v3.46-freedom-glb-louver-tests.js",
+      "bytes": 5514,
+      "sha256": "2ee909ae15628bd221eab4e57a44b6a57f9fb5e0ac8c4dcf63f5e66c8a222c5e"
+    },
+    {
+      "path": "tests/p3dv-v3.49-file-mode-tests.js",
+      "bytes": 3318,
+      "sha256": "68ac3a0badb300380659d034fef92793423cb0ce5709f627e400dddd11a34b54"
+    },
+    {
+      "path": "tests/p3dv-v3.49-pergo-rise-parametric-tests.js",
+      "bytes": 11486,
+      "sha256": "fa0b9c4966bfed32e678710bd1554cd7fd987dd1bae6e4ec36cb2d060ba17d48"
+    },
+    {
+      "path": "tests/p3dv-v3.50-plmr-studio-interface-tests.js",
+      "bytes": 2851,
+      "sha256": "2177cfb05d6047b7922bc22d9e9157051bbdfb694637317bf2ed65d8b753ef7f"
+    },
+    {
+      "path": "tests/p3dv-v3.51-large-preview-live-color-protocol-tests.js",
+      "bytes": 8728,
+      "sha256": "264c1ed81d930a229e0ebc0d4d87667585fbb7d578e865c3c1330f03de7760db"
+    },
+    {
+      "path": "tests/p3dv-v3.52-freedom-biorise-input-ar-tests.js",
+      "bytes": 8670,
+      "sha256": "3704cf7cb823c494bd8f2a0b15ea3fc0986d34447f090e0ef93137e952248636"
+    },
+    {
+      "path": "zip-fabric-textures.js",
+      "bytes": 409988,
+      "sha256": "1b87c9e38533be71bd67f24ab7ab732a47a4f4158db5b7077570fa3b86832247"
+    }
+  ]
+}

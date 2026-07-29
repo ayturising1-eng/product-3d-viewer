@@ -1,806 +1,718 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>PLMR | 3D Designer</title>
-  <meta name="application-name" content="PLMR | 3D Designer" />
-  <meta name="apple-mobile-web-app-title" content="PLMR 3D" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="description" content="PLMR ürünleri için profesyonel 3D tasarım, ürün yerleşimi ve teklif önizleme arayüzü." />
-  <link rel="icon" href="./assets/branding/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./assets/branding/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="48x48" href="./assets/branding/favicon-48.png" />
-  <link rel="apple-touch-icon" href="./assets/branding/apple-touch-icon.png" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./styles.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>PLMR | 3D Designer</title>
+<meta content="PLMR | 3D Designer" name="application-name"/>
+<meta content="PLMR | 3D Designer" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="#ffffff" name="theme-color"/>
+<meta content="PLMR ürünleri için profesyonel 3D tasarım, ürün yerleşimi ve teklif önizleme arayüzü." name="description"/>
+<link href="./assets/branding/favicon.ico" rel="icon" sizes="any"/>
+<link href="./assets/branding/favicon-32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/branding/favicon-48.png" rel="icon" sizes="48x48" type="image/png"/>
+<link href="./assets/branding/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./manifest.webmanifest" rel="manifest"/>
+<link href="./styles.css" rel="stylesheet"/>
 </head>
-<body>
-  <header class="topbar plmr-brandbar">
-    <div class="plmr-brand">
-      <img src="./assets/branding/plmr-logo.png" alt="PLMR" class="plmr-brand-logo" />
-      <span class="plmr-brand-divider" aria-hidden="true"></span>
-      <span class="plmr-brand-title">3D Designer</span>
-    </div>
-    <div class="plmr-brand-meta">
-      <span class="plmr-brand-product">Bioclimatic ürün tasarım sistemi</span>
-      <span class="app-version">p3dv.v3.46</span>
-    </div>
-  </header>
-
-  <main class="app">
-    <div class="viewer-workspace">
-      <aside class="freedom-input-panel" aria-label="Proje, ürün ve sistem bilgileri">
-        <section class="plmr-input-card project-information-card">
-          <div class="plmr-card-head">
-            <strong>1. Proje Bilgileri</strong>
-            <button class="plmr-card-edit" type="button" disabled aria-label="Proje bilgilerini düzenle" title="Bu alan sonraki aşamada etkinleştirilecek">✎</button>
-          </div>
-          <dl class="plmr-data-list">
-            <div><dt>Müşteri</dt><dd>—</dd></div>
-            <div><dt>Proje</dt><dd>—</dd></div>
-            <div><dt>Proje Kodu</dt><dd>—</dd></div>
-            <div><dt>Revizyon</dt><dd>R01</dd></div>
-            <div><dt>Çizen</dt><dd>—</dd></div>
-            <div><dt>Tarih</dt><dd id="plmrProjectDate">—</dd></div>
-          </dl>
-        </section>
-
-        <section class="plmr-input-card product-options-card">
-          <div class="plmr-card-head">
-            <strong>2. Ürün ve Opsiyonlar</strong>
-            <button class="plmr-card-edit" type="button" disabled aria-label="Ürün seçeneklerini düzenle" title="Ürün seçimleri aşağıdaki aktif alanlardan yapılır">✎</button>
-          </div>
-          <div class="freedom-input-head"><strong>Ürün Giriş Bilgileri</strong></div>
-          <dl class="freedom-product-info">
-            <div><dt>Ürün Ailesi</dt><dd>Bioclimatic</dd></div>
-            <div class="product-info-control"><dt>Ürün Grubu</dt><dd><select id="productGroupInput" aria-label="Ürün Grubu"><option value="b-cube">B-Cube</option><option value="bio-rise">Bio-Rise</option></select></dd></div>
-            <div><dt>Ürün Alt Grup</dt><dd id="productSubgroupValue">Freedom</dd></div>
-            <div><dt>Module</dt><dd>Modul 1</dd></div>
-          </dl>
-        </section>
-
-        <section class="plmr-input-card system-dimensions-card">
-          <div class="plmr-card-head">
-            <strong>3. Sistem Ölçüleri (mm)</strong>
-            <button class="plmr-card-edit" type="button" disabled aria-label="Sistem ölçülerini düzenle" title="Ölçüler aşağıdaki aktif alanlardan girilir">✎</button>
-          </div>
-          <form id="freedomInputForm" class="freedom-input-form" novalidate>
-            <label>
-              Genişlik (W)
-              <input id="freedomWidthInput" type="number" inputmode="decimal" min="1000" step="1" placeholder="Önerilen maks. 4050 mm" />
-              <small id="freedomWidthLimitNote" class="freedom-limit-note">Önerilen maksimum: 4050 mm · Üzeri uyarıyla çizilir.</small>
-            </label>
-            <label class="projection-field">
-              Açılım (D)
-              <div class="projection-control">
-                <select id="projectionOptions" aria-label="Açılım ve panel sayısı seçenekleri"></select>
-                <button id="projectionCustomToggleBtn" class="projection-custom-toggle" type="button">Özel değer</button>
-                <input id="freedomDepthInput" class="projection-custom-input" type="text" inputmode="decimal" min="2038" placeholder="Önerilen 2038–7060 mm" hidden />
-              </div>
-              <small id="freedomDepthLimitNote" class="freedom-limit-note">Önerilen maksimum: 7060 mm · Üzeri uyarıyla çizilir.</small>
-            </label>
-            <label>
-              Yükseklik (H)
-              <input id="freedomHeightInput" type="number" inputmode="decimal" min="1600" step="1" placeholder="Yükseklik (mm)" />
-            </label>
-            <label>
-              Panel Sayısı
-              <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="7" step="1" placeholder="Önerilen maks. 30 adet" />
-            </label>
-            <small id="productFormulaText" class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
-            <div id="freedomInputValidation" class="freedom-input-validation" aria-live="polite"></div>
-            <button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
-          </form>
-        </section>
-
-        <section class="plmr-input-card color-material-card">
-          <div class="plmr-card-head"><strong>4. Renk ve Malzeme</strong><span class="plmr-card-state">Aktif</span></div>
-          <section class="ral-color-controls" aria-label="RAL renk seçimleri">
-            <div class="ral-color-controls-head">
-              <strong>Renk Seçimi</strong>
-              <div class="color-mode-actions" role="group" aria-label="Renk modu">
-                <button id="defaultColorModeBtn" type="button" class="is-active" aria-pressed="true">Default</button>
-                <button id="ralColorModeBtn" type="button" aria-pressed="false">RAL</button>
-              </div>
-            </div>
-            <button id="systemColorTrigger" type="button" class="ral-color-trigger">
-              <span id="systemColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
-              <span class="ral-color-trigger-copy"><small>Sistem Rengi</small><strong id="systemColorValue">Klasik Sistem Paleti</strong></span>
-              <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
-            </button>
-            <button id="panelColorTrigger" type="button" class="ral-color-trigger">
-              <span id="panelColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
-              <span class="ral-color-trigger-copy"><small>Panel Rengi</small><strong id="panelColorValue">Klasik Panel Yeşili</strong></span>
-              <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
-            </button>
-            <small class="ral-color-note">Default modda klasik sistem ve panel renkleri kullanılır. RAL seçimi kullanıcı isteğiyle etkinleşir.</small>
-          </section>
-        </section>
-
-        <section class="plmr-input-card extra-options-card">
-          <div class="plmr-card-head"><strong>5. Ek Opsiyonlar</strong><span class="plmr-card-state is-passive">Hazırlanıyor</span></div>
-          <div class="plmr-passive-options" aria-label="Henüz tanımlanmamış ek opsiyonlar">
-            <label><input type="checkbox" disabled /> LED Aydınlatma</label>
-            <label><input type="checkbox" disabled /> Rüzgâr Sensörü</label>
-            <label><input type="checkbox" disabled /> Yağmur Sensörü</label>
-            <label><input type="checkbox" disabled /> Güneş Sensörü</label>
-            <label><input type="checkbox" disabled /> Isıtıcı</label>
-            <label><input type="checkbox" disabled /> Zip Perde Paketi</label>
-          </div>
-        </section>
-      </aside>
-
-      <section class="viewer-shell" aria-label="3D ürün çizimi ve ön izleme">
-        <div class="viewer-panel-head">
-          <div>
-            <strong>6. <span id="previewProductLabel">B-Cube Freedom</span> Ürün Çizimi (Ön İzleme)</strong>
-            <span>3D görünüm içinde ekleme, düzenleme ve ürün yerleşimi yapın.</span>
-          </div>
-          <span class="viewer-panel-mode">3D</span>
-        </div>
-
-        <div class="plmr-commandbar" role="toolbar" aria-label="Çizim araçları">
-          <button id="toolbarNewBtn" class="plmr-tool-button" type="button" disabled title="Yeni proje işlevi sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">▱</span><span>Yeni</span>
-          </button>
-          <button id="toolbarOpenBtn" class="plmr-tool-button" type="button" disabled title="Proje açma işlevi sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">▰</span><span>Aç</span>
-          </button>
-          <button id="toolbarSaveBtn" class="plmr-tool-button" type="button" disabled title="Kaydetme işlevi sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">▣</span><span>Kaydet</span>
-          </button>
-          <button id="toolbarDxfBtn" class="plmr-tool-button" type="button" disabled title="DXF dışa aktarımı sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon file-icon" aria-hidden="true">DXF</span><span>DXF İndir</span>
-          </button>
-          <button id="toolbarPdfBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon file-icon" aria-hidden="true">PDF</span><span>PDF İndir</span>
-          </button>
-          <span class="plmr-command-divider" aria-hidden="true"></span>
-          <button id="toolbarZoomInBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">⊕</span><span>Yakınlaştır</span>
-          </button>
-          <button id="toolbarZoomOutBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">⊖</span><span>Uzaklaştır</span>
-          </button>
-          <button id="toolbarFitBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">⌗</span><span>Sığdır</span>
-          </button>
-          <button id="toolbarMeasureBtn" class="plmr-tool-button" type="button" disabled title="Bağımsız ölçü aracı sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">↔</span><span>Ölçü</span>
-          </button>
-          <button id="toolbarLayersBtn" class="plmr-tool-button" type="button" disabled title="Katman yönetimi sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">▤</span><span>Katmanlar</span>
-          </button>
-          <button id="toolbarViewBtn" class="plmr-tool-button" type="button" disabled title="Hazır görünüş menüsü sonraki aşamada etkinleştirilecek">
-            <span class="plmr-tool-icon" aria-hidden="true">◉</span><span>Görünüm</span>
-          </button>
-          <button id="toolbarRefreshBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">↻</span><span>Yenile</span>
-          </button>
-          <button id="toolbarArBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">AR</span><span>Gerçek Alan</span>
-          </button>
-          <span class="plmr-command-divider" aria-hidden="true"></span>
-          <button id="previewExpandBtn" class="plmr-tool-button is-primary" type="button" aria-pressed="false">
-            <span class="plmr-tool-icon" aria-hidden="true">⛶</span><span id="previewExpandLabel">Önizlemeyi Büyüt</span>
-          </button>
-          <button id="toolbarFullscreenBtn" class="plmr-tool-button" type="button">
-            <span class="plmr-tool-icon" aria-hidden="true">⛶</span><span>Tam Ekran</span>
-          </button>
-        </div>
-
-        <div class="viewer-meta">
-          <button id="positionEditBtn" class="position-pill" type="button">
-            <strong id="positionTitle">B-Cube Freedom Poz1</strong>
-            <span id="positionSummary">Ölçüleri girin</span>
-          </button>
-          <span id="productStatus" class="product-status">Bir cephe alanı seçerek işleme başlayın</span>
-        </div>
-        <div id="toolboxSelectionBanner" class="toolbox-selection-banner" hidden>
-          <div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div>
-          <div class="toolbox-selection-banner-actions">
-            <button id="toolboxSelectionDoneBtn" type="button">Tamam · Enter</button>
-            <button id="toolboxSelectionCancelBtn" class="ghost" type="button">İptal · Esc</button>
-          </div>
-        </div>
-        <iframe id="viewerFrame" title="Bioclimatic ürün 3D viewer" allow="camera; xr-spatial-tracking; fullscreen"></iframe>
-      </section>
-
-      <aside class="viewer-toolbox" aria-label="Büyük ön izleme araç kutusu">
-        <div class="toolbox-head">
-          <div><strong>Çizim Araçları</strong><span>Büyük ön izleme çalışma alanı</span></div>
-          <span class="toolbox-badge">PLMR</span>
-        </div>
-        <div class="toolbox-section-title">Görünüm</div>
-        <div class="dimension-filter" role="group" aria-label="Ölçü görünürlüğü">
-          <strong>Ölçü Filtresi</strong>
-          <label><input id="toolboxIntermediateDimensionsInput" type="checkbox" /> Ara Ölçüler</label>
-          <label><input id="toolboxMainDimensionsInput" type="checkbox" checked /> Ana Ölçüler</label>
-        </div>
-        <div class="toolbox-actions utility-actions">
-          <button id="toolboxResetCameraBtn" type="button">Kamerayı Sıfırla</button>
-          <button id="replayAnimationBtn" class="product-state-toggle is-open" type="button">Ürünler Açık</button>
-          <button id="exportProductListPdfBtn" type="button">Ürün Listesi PDF</button>
-          <button id="mobileArBtn" class="mobile-ar-button" type="button">Gerçek Alanda Gör</button>
-        </div>
-        <div id="mobileArStatus" class="mobile-ar-status" aria-live="polite">Mobil cihazda ürünü 1:1 gerçek ölçekte yerleştirmek için kullanılır.</div>
-        <div class="product-open-filter" role="group" aria-label="Ürün açık kapalı durumları">
-          <strong>Ürün Durumları</strong>
-          <label class="panel-master-toggle"><input id="toolboxPanelMasterInput" type="checkbox" checked /> Paneller Açık</label>
-          <span id="toolboxProductOpenEmpty" class="product-open-empty">Henüz yerleştirilmiş ürün yok.</span>
-          <div id="toolboxProductOpenList" class="product-open-list"></div>
-        </div>
-        <div class="toolbox-separator"></div>
-        <div class="toolbox-section-title">Hızlı Testler</div>
-        <div class="quick-test-grid" role="group" aria-label="Hazır test senaryoları">
-          <button id="quickTestBtn1" type="button">Test 1</button><button id="quickTestBtn2" type="button">Test 2</button>
-          <button id="quickTestBtn3" type="button">Test 3</button><button id="quickTestBtn4" type="button">Test 4</button>
-          <button id="quickTestBtn5" type="button">Test 5</button><button id="quickTestBtn6" type="button">Test 6</button>
-          <button id="quickTestBtn7" type="button">Test 7</button><button id="quickTestBtn8" type="button">Test 8</button>
-          <button id="quickTestBtn9" type="button">Test 9</button><button id="quickTestBtn10" type="button">Test 10</button>
-        </div>
-        <div id="quickTestStatus" class="quick-test-status" aria-live="polite">Bir test seçildiğinde model, profiller, düzenlenmiş aralıklar, renkler ve cephe ürünleri otomatik hazırlanır.</div>
-        <div class="toolbox-separator"></div>
-        <div class="toolbox-section-title">Çoklu İşlemler</div>
-        <div class="toolbox-actions multi-actions">
-          <button id="multiProductBtn" type="button">Çoklu Ürün Ekleme</button>
-          <button id="multiDeleteBtn" type="button">Çoklu Ürün Silme</button>
-          <button id="multiProfileAddBtn" type="button">Çoklu Profil Ekleme</button>
-          <button id="multiProfileDeleteBtn" type="button">Çoklu Profil Silme</button>
-          <button id="fitProductsBtn" type="button">Ürünleri Alana Uydur</button>
-        </div>
-        <div class="toolbox-separator"></div>
-        <div class="toolbox-actions"><button id="clearProductsBtn" class="danger-tool" type="button">Tüm Ürünleri Sil</button></div>
-      </aside>
-    </div>
-  </main>
-
-  <div id="colorPickerDialog" class="dialog-backdrop" hidden>
-    <section class="dialog-card ral-color-picker-card" role="dialog" aria-modal="true" aria-labelledby="colorPickerTitle">
-      <div class="ral-color-picker-head">
-        <div>
-          <span class="ral-color-picker-eyebrow">RAL Kartelası</span>
-          <h2 id="colorPickerTitle">Sistem Rengi Seçin</h2>
-          <p id="colorPickerDescription">Yalnız RAL kodları listelenir.</p>
-        </div>
-        <button id="colorPickerCloseBtn" type="button" class="ghost">Kapat</button>
-      </div>
-      <div class="ral-color-picker-tools">
-        <div class="ral-color-tabs" role="tablist" aria-label="RAL katalog filtresi">
-          <button id="colorCatalogRisingBtn" type="button" class="is-active" role="tab" aria-selected="true">Rising Standart</button>
-          <button id="colorCatalogAllBtn" type="button" role="tab" aria-selected="false">Tüm RAL Renkleri</button>
-        </div>
-        <label class="ral-color-search">
-          <span>RAL Kodu Ara</span>
-          <input id="colorSearchInput" type="search" autocomplete="off" placeholder="Örn. 7016" />
-        </label>
-      </div>
-      <div class="ral-color-result-line"><strong id="colorResultCount">0 renk</strong><span>Bir renk seçildiğinde yüzey tipi seçimi açılır.</span></div>
-      <div id="colorOptionGrid" class="ral-color-option-grid" role="listbox" aria-label="RAL renk seçenekleri"></div>
-    </section>
-  </div>
-
-  <div id="colorFinishDialog" class="dialog-backdrop" hidden>
-    <section class="dialog-card finish-picker-card" role="dialog" aria-modal="true" aria-labelledby="colorFinishTitle">
-      <div class="ral-color-picker-head finish-picker-head">
-        <div>
-          <span class="ral-color-picker-eyebrow">Yüzey Seçimi</span>
-          <h2 id="colorFinishTitle">Yüzey tipini seçin</h2>
-          <p id="colorFinishDescription">Seçilen RAL kodu için parlaklık/yüzey tipini belirleyin.</p>
-        </div>
-        <button id="colorFinishCloseBtn" type="button" class="ghost">Kapat</button>
-      </div>
-      <div id="colorFinishSummary" class="finish-picker-summary">RAL 9006</div>
-      <div id="colorFinishOptions" class="finish-option-grid" role="listbox" aria-label="Yüzey tipi seçenekleri"></div>
-    </section>
-  </div>
-
-  <div id="positionDialog" class="dialog-backdrop" hidden>
-    <form id="positionForm" class="dialog-card">
-      <h2 id="positionDialogTitle">B-Cube Freedom Poz1</h2>
-      <label>
+<body class="p3dv-plmr-interface">
+<header class="plmr-studio-header">
+<div class="plmr-studio-brand">
+<img alt="PLMR" src="./assets/branding/plmr-logo-header.png"/>
+</div>
+<div aria-label="Ürün seçimleri" class="plmr-header-selectors">
+<label><span>Ürün</span><select aria-label="Ürün" id="productGroupInput"><option selected="" value="pergo-rise">Pergo Rise</option><option value="b-cube">B-Cube Freedom</option><option value="bio-rise">Bio-Rise</option></select></label>
+<label><span>Modül</span><select aria-label="Modül"><option>Module 1</option></select></label>
+<label class="engine-selector"><span>Çizim Motoru</span><select aria-label="Çizim Motoru"><option>Web 3D</option></select></label>
+</div>
+<div class="plmr-header-actions">
+<label class="language-selector"><span>Dil</span><select aria-label="Dil"><option>TR</option><option>EN</option></select></label>
+<div class="plmr-user-summary"><span>PÜLÜMÜR AUTOMATION STUDIO</span><strong>Ayetullah</strong><b>Sistem Yöneticisi</b></div>
+<button aria-disabled="true" class="header-action-btn is-disabled" disabled="" type="button">Yönetim</button>
+<button aria-disabled="true" class="header-help-btn is-disabled" disabled="" type="button">Yardım</button>
+<span class="app-version">p3dv.v3.52</span>
+</div>
+</header>
+<div class="plmr-studio-workspace">
+<nav aria-label="Proje kontrol merkezi" class="plmr-project-rail">
+<div class="project-rail-title"><span>PROJE<br/>KONTROL<br/>MERKEZİ</span><b>⌃</b></div>
+<div class="project-rail-body">
+<div class="project-state"><span>DURUM</span><strong>Kaydedilmedi</strong></div>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarOpenBtn" type="button">Proje Dosyası Aç</button>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarNewBtn" type="button">Yeni Proje</button>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarSaveBtn" type="button">Kaydet</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Yeni Revizyon</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Projelerim</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Revizyonlar</button>
+</div>
+<button aria-disabled="true" class="project-rail-exit is-disabled" disabled="" type="button">Çıkış</button>
+</nav>
+<div class="plmr-main-stack">
+<main class="plmr-designer-layout">
+<section aria-label="Parametreler" class="plmr-parameter-panel">
+<div class="plmr-form-grid">
+<div class="plmr-form-column">
+<fieldset class="plmr-form-card project-card">
+<div class="plmr-card-legend teal"><span>PROJE BİLGİLERİ</span><button aria-disabled="true" disabled="" type="button">Düzenle</button></div>
+<div class="project-data-row"><i>▣</i><span>Proje Kodu</span><strong id="projectCodeValue">-</strong></div>
+<div class="project-data-row"><i>♙</i><span>Müşteri</span><strong>—</strong></div>
+<div class="project-data-row"><i>▰</i><span>Proje</span><strong>—</strong></div>
+<div class="project-data-row"><i>↻</i><span>Revizyon</span><strong>R01</strong></div>
+<div class="project-data-row"><i>♙</i><span>Çizen</span><strong>—</strong></div>
+<div class="project-data-row"><i>▦</i><span>Tarih</span><strong id="plmrProjectDate">—</strong></div>
+<div class="project-card-actions"><button aria-disabled="true" class="calculator-btn is-disabled" disabled="" type="button">Pülümür<br/>Hesaplayıcı</button><button aria-disabled="true" class="reset-all-btn is-disabled" disabled="" type="button">Tüm Değerleri<br/>Resetle</button></div>
+</fieldset>
+<fieldset class="plmr-form-card options-card">
+<div class="plmr-card-legend amber"><span>OPSİYONLAR</span><button aria-disabled="true" disabled="" type="button">Resetle</button></div>
+<label class="plmr-cell-row"><span>Parapet</span><select id="parapetInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row"><span>Parapet H <b>*(mm)</b></span><input id="parapetHeightInput" inputmode="numeric" placeholder="-" type="text"/></label>
+<div class="plmr-cell-row color-cell"><span>Taşıyıcı Rengi</span><button class="cell-value-button" id="systemColorTrigger" type="button"><span class="cell-swatch" id="systemColorSwatch"></span><strong id="systemColorValue">-</strong><em>▾</em></button></div>
+<div class="plmr-cell-row color-cell panel-color-cell"><span>Panel Rengi <label class="panel-color-independent" title="Panel için ayrı renk seç"><input checked="" id="panelColorIndependentInput" type="checkbox"/><i>✓</i></label></span><button class="cell-value-button" id="panelColorTrigger" type="button"><span class="cell-swatch" id="panelColorSwatch"></span><strong id="panelColorValue">-</strong><em>▾</em></button></div>
+<label class="plmr-cell-row"><span>Panel Dolgusu</span><select id="panelFillInput"><option>EVET</option><option>HAYIR</option></select></label>
+<label class="plmr-cell-row"><span>Motor</span><div class="excel-cell p3dv-combo" id="motorCombo"><input autocomplete="off" id="motorInput" readonly="" type="text" value="Yok"/><button aria-label="Motor listesini aç" id="motorComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="motorComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span>Kumanda</span><div class="excel-cell p3dv-combo" id="remoteCombo"><input autocomplete="off" id="remoteInput" type="text" value="Yok"/><button aria-label="Kumanda listesini aç" id="remoteComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="remoteComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span>LED</span><div class="excel-cell p3dv-combo" id="ledCombo"><input autocomplete="off" id="ledInput" type="text" value="NO"/><button aria-label="LED listesini aç" id="ledComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="ledComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span>Dimmer</span><select id="dimmerInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row notes-row"><span>Ekstralar / Notlar</span><textarea id="extrasInput" placeholder="-" rows="2"></textarea></label>
+<div aria-hidden="true" class="p3dv-hidden-controls"><button class="is-active" id="defaultColorModeBtn" type="button">Default</button><button id="ralColorModeBtn" type="button">RAL</button></div>
+</fieldset>
+</div>
+<div class="plmr-form-column">
+<fieldset class="plmr-form-card system-card">
+<div class="plmr-card-legend blue"><span>SİSTEM ÖLÇÜLERİ <b>*(mm)</b></span><button aria-disabled="true" disabled="" type="button">Resetle</button></div>
+<form class="plmr-system-form" id="freedomInputForm" novalidate="">
+<label class="plmr-cell-row system-count-row"><span>Sistem Adedi</span><input id="pergoSystemCountInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="Örn. 1" type="text"/></label>
+<label class="plmr-cell-row"><span id="primaryWidthLabel">Genişlik</span><input autocomplete="off" id="freedomWidthInput" inputmode="text" placeholder="Örn. 4000 veya 3000;100;2500;NO" type="text"/></label>
+<label class="plmr-cell-row opening-row"><span id="primaryDepthLabel">Açılım</span><div class="excel-cell p3dv-combo projection-combo" id="projectionCombo"><input autocomplete="off" id="freedomDepthInput" inputmode="numeric" placeholder="Örn. 2038 veya 2038;2254" type="text"/><button aria-label="Açılım listesini aç" id="projectionCustomToggleBtn" type="button">▾</button><div class="p3dv-combo-menu projection-combo-menu" hidden="" id="projectionComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span id="primaryHeightLabel">Yükseklik</span><input autocomplete="off" id="freedomHeightInput" inputmode="numeric" placeholder="Örn. 3200 veya 3200;3400" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoFrontHeightRow"><span>Ön H <em>Oluk Altı</em></span><input id="pergoFrontHeightInput" inputmode="text" placeholder="Örn. 2600" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoRayCountRow"><span>Ray Sayısı <b>Bir Sistem</b></span><input id="pergoRayCountInput" inputmode="text" placeholder="Örn. 2 veya 2;3;2" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoPostCountRow"><span>Dikme Sayısı <b>Tüm Sistem</b></span><input id="pergoPostCountInput" inputmode="text" placeholder="Örn. 2 veya boş: otomatik" type="text"/></label>
+<div aria-hidden="true" class="system-card-spacer" id="freedomSystemCardSpacer"><span></span><span></span><span></span></div>
+<div class="system-hidden-fields">
+<select aria-label="Açılım seçenekleri" id="projectionOptions"></select>
+<input id="freedomPanelCountInput" type="number" value="1"/>
+<div hidden="" id="pergoRiseParametricFields"></div>
+<small id="freedomWidthLimitNote"></small><small id="freedomDepthLimitNote"></small>
+<small id="productFormulaText"></small><div aria-live="polite" id="freedomInputValidation"></div>
+<button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
+</div>
+</form>
+</fieldset>
+<fieldset class="plmr-form-card extra-card">
+<div class="plmr-card-legend purple"><span>EK OPSİYONLAR</span><button aria-disabled="true" disabled="" type="button">Resetle</button></div>
+<label class="plmr-cell-row"><span>Su Çıkışı Standart mı?</span><select id="waterStandardInput"><option>EVET</option><option>HAYIR</option></select></label>
+<div aria-hidden="true" class="extra-card-row-spacer"></div>
+<div class="quick-tests-block"><strong>HIZLI TESTLER</strong><div class="quick-test-grid">
+<button id="quickTestBtn1" type="button">Test 1</button><button id="quickTestBtn2" type="button">Test 2</button><button id="quickTestBtn3" type="button">Test 3</button><button id="quickTestBtn4" type="button">Test 4</button>
+<button id="quickTestBtn5" type="button">Test 5</button><button id="quickTestBtn6" type="button">Test 6</button><button id="quickTestBtn7" type="button">Test 7</button><button id="quickTestBtn8" type="button">Test 8</button>
+<button id="quickTestBtn9" type="button">Test 9</button><button id="quickTestBtn10" type="button">Test 10</button><button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 11</button><button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 12</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 13</button><button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 14</button><button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 15</button><button aria-disabled="true" class="is-disabled" disabled="" type="button">Test 16</button>
+</div></div>
+<div aria-live="polite" class="sr-only" id="quickTestStatus"></div>
+</fieldset>
+</div>
+</div>
+</section>
+<section aria-label="3D çizim ön izleme" class="plmr-preview-panel">
+<div class="plmr-preview-head">
+<div class="preview-title-group"><h2>ÇİZİM ÖN İZLEME</h2><span class="sr-only" id="previewProductLabel">Pergo Rise</span></div>
+<div class="preview-toolbar-axis">
+<div class="preview-actions-left">
+<button id="toolbarRefreshBtn" type="button">Önizlemeyi Yenile</button>
+<button aria-pressed="false" id="previewExpandBtn" type="button"><span id="previewExpandLabel">Önizlemeyi Büyüt</span></button>
+<div aria-label="Çizim geçmişi" class="preview-history-actions" role="group">
+<button aria-disabled="true" disabled="" id="previewUndoBtn" type="button"><span>Geri Al</span><small>Ctrl+Z</small></button>
+<button aria-disabled="true" disabled="" id="previewRedoBtn" type="button"><span>İleri Al</span><small>Ctrl+Shift+Z</small></button>
+</div>
+<div aria-label="3D görünüm kontrolleri" class="preview-camera-actions" role="group">
+<button id="toolbarZoomInBtn" type="button">Yakınlaştır</button>
+<button id="toolbarZoomOutBtn" type="button">Uzaklaştır</button>
+<button id="toolbarFitBtn" type="button">Sığdır</button>
+<button class="ar-real-space-btn" id="toolbarArBtn" type="button">AR Gerçek Alan</button>
+</div>
+</div>
+<div class="preview-actions-right">
+<button class="drawing-check-btn" id="headerCheckDrawingBtn" type="button">Çizimi Kontrol Et</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Proje Dosyası İndir</button>
+<button class="pdf-download-btn" id="toolbarPdfBtn" type="button">PDF İndir</button>
+<button aria-disabled="true" class="dxf-download-btn is-disabled" disabled="" id="toolbarDxfBtn" type="button">DXF İndir</button>
+</div>
+</div>
+</div>
+<div class="plmr-preview-workspace" id="expandedPreviewWorkspace">
+<div class="plmr-preview-canvas">
+<div aria-hidden="true" class="viewer-meta">
+<button class="position-pill" id="positionEditBtn" type="button"><strong id="positionTitle">Pergo Rise Poz1</strong><span id="positionSummary">Ölçüleri girin</span></button>
+<span class="product-status" id="productStatus">3D model için ölçüleri tamamlayın</span>
+</div>
+<div class="toolbox-selection-banner" hidden="" id="toolboxSelectionBanner"><div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div><div><button id="toolboxSelectionDoneBtn" type="button">Tamam</button><button id="toolboxSelectionCancelBtn" type="button">İptal</button></div></div>
+<iframe allow="camera; xr-spatial-tracking; fullscreen" id="viewerFrame" title="Pergo Rise 3D viewer"></iframe>
+</div>
+<aside aria-label="Büyük önizleme hızlı çizim komutları" class="large-preview-toolbox is-open" id="largePreviewToolbox">
+<div class="large-preview-toolbox-head">
+<button aria-expanded="true" aria-label="Toolbox'ı daralt" class="large-preview-toolbox-icon large-preview-toolbox-toggle" id="largePreviewToolboxToggleBtn" type="button"><span>‹</span></button>
+<button aria-label="Toolbox'ı sabitle" aria-pressed="true" class="large-preview-toolbox-icon large-preview-toolbox-pin" id="largePreviewToolboxPinBtn" title="Toolbox'ı açık tut" type="button">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M14 2l8 8-2 2-2-2-4 4v5l-2 2-3-3-5 5-1-1 5-5-3-3 2-2h5l4-4-2-2 2-2z"></path></svg>
+</button>
+</div>
+<div class="large-preview-toolbox-grid">
+<button aria-pressed="false" class="large-preview-toggle is-off" id="largePreviewShowAllDimsBtn" type="button"><span class="large-toggle-dot"></span><span>Tüm ölçüleri<br/>göster</span><b>▾</b></button>
+<button aria-pressed="true" class="large-preview-toggle is-on" id="largePreviewShowMainDimsBtn" type="button"><span class="large-toggle-dot"></span><span>Ana ölçüleri<br/>göster</span></button>
+<div class="large-preview-product-state toolbox-wide is-open" id="largePreviewProductStateControl">
+<button aria-pressed="true" id="largePreviewProductStateBtn" type="button"><span class="product-state-dot"></span><span>Ürün Durumları</span><strong id="largePreviewProductStateValue">AÇIK</strong></button>
+<button aria-expanded="false" aria-label="Ürün durumları listesini aç" id="largePreviewProductStateMenuBtn" type="button">▾</button>
+<div class="large-preview-product-state-menu" hidden="" id="largePreviewProductStateMenu"></div>
+</div>
+<button class="large-preview-command toolbox-wide" id="largePreviewCheckDrawingBtn" type="button">Çizimi Kontrol Et</button>
+<button class="large-preview-command" id="largePreviewMultiProductBtn" type="button">Çoklu Ürün Ekleme</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewMultiDimensionBtn" type="button">Çoklu Ölçü Düzenleme</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewEqualizeGapsBtn" type="button">Aralıkları Eşitle</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewPostSettingsBtn" type="button">Dikme Ayarları</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkExtendBtn" type="button">Çoklu Profil Uzat</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkPostProfileBtn" type="button">Dikme Profilini Toplu Değiştir</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewConvertProductBtn" type="button">Ürün Tipini Değiştir</button>
+<button class="large-preview-command" id="largePreviewFitProductsBtn" type="button">Ürünü Alana Uydur</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewDetailCopyBtn" type="button">Detay Kopyala</button>
+<button class="large-preview-command" id="largePreviewMultiDeleteBtn" type="button">Çoklu Ürün Silme</button>
+<button class="large-preview-command danger toolbox-wide" id="largePreviewDeleteAllBtn" type="button">Tüm Ürünleri Sil</button>
+</div>
+</aside>
+</div>
+</section>
+</main>
+</div>
+</div>
+<aside aria-hidden="true" class="p3dv-functional-store">
+<span id="productSubgroupValue">Pergo Rise</span>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarMeasureBtn" type="button">Ölçü</button><button aria-disabled="true" class="is-disabled" disabled="" id="toolbarLayersBtn" type="button">Katmanlar</button><button aria-disabled="true" class="is-disabled" disabled="" id="toolbarViewBtn" type="button">Görünüm</button>
+<button id="toolbarFullscreenBtn" type="button">Tam Ekran</button>
+<input id="toolboxIntermediateDimensionsInput" type="checkbox"/><input checked="" id="toolboxMainDimensionsInput" type="checkbox"/>
+<button id="toolboxResetCameraBtn" type="button">Kamerayı Sıfırla</button><button id="replayAnimationBtn" type="button">Ürünler Açık</button>
+<button id="exportProductListPdfBtn" type="button">Ürün Listesi PDF</button><button id="mobileArBtn" type="button">Gerçek Alanda Gör</button>
+<div id="mobileArStatus"></div><input checked="" id="toolboxPanelMasterInput" type="checkbox"/><span id="toolboxProductOpenEmpty"></span><div id="toolboxProductOpenList"></div>
+<button id="multiProductBtn" type="button"></button><button id="multiDeleteBtn" type="button"></button><button id="multiProfileAddBtn" type="button"></button><button id="multiProfileDeleteBtn" type="button"></button><button id="fitProductsBtn" type="button"></button><button id="clearProductsBtn" type="button"></button>
+</aside>
+<!-- P3DV historical regression contract; invisible in the V3.50 PLMR Studio shell.
+  Ürün Giriş Bilgileri · Ürün Ailesi · Ürün Grubu · Ürün Alt Grup · Bioclimatic · B-Cube · Freedom · Bio-Rise · Zip Perde · Modul 1 · Module
+  placeholder="Önerilen maks. 4050 mm" · placeholder="Önerilen 2038–7060 mm"
+  min="2038" · type="text" inputmode="decimal" min="2038"
+  Paneller Açık · Hızlı Testler · Sabit Doğrama · Dikey Bölme Sayısı · Yatay Bölme Sayısı
+  Yatay Bölme Yükseklikleri (mm) · Dikmenin Önü
+  -->
+<div class="dialog-backdrop" hidden="" id="colorPickerDialog">
+<section aria-labelledby="colorPickerTitle" aria-modal="true" class="dialog-card ral-color-picker-card" role="dialog">
+<div class="ral-color-picker-head">
+<div>
+<span class="ral-color-picker-eyebrow">RAL Kartelası</span>
+<h2 id="colorPickerTitle">Sistem Rengi Seçin</h2>
+<p id="colorPickerDescription">Yalnız RAL kodları listelenir.</p>
+</div>
+<button class="ghost" id="colorPickerCloseBtn" type="button">Kapat</button>
+</div>
+<div class="ral-color-picker-tools">
+<div aria-label="RAL katalog filtresi" class="ral-color-tabs" role="tablist">
+<button aria-selected="true" class="is-active" id="colorCatalogRisingBtn" role="tab" type="button">Rising Standart</button>
+<button aria-selected="false" id="colorCatalogAllBtn" role="tab" type="button">Tüm RAL Renkleri</button>
+</div>
+<label class="ral-color-search">
+<span>RAL Kodu Ara</span>
+<input autocomplete="off" id="colorSearchInput" placeholder="Örn. 7016" type="search"/>
+</label>
+</div>
+<div class="ral-color-result-line"><strong id="colorResultCount">0 renk</strong><span>Bir renk seçildiğinde yüzey tipi seçimi açılır.</span></div>
+<div aria-label="RAL renk seçenekleri" class="ral-color-option-grid" id="colorOptionGrid" role="listbox"></div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="colorFinishDialog">
+<section aria-labelledby="colorFinishTitle" aria-modal="true" class="dialog-card finish-picker-card" role="dialog">
+<div class="ral-color-picker-head finish-picker-head">
+<div>
+<span class="ral-color-picker-eyebrow">Yüzey Seçimi</span>
+<h2 id="colorFinishTitle">Yüzey tipini seçin</h2>
+<p id="colorFinishDescription">Seçilen RAL kodu için parlaklık/yüzey tipini belirleyin.</p>
+</div>
+<button class="ghost" id="colorFinishCloseBtn" type="button">Kapat</button>
+</div>
+<div class="finish-picker-summary" id="colorFinishSummary">RAL 9006</div>
+<div aria-label="Yüzey tipi seçenekleri" class="finish-option-grid" id="colorFinishOptions" role="listbox"></div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="positionDialog">
+<form class="dialog-card" id="positionForm">
+<h2 id="positionDialogTitle">B-Cube Freedom Poz1</h2>
+<label>
         Width (mm)
-        <input id="widthInput" type="number" inputmode="decimal" min="1000" required />
-      </label>
-      <label>
+        <input id="widthInput" inputmode="decimal" min="1000" required="" type="number"/>
+</label>
+<label>
         Projection / Depth (mm)
-        <input id="depthInput" type="number" inputmode="decimal" min="2038" required />
-      </label>
-      <label>
+        <input id="depthInput" inputmode="decimal" min="2038" required="" type="number"/>
+</label>
+<label>
         Height (mm)
-        <input id="heightInput" type="number" inputmode="decimal" min="1600" required />
-      </label>
-      <div class="lamella-readout">
-        <span>Lamellas</span>
-        <strong id="dialogLamellaCount">25</strong>
-      </div>
-      <div class="dialog-actions">
-        <button type="button" id="cancelPositionBtn" class="ghost">Cancel</button>
-        <button type="submit">Uygula</button>
-      </div>
-    </form>
-  </div>
-
-
-  <div id="zoneActionDialog" class="dialog-backdrop context-backdrop" hidden>
-    <section class="dialog-card zone-action-card" role="dialog" aria-modal="true" aria-labelledby="zoneActionTitle">
-      <div>
-        <h2 id="zoneActionTitle">Cephe alanı</h2>
-        <p id="zoneActionInfo" class="dialog-copy">Yapılacak işlemi seçin.</p>
-      </div>
-      <div class="zone-action-grid">
-        <button id="zoneActionAddProfileBtn" type="button">Profil Ekle</button>
-        <button id="zoneActionEditDimensionBtn" type="button">Ölçüyü Düzenle</button>
-        <button id="zoneActionPlaceProductBtn" type="button">Ürün Yerleştir</button>
-        <button id="zoneActionDeleteProductBtn" class="danger-action" type="button" disabled>Ürünü Sil</button>
-      </div>
-      <div class="dialog-actions">
-        <button id="cancelZoneActionBtn" class="ghost" type="button">Kapat</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="profileDialog" class="dialog-backdrop" hidden>
-    <form id="profileForm" class="dialog-card">
-      <div>
-        <h2>Profil Ekle</h2>
-        <p class="dialog-copy">Dikey profil, seçilen ürünün üst mavi profil yüksekliği kadar kısalır. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
-      </div>
-      <label>
+        <input id="heightInput" inputmode="decimal" min="1600" required="" type="number"/>
+</label>
+<div class="lamella-readout">
+<span>Lamellas</span>
+<strong id="dialogLamellaCount">25</strong>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPositionBtn" type="button">Cancel</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop context-backdrop" hidden="" id="zoneActionDialog">
+<section aria-labelledby="zoneActionTitle" aria-modal="true" class="dialog-card zone-action-card" role="dialog">
+<div>
+<h2 id="zoneActionTitle">Cephe alanı</h2>
+<p class="dialog-copy" id="zoneActionInfo">Yapılacak işlemi seçin.</p>
+</div>
+<div class="zone-action-grid">
+<button id="zoneActionAddProfileBtn" type="button">Profil Ekle</button>
+<button id="zoneActionEditDimensionBtn" type="button">Ölçüyü Düzenle</button>
+<button id="zoneActionPlaceProductBtn" type="button">Ürün Yerleştir</button>
+<button class="danger-action" disabled="" id="zoneActionDeleteProductBtn" type="button">Ürünü Sil</button>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelZoneActionBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="profileDialog">
+<form class="dialog-card" id="profileForm">
+<div>
+<h2>Profil Ekle</h2>
+<p class="dialog-copy">Dikey profil, seçilen ürünün üst mavi profil yüksekliği kadar kısalır. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
+</div>
+<label>
         Yerleşim Yönü
         <select id="profileOrientationInput">
-          <option value="vertical">Dikey Profil</option>
-          <option value="horizontal">Yatay Profil</option>
-        </select>
-      </label>
-      <label>
+<option value="vertical">Dikey Profil</option>
+<option value="horizontal">Yatay Profil</option>
+</select>
+</label>
+<label>
         Profil Tipi
         <select id="profileTypeInput">
-          <option value="100x100">100 × 100 mm</option>
-          <option value="CUSTOM">Özel Kesit</option>
-        </select>
-      </label>
-      <div id="profileCustomFields" class="two-field-grid" hidden>
-        <label>
+<option value="100x100">100 × 100 mm</option>
+<option value="CUSTOM">Özel Kesit</option>
+</select>
+</label>
+<div class="two-field-grid" hidden="" id="profileCustomFields">
+<label>
           Profil Yüz Genişliği (mm)
-          <input id="profileWidthInput" type="number" min="40" max="300" step="1" value="100" required />
-        </label>
-        <label>
+          <input id="profileWidthInput" max="300" min="40" required="" step="1" type="number" value="100"/>
+</label>
+<label>
           Profil Derinliği (mm)
-          <input id="profileDepthInput" type="number" min="30" max="300" step="1" value="100" required />
-        </label>
-      </div>
-      <div id="profileValidation" class="product-validation" aria-live="polite"></div>
-      <div class="dialog-actions">
-        <button id="cancelProfileBtn" class="ghost" type="button">İptal</button>
-        <button type="submit">Ortaya Yerleştir</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="dividerProfileDialog" class="dialog-backdrop" hidden>
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dividerProfileTitle">
-      <div>
-        <h2 id="dividerProfileTitle">Eklenen Profil</h2>
-        <p id="dividerProfileInfo" class="dialog-copy">Profil bilgisi</p>
-      </div>
-      <div class="dialog-actions split-actions">
-        <button id="deleteDividerProfileBtn" class="danger-action" type="button">Profili Sil</button>
-        <span class="action-spacer"></span>
-        <button id="cancelDividerProfileBtn" class="ghost" type="button">Kapat</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="postActionDialog" class="dialog-backdrop" hidden>
-    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="postActionTitle">
-      <div>
-        <h2 id="postActionTitle">Ana Dikme</h2>
-        <p id="postActionInfo" class="dialog-copy">Dikme işlemini seçin.</p>
-      </div>
-      <div class="zone-action-grid two-actions">
-        <button id="postChangeProfileBtn" type="button">Profili Değiştir</button>
-        <button id="postRotateProfileBtn" type="button">Profili Döndür</button>
-      </div>
-      <div class="dialog-actions">
-        <button id="cancelPostActionBtn" class="ghost" type="button">Kapat</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="postProfileDialog" class="dialog-backdrop" hidden>
-    <form id="postProfileForm" class="dialog-card">
-      <div>
-        <h2 id="postProfileTitle">Ana Dikme Profilini Değiştir</h2>
-        <p class="dialog-copy">Toplam sistem genişliği, açılımı ve yüksekliği değişmez. Bağlı profiller ve ürün alanları otomatik uyarlanır.</p>
-      </div>
-      <label>
+          <input id="profileDepthInput" max="300" min="30" required="" step="1" type="number" value="100"/>
+</label>
+</div>
+<div aria-live="polite" class="product-validation" id="profileValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelProfileBtn" type="button">İptal</button>
+<button type="submit">Ortaya Yerleştir</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="dividerProfileDialog">
+<section aria-labelledby="dividerProfileTitle" aria-modal="true" class="dialog-card" role="dialog">
+<div>
+<h2 id="dividerProfileTitle">Eklenen Profil</h2>
+<p class="dialog-copy" id="dividerProfileInfo">Profil bilgisi</p>
+</div>
+<div class="dialog-actions split-actions">
+<button class="danger-action" id="deleteDividerProfileBtn" type="button">Profili Sil</button>
+<span class="action-spacer"></span>
+<button class="ghost" id="cancelDividerProfileBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="postActionDialog">
+<section aria-labelledby="postActionTitle" aria-modal="true" class="dialog-card" role="dialog">
+<div>
+<h2 id="postActionTitle">Ana Dikme</h2>
+<p class="dialog-copy" id="postActionInfo">Dikme işlemini seçin.</p>
+</div>
+<div class="zone-action-grid two-actions">
+<button id="postChangeProfileBtn" type="button">Profili Değiştir</button>
+<button id="postRotateProfileBtn" type="button">Profili Döndür</button>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPostActionBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="postProfileDialog">
+<form class="dialog-card" id="postProfileForm">
+<div>
+<h2 id="postProfileTitle">Ana Dikme Profilini Değiştir</h2>
+<p class="dialog-copy">Toplam sistem genişliği, açılımı ve yüksekliği değişmez. Bağlı profiller ve ürün alanları otomatik uyarlanır.</p>
+</div>
+<label>
         Profil Tipi
         <select id="postProfileTypeInput">
-          <option value="100x220">100 × 220 mm</option>
-          <option value="100x100">100 × 100 mm</option>
-          <option value="CUSTOM">Özel Kesit</option>
-        </select>
-      </label>
-      <div id="postCustomFields" class="two-field-grid" hidden>
-        <label>
+<option value="100x220">100 × 220 mm</option>
+<option value="100x100">100 × 100 mm</option>
+<option value="CUSTOM">Özel Kesit</option>
+</select>
+</label>
+<div class="two-field-grid" hidden="" id="postCustomFields">
+<label>
           X Ölçüsü (mm)
-          <input id="postXInput" type="number" min="40" max="300" step="1" required />
-        </label>
-        <label>
+          <input id="postXInput" max="300" min="40" required="" step="1" type="number"/>
+</label>
+<label>
           Z Ölçüsü (mm)
-          <input id="postZInput" type="number" min="40" max="300" step="1" required />
-        </label>
-      </div>
-      <div id="postValidation" class="product-validation" aria-live="polite"></div>
-      <div class="dialog-actions">
-        <button id="cancelPostProfileBtn" class="ghost" type="button">İptal</button>
-        <button type="submit">Uygula</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="zoneDimensionDialog" class="dialog-backdrop" hidden>
-    <form id="zoneDimensionForm" class="dialog-card">
-      <div>
-        <h2 id="zoneDimensionTitle">Alan Ölçüsünü Düzenle</h2>
-        <p class="dialog-copy">Bölünmüş alanda genişlik değişikliği en yakın ara profili kaydırır. Bölünmemiş alanda sistem ölçüsü güncellenir.</p>
-      </div>
-      <label>
+          <input id="postZInput" max="300" min="40" required="" step="1" type="number"/>
+</label>
+</div>
+<div aria-live="polite" class="product-validation" id="postValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPostProfileBtn" type="button">İptal</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="zoneDimensionDialog">
+<form class="dialog-card" id="zoneDimensionForm">
+<div>
+<h2 id="zoneDimensionTitle">Alan Ölçüsünü Düzenle</h2>
+<p class="dialog-copy">Bölünmüş alanda genişlik değişikliği en yakın ara profili kaydırır. Bölünmemiş alanda sistem ölçüsü güncellenir.</p>
+</div>
+<label>
         Net Alan Genişliği (mm)
-        <input id="zoneWidthInput" type="number" min="250" step="1" required />
-      </label>
-      <label>
+        <input id="zoneWidthInput" min="250" required="" step="1" type="number"/>
+</label>
+<label>
         Net Alan Yüksekliği (mm)
-        <input id="zoneHeightInput" type="number" min="400" step="1" required />
-      </label>
-      <div id="zoneDimensionValidation" class="product-validation" aria-live="polite"></div>
-      <div class="dialog-actions">
-        <button id="cancelZoneDimensionBtn" class="ghost" type="button">İptal</button>
-        <button type="submit">Uygula</button>
-      </div>
-    </form>
-  </div>
-
-
-  <div id="productDialog" class="dialog-backdrop" hidden>
-    <form id="productForm" class="dialog-card product-dialog-card">
-      <div class="product-dialog-head">
-        <div>
-          <h2 id="productZoneTitle">Cephe açıklığı</h2>
-          <p id="productZoneInfo" class="dialog-copy">Ürün tipini seçin.</p>
-        </div>
-        <span id="productRuleBadge" class="rule-badge">PLMR seçimleri</span>
-      </div>
-
-      <div class="product-type-row">
-        <label id="productTypeWrap">
+        <input id="zoneHeightInput" min="400" required="" step="1" type="number"/>
+</label>
+<div aria-live="polite" class="product-validation" id="zoneDimensionValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelZoneDimensionBtn" type="button">İptal</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="productDialog">
+<form class="dialog-card product-dialog-card" id="productForm">
+<div class="product-dialog-head">
+<div>
+<h2 id="productZoneTitle">Cephe açıklığı</h2>
+<p class="dialog-copy" id="productZoneInfo">Ürün tipini seçin.</p>
+</div>
+<span class="rule-badge" id="productRuleBadge">PLMR seçimleri</span>
+</div>
+<div class="product-type-row">
+<label id="productTypeWrap">
           Ürün
           <select id="productTypeInput">
-            <option value="sliding">Sürme Sistem</option>
-            <option value="folding">Katlanır Cam</option>
-            <option value="guillotine">Giyotin Sistem</option>
-            <option value="zip">Zip Perde</option>
-            <option value="fixed">Sabit Doğrama</option>
-            <option value="door">Kapı (Dış Bakış)</option>
-          </select>
-        </label>
-      </div>
-
-      <div id="productFormGrid" class="product-form-grid">
-        <label id="productSeriesWrap">
+<option value="sliding">Sürme Sistem</option>
+<option value="folding">Katlanır Cam</option>
+<option value="guillotine">Giyotin Sistem</option>
+<option value="zip">Zip Perde</option>
+<option value="fixed">Sabit Doğrama</option>
+<option value="door">Kapı (Dış Bakış)</option>
+</select>
+</label>
+</div>
+<div class="product-form-grid" id="productFormGrid">
+<label id="productSeriesWrap">
           Ürün Serisi
           <select id="productSeriesInput">
-            <option value="A SERIES">A Serisi</option>
-            <option value="K SERIES">K Serisi</option>
-          </select>
-        </label>
-
-        <label id="productSubtypeWrap">
+<option value="A SERIES">A Serisi</option>
+<option value="K SERIES">K Serisi</option>
+</select>
+</label>
+<label id="productSubtypeWrap">
           Tip
           <select id="productSubtypeInput"></select>
-        </label>
-
-        <label id="productPlacementWrap" hidden>
+</label>
+<label hidden="" id="productPlacementWrap">
           Yerleşim Yeri
           <select id="productPlacementInput">
-            <option value="BETWEEN POSTS">Dikme Arası</option>
-            <option value="FRONT OF POSTS">Dikmenin Önü</option>
-          </select>
-        </label>
-
-        <label id="productMechanismWrap" hidden>
+<option value="BETWEEN POSTS">Dikme Arası</option>
+<option value="FRONT OF POSTS">Dikmenin Önü</option>
+</select>
+</label>
+<label hidden="" id="productMechanismWrap">
           Mekanizma
           <select id="productMechanismInput"></select>
-        </label>
-
-        <label id="productOpeningWrap">
+</label>
+<label id="productOpeningWrap">
           Açılım Tipi
           <select id="productOpeningInput"></select>
-        </label>
-
-        <label id="productDirectionWrap">
-          <span id="productDirectionLabel">Açılım Yönü</span>
-          <select id="productDirectionInput"></select>
-        </label>
-
-        <label id="productGlassThicknessWrap">
+</label>
+<label id="productDirectionWrap">
+<span id="productDirectionLabel">Açılım Yönü</span>
+<select id="productDirectionInput"></select>
+</label>
+<label id="productGlassThicknessWrap">
           Cam Kalınlığı
           <select id="productGlassThicknessInput"></select>
-        </label>
-
-        <label id="productGlassColorWrap">
-          <span id="productGlassColorLabel">Cam Rengi</span>
-          <select id="productGlassColorInput">
-            <option value="TRANSPARENT">Şeffaf</option>
-            <option value="FUME">Füme</option>
-            <option value="BRONZE">Bronz</option>
-            <option value="LOW-E GLASS">Low-e Cam</option>
-            <option value="OTHER">Diğer</option>
-          </select>
-        </label>
-
-        <div id="productFabricWrap" hidden class="door-type-select-wrap fabric-picker-wrap">
-          <span class="field-label">Zip Perde Kumaşı</span>
-          <input id="productFabricInput" type="hidden" value="7635-52101" />
-          <button id="productFabricTrigger" type="button" class="door-type-trigger" aria-haspopup="dialog" aria-expanded="false">
-            <span id="productFabricValue">7635-52101</span>
-            <span class="door-type-trigger-icon" aria-hidden="true">⌄</span>
-          </button>
-          <small class="field-hint">Perde kataloğunu açmak için tıklayın.</small>
-        </div>
-
-        <label id="productCustomGlassWrap" hidden>
-          <span id="productCustomGlassLabel">Özel Cam Rengi</span>
-          <input id="productCustomGlassInput" type="text" autocomplete="off" placeholder="Renk adını yazın" />
-        </label>
-
-        <label id="productPanelsWrap">
+</label>
+<label id="productGlassColorWrap">
+<span id="productGlassColorLabel">Cam Rengi</span>
+<select id="productGlassColorInput">
+<option value="TRANSPARENT">Şeffaf</option>
+<option value="FUME">Füme</option>
+<option value="BRONZE">Bronz</option>
+<option value="LOW-E GLASS">Low-e Cam</option>
+<option value="OTHER">Diğer</option>
+</select>
+</label>
+<div class="door-type-select-wrap fabric-picker-wrap" hidden="" id="productFabricWrap">
+<span class="field-label">Zip Perde Kumaşı</span>
+<input id="productFabricInput" type="hidden" value="7635-52101"/>
+<button aria-expanded="false" aria-haspopup="dialog" class="door-type-trigger" id="productFabricTrigger" type="button">
+<span id="productFabricValue">7635-52101</span>
+<span aria-hidden="true" class="door-type-trigger-icon">⌄</span>
+</button>
+<small class="field-hint">Perde kataloğunu açmak için tıklayın.</small>
+</div>
+<label hidden="" id="productCustomGlassWrap">
+<span id="productCustomGlassLabel">Özel Cam Rengi</span>
+<input autocomplete="off" id="productCustomGlassInput" placeholder="Renk adını yazın" type="text"/>
+</label>
+<label id="productPanelsWrap">
           Panel Sayısı <span class="manual-chip">Manuel</span>
-          <input id="productPanelsInput" type="number" inputmode="numeric" min="2" max="12" step="1" required />
-          <small id="productPanelHint" class="field-hint">2–12 panel</small>
-        </label>
-
-        <label id="productFoldingViewWrap" hidden>
+<input id="productPanelsInput" inputmode="numeric" max="12" min="2" required="" step="1" type="number"/>
+<small class="field-hint" id="productPanelHint">2–12 panel</small>
+</label>
+<label hidden="" id="productFoldingViewWrap">
           Bakış Yönü
           <select id="productFoldingViewInput">
-            <option value="INSIDE VIEW" selected>İç Bakış</option>
-            <option value="OUTSIDE VIEW">Dış Bakış</option>
-          </select>
-          <small class="field-hint">Bakış yönü, ürünü hangi taraftan karşınıza aldığınızı belirler. Sol/sağ seçimi bu bakışa göre; içeri/dışarı seçimi ise her zaman sistemin içine ve dışına göre değerlendirilir.</small>
-        </label>
-
-        <label id="productFoldingOpenDirectionWrap" hidden>
+<option selected="" value="INSIDE VIEW">İç Bakış</option>
+<option value="OUTSIDE VIEW">Dış Bakış</option>
+</select>
+<small class="field-hint">Bakış yönü, ürünü hangi taraftan karşınıza aldığınızı belirler. Sol/sağ seçimi bu bakışa göre; içeri/dışarı seçimi ise her zaman sistemin içine ve dışına göre değerlendirilir.</small>
+</label>
+<label hidden="" id="productFoldingOpenDirectionWrap">
           Panellerin Açılma Yönü
           <select id="productFoldingOpenDirectionInput">
-            <option value="INWARD" selected>İçeri</option>
-            <option value="OUTWARD">Dışarı</option>
-          </select>
-          <small class="field-hint">İlk kanadın ve toplanan paket yönünün içeri mi dışarı mı açılacağını belirler.</small>
-        </label>
-
-        <label id="productFixedVerticalCountWrap" hidden>
+<option selected="" value="INWARD">İçeri</option>
+<option value="OUTWARD">Dışarı</option>
+</select>
+<small class="field-hint">İlk kanadın ve toplanan paket yönünün içeri mi dışarı mı açılacağını belirler.</small>
+</label>
+<label hidden="" id="productFixedVerticalCountWrap">
           Dikey Bölme Sayısı
-          <input id="productFixedVerticalCountInput" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" />
-          <small class="field-hint">Ölçüye göre otomatik gelir; gerektiğinde manuel değiştirilebilir.</small>
-        </label>
-
-        <label id="productFixedHorizontalCountWrap" hidden>
+          <input id="productFixedVerticalCountInput" inputmode="numeric" max="20" min="1" step="1" type="number" value="1"/>
+<small class="field-hint">Ölçüye göre otomatik gelir; gerektiğinde manuel değiştirilebilir.</small>
+</label>
+<label hidden="" id="productFixedHorizontalCountWrap">
           Yatay Bölme Sayısı
-          <input id="productFixedHorizontalCountInput" type="number" inputmode="numeric" min="1" max="10" step="1" value="1" />
-          <small class="field-hint">1 = tek bölme, 2 = arada 1 profil, 3 = arada 2 profil.</small>
-        </label>
-
-        <label id="productFixedHorizontalHeightsWrap" hidden>
+          <input id="productFixedHorizontalCountInput" inputmode="numeric" max="10" min="1" step="1" type="number" value="1"/>
+<small class="field-hint">1 = tek bölme, 2 = arada 1 profil, 3 = arada 2 profil.</small>
+</label>
+<label hidden="" id="productFixedHorizontalHeightsWrap">
           Yatay Bölme Yükseklikleri (mm)
-          <input id="productFixedHorizontalHeightsInput" type="text" autocomplete="off" placeholder="Örn: 1500;1495" />
-          <small class="field-hint">Alt dış uçtan başlayarak bölme yüksekliklerini ; ile yazın. Toplam ürün yüksekliğine eşit olmalıdır.</small>
-        </label>
-
-
-        <div id="productDoorTypeWrap" hidden class="door-type-select-wrap">
-          <span class="field-label">Kapı Tipi</span>
-          <select id="productDoorTypeInput" hidden aria-hidden="true" tabindex="-1"></select>
-          <button id="productDoorTypeTrigger" type="button" class="door-type-trigger" aria-haspopup="dialog" aria-expanded="false">
-            <span id="productDoorTypeValue">Tek Kanat · Hareketli</span>
-            <span class="door-type-trigger-icon" aria-hidden="true">⌄</span>
-          </button>
-          <small class="field-hint">Kapı tipi seçim ekranını açmak için tıklayın.</small>
-        </div>
-
-        <label id="productDoorHingeWrap" hidden>
+          <input autocomplete="off" id="productFixedHorizontalHeightsInput" placeholder="Örn: 1500;1495" type="text"/>
+<small class="field-hint">Alt dış uçtan başlayarak bölme yüksekliklerini ; ile yazın. Toplam ürün yüksekliğine eşit olmalıdır.</small>
+</label>
+<div class="door-type-select-wrap" hidden="" id="productDoorTypeWrap">
+<span class="field-label">Kapı Tipi</span>
+<select aria-hidden="true" hidden="" id="productDoorTypeInput" tabindex="-1"></select>
+<button aria-expanded="false" aria-haspopup="dialog" class="door-type-trigger" id="productDoorTypeTrigger" type="button">
+<span id="productDoorTypeValue">Tek Kanat · Hareketli</span>
+<span aria-hidden="true" class="door-type-trigger-icon">⌄</span>
+</button>
+<small class="field-hint">Kapı tipi seçim ekranını açmak için tıklayın.</small>
+</div>
+<label hidden="" id="productDoorHingeWrap">
           Menteşe Yönü
           <select id="productDoorHingeInput">
-            <option value="LEFT">Sol</option>
-            <option value="RIGHT">Sağ</option>
-          </select>
-        </label>
-
-        <label id="productDoorActiveLeafWrap" hidden>
+<option value="LEFT">Sol</option>
+<option value="RIGHT">Sağ</option>
+</select>
+</label>
+<label hidden="" id="productDoorActiveLeafWrap">
           Aktif Kanat
           <select id="productDoorActiveLeafInput">
-            <option value="RIGHT">Sağ Aktif</option>
-            <option value="LEFT">Sol Aktif</option>
-          </select>
-        </label>
-
-        <label id="productDoorOpenDirectionWrap" hidden>
+<option value="RIGHT">Sağ Aktif</option>
+<option value="LEFT">Sol Aktif</option>
+</select>
+</label>
+<label hidden="" id="productDoorOpenDirectionWrap">
           Açılma Yönü
           <select id="productDoorOpenDirectionInput">
-            <option value="OUTWARD">Dışa</option>
-            <option value="INWARD">İçe</option>
-          </select>
-        </label>
-
-        <label id="productDoorHandleTypeWrap" hidden>
+<option value="OUTWARD">Dışa</option>
+<option value="INWARD">İçe</option>
+</select>
+</label>
+<label hidden="" id="productDoorHandleTypeWrap">
           Kapı Kolu
           <select id="productDoorHandleTypeInput">
-            <option value="NORMAL">Normal Kapı Kolu</option>
-            <option value="PANIC">Panik Kapı Kolu</option>
-          </select>
-          <small class="field-hint">Kol ekseni zeminden 900 mm yüksektedir.</small>
-        </label>
-
-        <label id="productDoorTopFixedHeightWrap" hidden>
+<option value="NORMAL">Normal Kapı Kolu</option>
+<option value="PANIC">Panik Kapı Kolu</option>
+</select>
+<small class="field-hint">Kol ekseni zeminden 900 mm yüksektedir.</small>
+</label>
+<label hidden="" id="productDoorTopFixedHeightWrap">
           Hareketli Kapı Kanadı Yüksekliği (mm)
-          <input id="productDoorTopFixedHeightInput" type="number" inputmode="numeric" min="1200" step="1" value="2200" />
-          <small class="field-hint">Üst sabit cam yüksekliği, kalan net alandan otomatik hesaplanır.</small>
-        </label>
-
-        <div id="productDoorHeightSummaryWrap" class="door-height-summary" hidden aria-live="polite">
-          <div hidden aria-hidden="true">
-            <span>Üst Sabit Cam Yüksekliği</span>
-            <strong id="productDoorFixedHeightValue">—</strong>
-          </div>
-          <div>
-            <span>Hareketli Kapı Kanadı Yüksekliği</span>
-            <strong id="productDoorMovingHeightValue">2200 mm</strong>
-          </div>
-        </div>
-
-        <label id="productPanelTypeWrap" hidden>
-          <span id="productPanelTypeLabel">Giyotin Panel Tipi</span>
-          <select id="productPanelTypeInput">
-            <option value="1+1">1+1</option>
-            <option value="1+2">1+2</option>
-          </select>
-        </label>
-
-        <label id="productMotorDirectionWrap" hidden>
+          <input id="productDoorTopFixedHeightInput" inputmode="numeric" min="1200" step="1" type="number" value="2200"/>
+<small class="field-hint">Üst sabit cam yüksekliği, kalan net alandan otomatik hesaplanır.</small>
+</label>
+<div aria-live="polite" class="door-height-summary" hidden="" id="productDoorHeightSummaryWrap">
+<div aria-hidden="true" hidden="">
+<span>Üst Sabit Cam Yüksekliği</span>
+<strong id="productDoorFixedHeightValue">—</strong>
+</div>
+<div>
+<span>Hareketli Kapı Kanadı Yüksekliği</span>
+<strong id="productDoorMovingHeightValue">2200 mm</strong>
+</div>
+</div>
+<label hidden="" id="productPanelTypeWrap">
+<span id="productPanelTypeLabel">Giyotin Panel Tipi</span>
+<select id="productPanelTypeInput">
+<option value="1+1">1+1</option>
+<option value="1+2">1+2</option>
+</select>
+</label>
+<label hidden="" id="productMotorDirectionWrap">
           Motor Yönü
           <select id="productMotorDirectionInput">
-            <option value="RIGHT">Sağ</option>
-            <option value="LEFT">Sol</option>
-          </select>
-        </label>
-
-        <span id="productViewWrap" hidden>
-          <input id="productViewInput" type="hidden" value="OUTSIDE VIEW" />
-        </span>
-
-        <label id="productMotorTypeWrap" hidden>
+<option value="RIGHT">Sağ</option>
+<option value="LEFT">Sol</option>
+</select>
+</label>
+<span hidden="" id="productViewWrap">
+<input id="productViewInput" type="hidden" value="OUTSIDE VIEW"/>
+</span>
+<label hidden="" id="productMotorTypeWrap">
           Motor Tipi
           <select id="productMotorTypeInput">
-            <option value="SOMFY RTS">Somfy RTS</option>
-            <option value="SOMFY IO">Somfy IO</option>
-            <option value="RISING">Rising</option>
-          </select>
-        </label>
-
-        <label id="productRemoteWrap" hidden>
+<option value="SOMFY RTS">Somfy RTS</option>
+<option value="SOMFY IO">Somfy IO</option>
+<option value="RISING">Rising</option>
+</select>
+</label>
+<label hidden="" id="productRemoteWrap">
           Kumanda
           <select id="productRemoteInput">
-            <option value="1 CHANNEL">1 Kanal</option>
-            <option value="2 CHANNELS">2 Kanal</option>
-            <option value="4 CHANNELS">4 Kanal</option>
-            <option value="6 CHANNELS">6 Kanal</option>
-            <option value="16 CHANNELS">16 Kanal</option>
-            <option value="40 CHANNELS">40 Kanal</option>
-          </select>
-        </label>
-      </div>
-
-      <section id="productDoorTypePicker" class="door-type-picker-page" hidden aria-labelledby="productDoorTypePickerTitle">
-        <div class="door-type-picker-head">
-          <div>
-            <span class="door-type-picker-eyebrow">Kapı (Dış Bakış)</span>
-            <h3 id="productDoorTypePickerTitle">Kapı Tipini Seçin</h3>
-            <p>Hareketli kanatlar mavi, sabit alanlar gri olarak gösterilir. Açılım yönü gerçek 3D kapı çiziminde kanat üzerindeki döner okla belirtilir.</p>
-          </div>
-          <button id="productDoorTypePickerClose" type="button" class="ghost door-type-picker-close">Geri</button>
-        </div>
-        <div id="productDoorTypeCards" class="door-type-card-grid" role="listbox" aria-label="Kapı tipi silüet seçimi"></div>
-      </section>
-
-      <section id="productFabricPicker" class="door-type-picker-page fabric-picker-page" hidden aria-labelledby="productFabricPickerTitle">
-        <div class="door-type-picker-head">
-          <div>
-            <span class="door-type-picker-eyebrow">Zip Perde Kumaşı</span>
-            <h3 id="productFabricPickerTitle">Perde Kataloğu</h3>
-            <p>Gerçek Sun-Store katalog sayfaları. Kumaş koduna doğrudan sayfa üzerindeki ilgili numune alanından tıklayın; seçim 3D perde yüzeyine yansır.</p>
-          </div>
-          <button id="productFabricPickerClose" type="button" class="ghost door-type-picker-close">Geri</button>
-        </div>
-        <div id="productFabricCards" class="fabric-page-stack" role="listbox" aria-label="Zip perde kumaş seçenekleri"></div>
-      </section>
-
-      <div id="cleanableWindowSection" hidden>
-        <input id="bottomPanelModeInput" type="hidden" value="VASISTAS" />
-        <span id="bottomPanelStateWrap" hidden>
-          <input id="bottomPanelStateInput" type="hidden" value="OPEN" />
-        </span>
-        <span id="bottomPanelHingeWrap" hidden>
-          <input id="bottomPanelHingeInput" type="hidden" value="BOTTOM" />
-        </span>
-      </div>
-
-      <section id="slidingCollectionSection" class="collecting-display-section" hidden>
-        <div class="section-heading collecting-heading">
-          <strong>Sürme · Toplanma Görünümü</strong>
-          <span>Kanatları seçilen açılım düzenine göre toplanmış biçimde gösterin.</span>
-        </div>
-        <div class="product-form-grid compact-grid">
-          <label>
+<option value="1 CHANNEL">1 Kanal</option>
+<option value="2 CHANNELS">2 Kanal</option>
+<option value="4 CHANNELS">4 Kanal</option>
+<option value="6 CHANNELS">6 Kanal</option>
+<option value="16 CHANNELS">16 Kanal</option>
+<option value="40 CHANNELS">40 Kanal</option>
+</select>
+</label>
+</div>
+<section aria-labelledby="productDoorTypePickerTitle" class="door-type-picker-page" hidden="" id="productDoorTypePicker">
+<div class="door-type-picker-head">
+<div>
+<span class="door-type-picker-eyebrow">Kapı (Dış Bakış)</span>
+<h3 id="productDoorTypePickerTitle">Kapı Tipini Seçin</h3>
+<p>Hareketli kanatlar mavi, sabit alanlar gri olarak gösterilir. Açılım yönü gerçek 3D kapı çiziminde kanat üzerindeki döner okla belirtilir.</p>
+</div>
+<button class="ghost door-type-picker-close" id="productDoorTypePickerClose" type="button">Geri</button>
+</div>
+<div aria-label="Kapı tipi silüet seçimi" class="door-type-card-grid" id="productDoorTypeCards" role="listbox"></div>
+</section>
+<section aria-labelledby="productFabricPickerTitle" class="door-type-picker-page fabric-picker-page" hidden="" id="productFabricPicker">
+<div class="door-type-picker-head">
+<div>
+<span class="door-type-picker-eyebrow">Zip Perde Kumaşı</span>
+<h3 id="productFabricPickerTitle">Perde Kataloğu</h3>
+<p>Gerçek Sun-Store katalog sayfaları. Kumaş koduna doğrudan sayfa üzerindeki ilgili numune alanından tıklayın; seçim 3D perde yüzeyine yansır.</p>
+</div>
+<button class="ghost door-type-picker-close" id="productFabricPickerClose" type="button">Geri</button>
+</div>
+<div aria-label="Zip perde kumaş seçenekleri" class="fabric-page-stack" id="productFabricCards" role="listbox"></div>
+</section>
+<div hidden="" id="cleanableWindowSection">
+<input id="bottomPanelModeInput" type="hidden" value="VASISTAS"/>
+<span hidden="" id="bottomPanelStateWrap">
+<input id="bottomPanelStateInput" type="hidden" value="OPEN"/>
+</span>
+<span hidden="" id="bottomPanelHingeWrap">
+<input id="bottomPanelHingeInput" type="hidden" value="BOTTOM"/>
+</span>
+</div>
+<section class="collecting-display-section" hidden="" id="slidingCollectionSection">
+<div class="section-heading collecting-heading">
+<strong>Sürme · Toplanma Görünümü</strong>
+<span>Kanatları seçilen açılım düzenine göre toplanmış biçimde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
             3D Gösterim
             <select id="slidingCollectionStateInput">
-              <option value="NORMAL">Kapalı / normal görünüm</option>
-              <option value="COLLECTED">Toplanmış göster</option>
-            </select>
-          </label>
-        </div>
-      </section>
-
-      <section id="foldingCollectionSection" class="collecting-display-section" hidden>
-        <div class="section-heading collecting-heading">
-          <strong>Katlanır Cam · Açık/Kapalı Görünüm</strong>
-          <span>Kanatları 90° döndürerek seçilen tarafta paketlenmiş biçimde gösterin.</span>
-        </div>
-        <div class="product-form-grid compact-grid">
-          <label>
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Toplanmış göster</option>
+</select>
+</label>
+</div>
+</section>
+<section class="collecting-display-section" hidden="" id="foldingCollectionSection">
+<div class="section-heading collecting-heading">
+<strong>Katlanır Cam · Açık/Kapalı Görünüm</strong>
+<span>Kanatları 90° döndürerek seçilen tarafta paketlenmiş biçimde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
             3D Gösterim
             <select id="foldingCollectionStateInput">
-              <option value="NORMAL">Kapalı / normal görünüm</option>
-              <option value="COLLECTED">Katlanmış göster</option>
-            </select>
-          </label>
-        </div>
-        <div id="foldingRuleNote" class="product-validation folding-rule-note" aria-live="polite"></div>
-      </section>
-
-      <section id="collectingDisplaySection" class="collecting-display-section" hidden>
-        <div class="section-heading collecting-heading">
-          <strong>Giyotin · Toplanma Görünümü</strong>
-          <span><b id="collectingDisplayDirection">Yukarı toplanır</b> panel paketini 3D modelde gösterin.</span>
-        </div>
-        <div class="product-form-grid compact-grid">
-          <label>
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Katlanmış göster</option>
+</select>
+</label>
+</div>
+<div aria-live="polite" class="product-validation folding-rule-note" id="foldingRuleNote"></div>
+</section>
+<section class="collecting-display-section" hidden="" id="collectingDisplaySection">
+<div class="section-heading collecting-heading">
+<strong>Giyotin · Toplanma Görünümü</strong>
+<span><b id="collectingDisplayDirection">Yukarı toplanır</b> panel paketini 3D modelde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
             3D Gösterim
             <select id="collectingDisplayStateInput">
-              <option value="NORMAL">Kapalı / normal görünüm</option>
-              <option value="COLLECTED">Toplanmış göster</option>
-            </select>
-          </label>
-        </div>
-      </section>
-
-      <div id="productValidation" class="product-validation" aria-live="polite"></div>
-
-      <div class="dialog-actions split-actions">
-        <button type="button" id="removeProductBtn" class="danger-action" hidden>Ürünü Sil</button>
-        <span class="action-spacer"></span>
-        <button type="button" id="cancelProductBtn" class="ghost">İptal</button>
-        <button type="submit">Yerleştir / Güncelle</button>
-      </div>
-    </form>
-  </div>
-
-  <script src="./ral-colors.js"></script>
-  <script src="./zip-fabric-textures.js"></script>
-  <script src="./p3dv-pdf.js"></script>
-  <script src="./assets/models/freedom-louver-data.js"></script>
-  <script src="./app.js"></script>
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Toplanmış göster</option>
+</select>
+</label>
+</div>
+</section>
+<div aria-live="polite" class="product-validation" id="productValidation"></div>
+<div class="dialog-actions split-actions">
+<button class="danger-action" hidden="" id="removeProductBtn" type="button">Ürünü Sil</button>
+<span class="action-spacer"></span>
+<button class="ghost" id="cancelProductBtn" type="button">İptal</button>
+<button type="submit">Yerleştir / Güncelle</button>
+</div>
+</form>
+</div>
+<script src="./ral-colors.js"></script>
+<script src="./zip-fabric-textures.js"></script>
+<script src="./p3dv-pdf.js"></script>
+<script src="./assets/models/freedom-louver-data.js"></script>
+<script src="./products/pergo-rise/plmr-runtime/multiPositionRules.js"></script>
+<script src="./products/pergo-rise/plmr-runtime/peri01ExcelBridge.js"></script>
+<script src="./products/pergo-rise/plmr-runtime/peri01Geometry.js"></script>
+<script src="./products/pergo-rise/pergo-rise-product.js"></script>
+<script src="./products/pergo-rise/pergo-rise-derived-geometry.js"></script>
+<script src="./app.js"></script>
+<script>
+    (() => {
+      const activatePergoRise = () => {
+        const select = document.getElementById('productGroupInput');
+        if (!select || select.value === 'pergo-rise') return;
+        select.value = 'pergo-rise';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', activatePergoRise, { once: true });
+      else activatePergoRise();
+    })();
+  </script>
 </body>
 </html>

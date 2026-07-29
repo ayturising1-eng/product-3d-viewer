@@ -1,6 +1,6 @@
 {
   "name": "PLMR | 3D Designer",
-  "short_name": "PLMR 3D",
+  "short_name": "PLMR | 3D Designer",
   "description": "PLMR ürünleri için profesyonel 3D tasarım ve ürün yerleşim arayüzü.",
   "start_url": "./index.html",
   "scope": "./",

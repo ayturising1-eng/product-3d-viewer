@@ -1,4 +1,5 @@
 (function () {
+  // Canonical legacy runtime default is retained; index.html activates Pergo Rise for the visible V3.52 shell after bindings are ready.
   const defaults = {
     productGroup: 'b-cube',
     width: 0,
@@ -23,7 +24,20 @@
     glassPreferences: { color: 'TRANSPARENT', customColor: '', thickness: '10 MM' },
     colorMode: 'default',
     systemColor: { code: 'RAL 9006', hex: '#7C7D7F', finish: 'MATTE' },
-    panelColor: { code: 'RAL 6018', hex: '#397A36', finish: 'MATTE' }
+    panelColor: { code: 'RAL 6018', hex: '#397A36', finish: 'MATTE' },
+    pergoRiseProject: null,
+    systemCount: 1,
+    inputDrafts: { width: '', depth: '', height: '' },
+    panelColorIndependent: true,
+    panelFill: 'EVET',
+    motor: 'Yok',
+    remote: 'Yok',
+    led: 'NO',
+    dimmer: 'HAYIR',
+    parapet: 'HAYIR',
+    parapetHeight: '',
+    waterStandard: 'EVET',
+    extras: ''
   };
 
   const GLAZING_SECTION_SPECS = Object.freeze({
@@ -39,6 +53,37 @@
     projectDate: 'plmrProjectDate',
     previewExpand: 'previewExpandBtn',
     previewExpandLabel: 'previewExpandLabel',
+    previewUndo: 'previewUndoBtn',
+    previewRedo: 'previewRedoBtn',
+    previewWorkspace: 'expandedPreviewWorkspace',
+    largePreviewToolbox: 'largePreviewToolbox',
+    largePreviewToolboxToggle: 'largePreviewToolboxToggleBtn',
+    largePreviewToolboxPin: 'largePreviewToolboxPinBtn',
+    largePreviewShowAllDims: 'largePreviewShowAllDimsBtn',
+    largePreviewShowMainDims: 'largePreviewShowMainDimsBtn',
+    largePreviewGlassTrack: 'largePreviewGlassTrackBtn',
+    largePreviewRayBoundary: 'largePreviewRayBoundaryBtn',
+    largePreviewTriangleJoinery: 'largePreviewTriangleJoineryBtn',
+    largePreviewWaterStandard: 'largePreviewWaterStandardBtn',
+    largePreviewParapet: 'largePreviewParapetInput',
+    largePreviewCheckDrawing: 'largePreviewCheckDrawingBtn',
+    largePreviewMultiProduct: 'largePreviewMultiProductBtn',
+    largePreviewMultiDimension: 'largePreviewMultiDimensionBtn',
+    largePreviewEqualizeGaps: 'largePreviewEqualizeGapsBtn',
+    largePreviewPostSettings: 'largePreviewPostSettingsBtn',
+    largePreviewBulkExtend: 'largePreviewBulkExtendBtn',
+    largePreviewBulkPostProfile: 'largePreviewBulkPostProfileBtn',
+    largePreviewConvertProduct: 'largePreviewConvertProductBtn',
+    largePreviewFitProducts: 'largePreviewFitProductsBtn',
+    largePreviewDetailCopy: 'largePreviewDetailCopyBtn',
+    largePreviewMultiDelete: 'largePreviewMultiDeleteBtn',
+    largePreviewDeleteAll: 'largePreviewDeleteAllBtn',
+    largePreviewProductStateControl: 'largePreviewProductStateControl',
+    largePreviewProductState: 'largePreviewProductStateBtn',
+    largePreviewProductStateValue: 'largePreviewProductStateValue',
+    largePreviewProductStateMenuButton: 'largePreviewProductStateMenuBtn',
+    largePreviewProductStateMenu: 'largePreviewProductStateMenu',
+    headerCheckDrawing: 'headerCheckDrawingBtn',
     toolbarRefresh: 'toolbarRefreshBtn',
     toolbarZoomIn: 'toolbarZoomInBtn',
     toolbarZoomOut: 'toolbarZoomOutBtn',
@@ -257,7 +302,41 @@
     productFabricPickerClose: 'productFabricPickerClose',
     productFabricCards: 'productFabricCards',
     pdfRequestFormMeta: 'pdfRequestFormMeta',
-    pdfRequestFormFields: 'pdfRequestFormFields'
+    pdfRequestFormFields: 'pdfRequestFormFields',
+    pergoRiseFields: 'pergoRiseParametricFields',
+    pergoSystemCount: 'pergoSystemCountInput',
+    pergoFrontHeight: 'pergoFrontHeightInput',
+    pergoRayCount: 'pergoRayCountInput',
+    pergoPostCount: 'pergoPostCountInput',
+    primaryWidthLabel: 'primaryWidthLabel',
+    primaryDepthLabel: 'primaryDepthLabel',
+    primaryHeightLabel: 'primaryHeightLabel',
+    projectCodeValue: 'projectCodeValue',
+    panelColorIndependent: 'panelColorIndependentInput',
+    panelFill: 'panelFillInput',
+    motorInput: 'motorInput',
+    motorCombo: 'motorCombo',
+    motorComboButton: 'motorComboButton',
+    motorComboMenu: 'motorComboMenu',
+    remoteInput: 'remoteInput',
+    remoteCombo: 'remoteCombo',
+    remoteComboButton: 'remoteComboButton',
+    remoteComboMenu: 'remoteComboMenu',
+    ledInput: 'ledInput',
+    ledCombo: 'ledCombo',
+    ledComboButton: 'ledComboButton',
+    ledComboMenu: 'ledComboMenu',
+    dimmerInput: 'dimmerInput',
+    parapetInput: 'parapetInput',
+    parapetHeightInput: 'parapetHeightInput',
+    waterStandardInput: 'waterStandardInput',
+    extrasInput: 'extrasInput',
+    projectionCombo: 'projectionCombo',
+    projectionComboMenu: 'projectionComboMenu',
+    pergoFrontHeightRow: 'pergoFrontHeightRow',
+    pergoRayCountRow: 'pergoRayCountRow',
+    pergoPostCountRow: 'pergoPostCountRow',
+    freedomSystemCardSpacer: 'freedomSystemCardSpacer'
   };
 
   const $ = (id) => document.getElementById(id);
@@ -265,12 +344,17 @@
   let viewerCameraState = null;
   let viewerLiveProductStateReady = false;
   let viewerLivePanelMasterReady = false;
+  let viewerLivePergoRiseReady = false;
+  let viewerLiveColorStateReady = false;
   let viewerSessionCounter = 0;
   let activeViewerSessionId = '';
   let pendingLiveProductState = false;
   let pendingLivePanelMasterState = false;
+  let pendingLiveColorState = false;
+  let pergoRiseRevision = 0;
   let liveStateRevision = 0;
   let freedomLouverBlobUrlCache = '';
+  const pergoRiseAssetPath = ''; // Raw GLB intentionally omitted; extracted component templates are canonical.
   let selectedZone = null;
   let selectedZoneId = null;
   let dimensionVisibility = { intermediate: false, main: true };
@@ -303,8 +387,25 @@
       heightMin: 1600, heightMax: 3500,
       panelMin: 8, panelMax: 28, panelPitch: 200, projectionOffset: 470,
       postSection: { x: 150, z: 100 }, beamSection: { vertical: 218, thickness: 100 }, sideBeamThickness: 50
+    },
+    'pergo-rise': {
+      groupLabel: 'Pergo Rise', subgroupLabel: 'None', modelLabel: 'Pergo Rise',
+      widthMin: 1000, widthMax: 14000,
+      depthMin: 1000, depthMax: 7000, depthStep: 500, depthListStart: 1000,
+      heightMin: 1800, heightMax: 4000,
+      panelMin: 1, panelMax: 1, panelPitch: 1, projectionOffset: 0,
+      postSection: { x: 100, z: 100 }, beamSection: { vertical: 100, thickness: 100 }, sideBeamThickness: 100,
+      staticViewer: true
     }
   };
+
+  const FREEDOM_UI_MOTOR_OPTIONS = Object.freeze(['Yok', 'Somfy Rts', 'Somfy IO']);
+  const FREEDOM_UI_REMOTE_OPTIONS = Object.freeze({
+    'YOK': ['Yok'],
+    'SOMFY RTS': ['-', 'SITUO 2 RTS', 'SITUO 5 RTS', 'TELIS 16 RTS'],
+    'SOMFY IO': ['-', 'SITUO 2 IO', 'SITUO 5 IO']
+  });
+  const FREEDOM_UI_LED_OPTIONS = Object.freeze(['YES', 'NO']);
 
   const PDF_REQUEST_SCHEMAS = {
     'b-cube': {
@@ -448,6 +549,43 @@
           ]
         }
       ]
+    },
+    'pergo-rise': {
+      familyLabel: 'Pergola',
+      groupLabel: 'Pergo Rise',
+      subGroupLabel: 'None',
+      productLabel: 'Pergo Rise',
+      sections: [
+        {
+          title: 'Project Details',
+          hint: 'Static Pergo Rise 3D model measurements',
+          fields: [
+            { id: 'width', label: 'Width', type: 'auto-mm', source: 'width' },
+            { id: 'projection', label: 'Projection', type: 'auto-mm', source: 'depth' },
+            { id: 'heightTopOfGutter', label: 'Height', type: 'auto-mm', source: 'height' },
+            { id: 'systemQuantity', label: 'System Quantity', type: 'number' }
+          ]
+        },
+        {
+          title: 'Color Details',
+          hint: 'Taken from current 3D color selections',
+          fields: [
+            { id: 'systemColor', label: 'System Color', type: 'auto-text', source: 'systemColor' },
+            { id: 'systemColorFinish', label: 'Finish', type: 'auto-text', source: 'systemColorFinish' },
+            { id: 'panelColor', label: 'Fabric / Panel Color', type: 'auto-text', source: 'panelColor' },
+            { id: 'panelColorFinish', label: 'Fabric Finish', type: 'auto-text', source: 'panelColorFinish' }
+          ]
+        },
+        {
+          title: 'Options',
+          fields: [
+            { id: 'lightingSelections', label: 'Lighting', type: 'multi', options: ['LED', 'RGB', 'Other'], fullWidth: true },
+            { id: 'lightingOther', label: 'Other Lighting', type: 'text', fullWidth: true, showWhen: { field: 'lightingSelections', values: ['Other'] } },
+            { id: 'fabricNote', label: 'Fabric Note', type: 'text', fullWidth: true },
+            { id: 'packagingType', label: 'Packaging Type', type: 'select', options: ['Wooden Box', 'Heavy-Duty Nylon'] }
+          ]
+        }
+      ]
     }
   };
 
@@ -468,7 +606,7 @@
   }
 
   function ensurePdfRequestState(group = modelState.productGroup) {
-    const key = group === 'bio-rise' ? 'bio-rise' : 'b-cube';
+    const key = PDF_REQUEST_SCHEMAS[group] ? group : 'b-cube';
     if (!pdfRequestState[key]) pdfRequestState[key] = createPdfRequestState(key);
     return pdfRequestState[key];
   }
@@ -639,38 +777,44 @@
 
   function projectionFromPanelCount(panelCount, group = modelState.productGroup) {
     const spec = activeProductSpec(group);
+    if (group === 'pergo-rise') return Math.max(0, Math.round(Number(panelCount) || 0));
     const count = Math.max(0, Math.round(Number(panelCount) || 0));
     return count > 0 ? count * spec.panelPitch + spec.projectionOffset : 0;
   }
 
   function panelCountFromProjection(depth, group = modelState.productGroup) {
     const spec = activeProductSpec(group);
+    if (group === 'pergo-rise') return 1;
     const projection = Number(depth) || 0;
     if (projection <= 0) return 0;
     return Math.max(spec.panelMin, Math.round((projection - spec.projectionOffset) / spec.panelPitch));
   }
 
   function lamellaCountFromProjection(depth, group = modelState.productGroup) {
+    if (group === 'pergo-rise') return 1;
     return panelCountFromProjection(depth, group);
   }
 
   function modelReady(model = modelState) {
     const spec = activeProductSpec(model.productGroup);
     const height = Number(model.height);
-    return Number(model.width) >= spec.widthMin &&
+    const baseReady = Number(model.width) >= spec.widthMin &&
       Number(model.depth) >= spec.depthMin &&
-      height >= spec.heightMin && (!spec.heightMax || height <= spec.heightMax) &&
-      Number(model.panelCount) >= spec.panelMin;
+      height >= spec.heightMin && (!spec.heightMax || height <= spec.heightMax);
+    if (!baseReady) return false;
+    if (model.productGroup === 'pergo-rise') return Boolean(model.pergoRiseProject && model.pergoRiseProject.derived);
+    return Number(model.panelCount) >= spec.panelMin;
   }
 
   function readModel() {
+    const isPergoRise = (modelState.productGroup || 'b-cube') === 'pergo-rise';
     return {
       productGroup: modelState.productGroup || 'b-cube',
       width: modelState.width,
       depth: modelState.depth,
       height: modelState.height,
-      lamellaCount: Math.max(0, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth))),
-      panelCount: Math.max(0, Math.round(Number(modelState.panelCount) || 0)),
+      lamellaCount: isPergoRise ? 1 : Math.max(0, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth))),
+      panelCount: isPergoRise ? 1 : Math.max(0, Math.round(Number(modelState.panelCount) || 0)),
       orientations: [...modelState.orientations],
       postSections: modelState.postSections.map((section) => ({ ...section })),
       beamSection: { ...modelState.beamSection },
@@ -685,9 +829,18 @@
       colorMode: modelState.colorMode === 'ral' ? 'ral' : 'default',
       systemColor: { ...(modelState.systemColor || defaults.systemColor) },
       panelColor: { ...(modelState.panelColor || defaults.panelColor) },
+      systemCount: Math.max(1, Math.round(Number(modelState.systemCount) || 1)),
+      inputDrafts: { ...(modelState.inputDrafts || {}) },
+      options: {
+        panelColorIndependent: modelState.panelColorIndependent !== false,
+        panelFill: modelState.panelFill || 'EVET', motor: modelState.motor || 'Yok', remote: modelState.remote || 'Yok',
+        led: modelState.led || 'NO', dimmer: modelState.dimmer || 'HAYIR', parapet: modelState.parapet || 'HAYIR',
+        parapetHeight: modelState.parapetHeight || '', waterStandard: modelState.waterStandard || 'EVET', extras: modelState.extras || ''
+      },
+      pergoRiseProject: modelState.pergoRiseProject ? JSON.parse(JSON.stringify(modelState.pergoRiseProject)) : null,
       pdfRequest: pdfRequestPayload({
         productGroup: modelState.productGroup || 'b-cube',
-        width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: Math.max(0, Math.round(Number(modelState.panelCount) || 0)), lamellaCount: Math.max(0, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth))), orientations: [...modelState.orientations], postSections: modelState.postSections.map((section) => ({ ...section })), beamSection: { ...modelState.beamSection }, placements: JSON.parse(JSON.stringify(modelState.placements || {})), zipPlacements: JSON.parse(JSON.stringify(modelState.zipPlacements || {})), facadeProfiles: JSON.parse(JSON.stringify(modelState.facadeProfiles || {})), productsOpen: Boolean(modelState.productsOpen), productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})), panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {})), panelMasterOpen: Boolean(modelState.panelMasterOpen), glassPreferences: { ...glassPreferenceState() }, colorMode: modelState.colorMode === 'ral' ? 'ral' : 'default', systemColor: { ...(modelState.systemColor || defaults.systemColor) }, panelColor: { ...(modelState.panelColor || defaults.panelColor) }
+        width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: ((modelState.productGroup || 'b-cube') === 'pergo-rise') ? 1 : Math.max(0, Math.round(Number(modelState.panelCount) || 0)), lamellaCount: ((modelState.productGroup || 'b-cube') === 'pergo-rise') ? 1 : Math.max(0, Math.round(Number(modelState.panelCount) || panelCountFromProjection(modelState.depth))), orientations: [...modelState.orientations], postSections: modelState.postSections.map((section) => ({ ...section })), beamSection: { ...modelState.beamSection }, placements: JSON.parse(JSON.stringify(modelState.placements || {})), zipPlacements: JSON.parse(JSON.stringify(modelState.zipPlacements || {})), facadeProfiles: JSON.parse(JSON.stringify(modelState.facadeProfiles || {})), productsOpen: Boolean(modelState.productsOpen), productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})), panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {})), panelMasterOpen: Boolean(modelState.panelMasterOpen), glassPreferences: { ...glassPreferenceState() }, colorMode: modelState.colorMode === 'ral' ? 'ral' : 'default', systemColor: { ...(modelState.systemColor || defaults.systemColor) }, panelColor: { ...(modelState.panelColor || defaults.panelColor) }
       })
     };
   }
@@ -742,10 +895,18 @@
     normalizeModelColors();
     modelState.colorMode = normalizeColorMode();
     const defaultMode = modelState.colorMode === 'default';
+    const panelIndependent = modelState.panelColorIndependent !== false;
+    if (!panelIndependent) modelState.panelColor = { ...modelState.systemColor };
     setText(ids.systemColorValue, defaultMode ? 'Klasik Sistem Paleti' : `${modelState.systemColor.code} · ${finishLabel(modelState.systemColor.finish)}`);
-    setText(ids.panelColorValue, defaultMode ? 'Klasik Panel Yeşili' : `${modelState.panelColor.code} · ${finishLabel(modelState.panelColor.finish)}`);
+    setText(ids.panelColorValue, !panelIndependent ? (defaultMode ? 'Sistem Rengine Bağlı' : `${modelState.systemColor.code} · ${finishLabel(modelState.systemColor.finish)}`) : (defaultMode ? 'Klasik Panel Yeşili' : `${modelState.panelColor.code} · ${finishLabel(modelState.panelColor.finish)}`));
     setColorSwatch(ids.systemColorSwatch, defaultMode ? '#FF00FF' : modelState.systemColor.hex);
-    setColorSwatch(ids.panelColorSwatch, defaultMode ? '#7CFC00' : modelState.panelColor.hex);
+    setColorSwatch(ids.panelColorSwatch, !panelIndependent ? (defaultMode ? '#FF00FF' : modelState.systemColor.hex) : (defaultMode ? '#7CFC00' : modelState.panelColor.hex));
+    const panelCheckbox = $(ids.panelColorIndependent);
+    const panelTrigger = $(ids.panelColorTrigger);
+    const panelCell = panelTrigger && panelTrigger.closest ? panelTrigger.closest('.panel-color-cell') : null;
+    if (panelCheckbox) panelCheckbox.checked = panelIndependent;
+    if (panelTrigger) { panelTrigger.disabled = !panelIndependent; panelTrigger.setAttribute('aria-disabled', String(!panelIndependent)); }
+    if (panelCell) panelCell.classList.toggle('is-linked', !panelIndependent);
     const defaultButton = $(ids.defaultColorMode);
     const ralButton = $(ids.ralColorMode);
     if (defaultButton) {
@@ -761,8 +922,9 @@
 
   function setColorMode(mode) {
     modelState.colorMode = normalizeColorMode(mode);
+    if (modelState.panelColorIndependent === false) modelState.panelColor = { ...modelState.systemColor };
     updateColorControls();
-    renderViewer();
+    applyColorStateLive();
   }
 
   function colorTargetLabel(target = activeColorTarget) {
@@ -826,11 +988,15 @@
     if (!pendingColorSelection) return;
     const next = { ...pendingColorSelection, finish: normalizeColorFinish(finishValue, pendingColorSelection.finish) };
     modelState.colorMode = 'ral';
-    if (activeColorTarget === 'panel') modelState.panelColor = next; else modelState.systemColor = next;
+    if (activeColorTarget === 'panel') modelState.panelColor = next;
+    else {
+      modelState.systemColor = next;
+      if (modelState.panelColorIndependent === false) modelState.panelColor = { ...next };
+    }
     closeColorFinishDialog();
     closeColorPicker();
     updateColorControls();
-    renderViewer();
+    applyColorStateLive();
   }
 
   function renderRalColorOptions() {
@@ -889,34 +1055,18 @@
   }
 
   function depthControlValue() {
-    const preset = projectionPresetSelect();
     const custom = $(ids.freedomDepth);
-    if (!preset) return String(custom && custom.value || '').trim();
-    const presetValue = String(preset.value || '').trim();
-    const customValue = String(custom && custom.value || '').trim();
-    if (custom && !custom.hidden && customValue) return customValue;
-    return presetValue || customValue;
+    return String(custom && custom.value || '').trim();
   }
 
   function setDepthControlValue(value) {
     const preset = projectionPresetSelect();
     const custom = $(ids.freedomDepth);
     const text = String(value == null ? '' : value).trim();
-    if (!preset || !custom) return;
-    const sourceOptions = preset.options || preset.children || [];
-    const matching = Array.from(sourceOptions).some((option) => option.value === text);
-    if (text && matching) {
-      preset.value = text;
-      custom.value = text;
-      custom.hidden = true;
-    } else if (text) {
-      preset.value = '';
-      custom.value = text;
-      custom.hidden = false;
-    } else {
-      preset.value = '';
-      custom.value = '';
-      custom.hidden = true;
+    if (custom) { custom.hidden = false; custom.value = text; }
+    if (preset) {
+      const matching = Array.from(preset.options || []).some((option) => option.value === text);
+      preset.value = matching ? text : '';
     }
   }
 
@@ -932,7 +1082,7 @@
       const option = document.createElement('option');
       const panelCount = panelCountFromProjection(value, modelState.productGroup);
       option.value = String(value);
-      option.textContent = `${value} mm · ${panelCount} Panel`;
+      option.textContent = modelState.productGroup === 'pergo-rise' ? `${value} mm` : `${value} mm · ${panelCount} Panel`;
       list.appendChild(option);
       lastValue = value;
     }
@@ -940,15 +1090,175 @@
       const option = document.createElement('option');
       const panelCount = panelCountFromProjection(spec.depthMax, modelState.productGroup);
       option.value = String(spec.depthMax);
-      option.textContent = `${spec.depthMax} mm · ${panelCount} Panel · Önerilen Maksimum`;
+      option.textContent = modelState.productGroup === 'pergo-rise' ? `${spec.depthMax} mm · Önerilen Maksimum` : `${spec.depthMax} mm · ${panelCount} Panel · Önerilen Maksimum`;
       list.appendChild(option);
     }
 
     setDepthControlValue(previousValue);
+    renderProjectionComboMenu();
+  }
+
+  function normalizeMotorKey(value) {
+    return String(value || 'Yok').trim().toLocaleUpperCase('tr-TR');
+  }
+
+  function sanitizeDigitsOnly(value, maxLength = 2) {
+    return String(value == null ? '' : value).replace(/\D+/g, '').slice(0, maxLength);
+  }
+
+  function sanitizeSemicolonNumbers(value) {
+    const source = String(value == null ? '' : value);
+    let out = '';
+    for (const char of source) {
+      if (/\d/.test(char)) out += char;
+      else if (char === ';' && out && !/[;:]$/.test(out)) out += ';';
+    }
+    return out;
+  }
+
+  function sanitizeWidthTopology(value) {
+    const source = String(value == null ? '' : value).toLocaleUpperCase('tr-TR');
+    let out = '';
+    let noState = 0;
+    for (const char of source) {
+      if (noState === 2) continue;
+      if (/\d/.test(char) && noState === 0) { out += char; continue; }
+      if ((char === ';' || char === ':') && noState === 0 && out && !/[;:]$/.test(out)) { out += char; continue; }
+      if (char === 'N' && noState === 0 && (out === '' || /[;:]$/.test(out))) { out += 'N'; noState = 1; continue; }
+      if (char === 'O' && noState === 1) { out += 'O'; noState = 2; }
+    }
+    return out;
+  }
+
+  function closeP3dvCombos(except = null) {
+    [ids.projectionCombo, ids.motorCombo, ids.remoteCombo, ids.ledCombo].forEach((id) => {
+      const combo = $(id);
+      if (!combo || combo === except) return;
+      combo.classList.remove('is-open');
+      const menu = combo.querySelector('.p3dv-combo-menu');
+      if (menu) menu.hidden = true;
+    });
+  }
+
+  function renderComboOptions(menu, values, currentValue, onSelect, labelForValue = null) {
+    if (!menu) return;
+    const current = String(currentValue || '').trim().toLocaleUpperCase('tr-TR');
+    menu.innerHTML = '';
+    values.forEach((value) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'p3dv-combo-option' + (String(value).trim().toLocaleUpperCase('tr-TR') === current ? ' is-selected' : '');
+      const label = labelForValue ? labelForValue(value) : null;
+      button.innerHTML = `<span>${String(value)}</span>${label ? `<small>${label}</small>` : ''}`;
+      button.addEventListener('mousedown', (event) => event.preventDefault());
+      button.addEventListener('click', () => onSelect(String(value)));
+      menu.appendChild(button);
+    });
+  }
+
+  function setComboOpen(combo, menu, open) {
+    if (!combo || !menu) return;
+    closeP3dvCombos(open ? combo : null);
+    combo.classList.toggle('is-open', Boolean(open));
+    menu.hidden = !open;
+  }
+
+  function renderProjectionComboMenu() {
+    const menu = $(ids.projectionComboMenu);
+    const list = projectionPresetSelect();
+    if (!menu || !list) return;
+    const values = Array.from(list.options || []).map((option) => option.value).filter(Boolean);
+    renderComboOptions(menu, values, depthControlValue(), (value) => {
+      setDepthControlValue(value);
+      setComboOpen($(ids.projectionCombo), menu, false);
+      $(ids.freedomDepth).dispatchEvent(new Event('input', { bubbles: true }));
+      $(ids.freedomDepth).dispatchEvent(new Event('change', { bubbles: true }));
+      $(ids.freedomDepth).focus();
+    }, (value) => modelState.productGroup === 'pergo-rise' ? `${value} mm` : `${panelCountFromProjection(Number(value), modelState.productGroup)} Panel`);
+  }
+
+  function remoteOptionsForMotor() {
+    return FREEDOM_UI_REMOTE_OPTIONS[normalizeMotorKey($(ids.motorInput) && $(ids.motorInput).value)] || ['Yok'];
+  }
+
+  function renderMotorComboMenu() {
+    renderComboOptions($(ids.motorComboMenu), FREEDOM_UI_MOTOR_OPTIONS, $(ids.motorInput).value, (value) => {
+      $(ids.motorInput).value = value;
+      modelState.motor = value;
+      const remoteValues = remoteOptionsForMotor();
+      if (!remoteValues.some((item) => String(item).toLocaleUpperCase('tr-TR') === String($(ids.remoteInput).value).toLocaleUpperCase('tr-TR'))) $(ids.remoteInput).value = remoteValues[0] || 'Yok';
+      modelState.remote = $(ids.remoteInput).value;
+      const noMotor = normalizeMotorKey(value) === 'YOK';
+      $(ids.remoteInput).disabled = noMotor;
+      $(ids.remoteComboButton).disabled = noMotor;
+      setComboOpen($(ids.motorCombo), $(ids.motorComboMenu), false);
+      renderRemoteComboMenu();
+    });
+  }
+
+  function renderRemoteComboMenu() {
+    renderComboOptions($(ids.remoteComboMenu), remoteOptionsForMotor(), $(ids.remoteInput).value, (value) => {
+      $(ids.remoteInput).value = value;
+      modelState.remote = value;
+      setComboOpen($(ids.remoteCombo), $(ids.remoteComboMenu), false);
+      $(ids.remoteInput).focus();
+    });
+  }
+
+  function renderLedComboMenu() {
+    renderComboOptions($(ids.ledComboMenu), FREEDOM_UI_LED_OPTIONS, $(ids.ledInput).value, (value) => {
+      $(ids.ledInput).value = value;
+      modelState.led = value;
+      setComboOpen($(ids.ledCombo), $(ids.ledComboMenu), false);
+      $(ids.ledInput).focus();
+    });
+  }
+
+  function syncFreedomOptionStateFromUi() {
+    modelState.panelColorIndependent = !$(ids.panelColorIndependent) || Boolean($(ids.panelColorIndependent).checked);
+    modelState.panelFill = $(ids.panelFill) ? $(ids.panelFill).value : (modelState.panelFill || 'EVET');
+    modelState.motor = $(ids.motorInput) ? $(ids.motorInput).value : (modelState.motor || 'Yok');
+    modelState.remote = $(ids.remoteInput) ? $(ids.remoteInput).value : (modelState.remote || 'Yok');
+    modelState.led = $(ids.ledInput) ? $(ids.ledInput).value : (modelState.led || 'NO');
+    modelState.dimmer = $(ids.dimmerInput) ? $(ids.dimmerInput).value : (modelState.dimmer || 'HAYIR');
+    modelState.parapet = $(ids.parapetInput) ? $(ids.parapetInput).value : (modelState.parapet || 'HAYIR');
+    modelState.parapetHeight = $(ids.parapetHeightInput) ? $(ids.parapetHeightInput).value : (modelState.parapetHeight || '');
+    modelState.waterStandard = $(ids.waterStandardInput) ? $(ids.waterStandardInput).value : (modelState.waterStandard || 'EVET');
+    modelState.extras = $(ids.extrasInput) ? $(ids.extrasInput).value : (modelState.extras || '');
+  }
+
+  function syncFreedomOptionUi() {
+    if ($(ids.panelColorIndependent)) $(ids.panelColorIndependent).checked = modelState.panelColorIndependent !== false;
+    if ($(ids.panelFill)) $(ids.panelFill).value = modelState.panelFill || 'EVET';
+    if ($(ids.motorInput)) $(ids.motorInput).value = modelState.motor || 'Yok';
+    if ($(ids.remoteInput)) $(ids.remoteInput).value = modelState.remote || 'Yok';
+    if ($(ids.ledInput)) $(ids.ledInput).value = modelState.led || 'NO';
+    if ($(ids.dimmerInput)) $(ids.dimmerInput).value = modelState.dimmer || 'HAYIR';
+    if ($(ids.parapetInput)) $(ids.parapetInput).value = modelState.parapet || 'HAYIR';
+    if ($(ids.parapetHeightInput)) $(ids.parapetHeightInput).value = modelState.parapetHeight || '';
+    if ($(ids.waterStandardInput)) $(ids.waterStandardInput).value = modelState.waterStandard || 'EVET';
+    if ($(ids.extrasInput)) $(ids.extrasInput).value = modelState.extras || '';
+    const noMotor = normalizeMotorKey(modelState.motor) === 'YOK';
+    if ($(ids.remoteInput)) $(ids.remoteInput).disabled = noMotor;
+    if ($(ids.remoteComboButton)) $(ids.remoteComboButton).disabled = noMotor;
+    renderMotorComboMenu(); renderRemoteComboMenu(); renderLedComboMenu(); updateColorControls();
+  }
+
+  function syncPanelColorIndependence() {
+    modelState.panelColorIndependent = Boolean($(ids.panelColorIndependent) && $(ids.panelColorIndependent).checked);
+    if (!modelState.panelColorIndependent) modelState.panelColor = { ...modelState.systemColor };
+    updateColorControls();
+    applyColorStateLive();
   }
 
   function updateProductInputUi() {
     const spec = activeProductSpec();
+    const isPergoRise = modelState.productGroup === 'pergo-rise';
+    const isFreedomFamily = !isPergoRise;
+    if(document.body&&document.body.classList){
+      document.body.classList.toggle('is-pergo-rise', isPergoRise);
+      document.body.classList.toggle('is-freedom-family', isFreedomFamily);
+    }
     if ($(ids.productGroup)) $(ids.productGroup).value = modelState.productGroup;
     setText(ids.productSubgroup, spec.subgroupLabel);
     setText(ids.positionTitle, `${spec.modelLabel} Poz1`);
@@ -956,27 +1266,49 @@
     setText(ids.previewProductLabel, spec.modelLabel);
     $(ids.frame).title = `${spec.modelLabel} 3D viewer`;
 
-    $(ids.freedomWidth).min = String(spec.widthMin);
+    $(ids.freedomWidth).type = 'text';
+    $(ids.freedomWidth).inputMode = 'text';
+    $(ids.freedomWidth).removeAttribute('min');
     $(ids.freedomWidth).removeAttribute('max');
-    $(ids.freedomWidth).placeholder = `Önerilen maks. ${spec.widthMax} mm`;
+    $(ids.freedomWidth).placeholder = isPergoRise ? '4000 · 4000;3000 · 4000:800:3000' : 'Örn. 4000 veya 3000;100;2500;NO';
     setText(ids.freedomWidthLimitNote, `Önerilen maksimum: ${spec.widthMax} mm · Üzeri uyarıyla çizilir.`);
-    $(ids.freedomDepth).inputMode = 'decimal';
-    $(ids.freedomDepth).min = String(spec.depthMin);
+    $(ids.freedomDepth).type = 'text';
+    $(ids.freedomDepth).inputMode = 'numeric';
+    $(ids.freedomDepth).removeAttribute('min');
     $(ids.freedomDepth).removeAttribute('max');
-    $(ids.freedomDepth).placeholder = `Önerilen ${spec.depthMin}–${spec.depthMax} mm`;
+    $(ids.freedomDepth).hidden = false;
+    $(ids.freedomDepth).placeholder = isPergoRise ? 'Örn. 6000 veya 4500;5200' : `Örn. ${spec.depthListStart} veya ${spec.depthListStart};${spec.depthListStart + spec.depthStep}`;
     setText(ids.freedomDepthLimitNote, `Önerilen maksimum: ${spec.depthMax} mm · Üzeri uyarıyla çizilir.`);
-    $(ids.freedomHeight).min = String(spec.heightMin);
-    if (spec.heightMax) {
-      $(ids.freedomHeight).max = String(spec.heightMax);
-      $(ids.freedomHeight).placeholder = `Maks. ${spec.heightMax} mm`;
-    } else {
-      $(ids.freedomHeight).removeAttribute('max');
-      $(ids.freedomHeight).placeholder = 'Yükseklik (mm)';
-    }
+    $(ids.freedomHeight).type = 'text';
+    $(ids.freedomHeight).inputMode = 'numeric';
+    $(ids.freedomHeight).removeAttribute('min');
+    $(ids.freedomHeight).removeAttribute('max');
+    $(ids.freedomHeight).placeholder = isPergoRise ? '3200 veya 3200;3100' : (spec.heightMax ? `Örn. 3000 veya 3000;${spec.heightMax}` : 'Örn. 2700 veya 2700;2900');
     $(ids.freedomPanelCount).min = String(spec.panelMin);
     $(ids.freedomPanelCount).removeAttribute('max');
-    $(ids.freedomPanelCount).placeholder = `Önerilen ${spec.panelMin}–${spec.panelMax} adet`;
-    setText(ids.productFormula, `Açılım = Panel Sayısı × ${spec.panelPitch} + ${spec.projectionOffset}`);
+    $(ids.freedomPanelCount).placeholder = isPergoRise ? 'Pergo Rise için sabit 1' : `Önerilen ${spec.panelMin}–${spec.panelMax} adet`;
+    const panelCountLabel = $(ids.freedomPanelCount) && typeof $(ids.freedomPanelCount).closest === 'function' ? $(ids.freedomPanelCount).closest('label') : null;
+    if (panelCountLabel) panelCountLabel.hidden = isPergoRise;
+    $(ids.productFormula).hidden = false;
+    setText(ids.productFormula, isPergoRise ? 'PLMR Project Model → Derived Geometry → GLB Component Assembly · statik açık / arkada toplanmış kumaş' : `Açılım = Panel Sayısı × ${spec.panelPitch} + ${spec.projectionOffset}`);
+    if ($(ids.pergoRiseFields)) $(ids.pergoRiseFields).hidden = !isPergoRise;
+    if ($(ids.replay)) $(ids.replay).hidden = isPergoRise;
+    setText(ids.primaryWidthLabel, isPergoRise ? 'Poz / Grup Genişliği' : 'Genişlik');
+    setText(ids.primaryDepthLabel, isPergoRise ? 'Poz Başına Açılım' : 'Açılım');
+    setText(ids.primaryHeightLabel, isPergoRise ? 'Arka Yükseklik' : 'Yükseklik');
+    [ids.pergoFrontHeightRow, ids.pergoRayCountRow, ids.pergoPostCountRow].forEach((id) => { const row=$(id); if (row) row.hidden=!isPergoRise; });
+    const spacer=$(ids.freedomSystemCardSpacer); if (spacer) spacer.hidden=isPergoRise;
+    if (!isPergoRise && !String($(ids.pergoSystemCount).value || '').trim()) $(ids.pergoSystemCount).value=String(modelState.systemCount || 1);
+    if (isPergoRise && modelState.pergoRiseProject && modelState.pergoRiseProject.input) {
+      const raw = modelState.pergoRiseProject.input;
+      if (!String($(ids.freedomWidth).value || '').trim()) $(ids.freedomWidth).value = raw.width || '';
+      if (!String($(ids.freedomDepth).value || '').trim()) setDepthControlValue(raw.opening || '');
+      if (!String($(ids.freedomHeight).value || '').trim()) $(ids.freedomHeight).value = raw.rearHeight || '';
+      if (!String($(ids.pergoSystemCount).value || '').trim()) $(ids.pergoSystemCount).value = raw.systemCount || '';
+      if (!String($(ids.pergoFrontHeight).value || '').trim()) $(ids.pergoFrontHeight).value = raw.frontHeight || '';
+      if (!String($(ids.pergoRayCount).value || '').trim()) $(ids.pergoRayCount).value = raw.rayCount || '';
+      if (!String($(ids.pergoPostCount).value || '').trim()) $(ids.pergoPostCount).value = raw.postCount || '';
+    }
 
     $(ids.width).min = String(spec.widthMin);
     $(ids.width).removeAttribute('max');
@@ -985,6 +1317,7 @@
     $(ids.height).min = String(spec.heightMin);
     if (spec.heightMax) $(ids.height).max = String(spec.heightMax); else $(ids.height).removeAttribute('max');
     populateProjectionOptions();
+    syncFreedomOptionUi();
     ensurePdfRequestState(modelState.productGroup);
     renderPdfRequestForm();
   }
@@ -997,13 +1330,24 @@
   }
 
   function handleProductGroupChange() {
-    const nextGroup = $(ids.productGroup).value === 'bio-rise' ? 'bio-rise' : 'b-cube';
+    const requestedGroup = $(ids.productGroup).value;
+    const nextGroup = requestedGroup === 'bio-rise' ? 'bio-rise' : (requestedGroup === 'pergo-rise' ? 'pergo-rise' : 'b-cube');
     if (nextGroup !== modelState.productGroup) {
       applyProductGroupDefaults(nextGroup);
       modelState.depth = 0;
       modelState.panelCount = 0;
+      modelState.pergoRiseProject = nextGroup === 'pergo-rise' ? null : modelState.pergoRiseProject;
       setDepthControlValue('');
-      $(ids.freedomPanelCount).value = '';
+      $(ids.freedomPanelCount).value = nextGroup === 'pergo-rise' ? '1' : '';
+      if (nextGroup === 'pergo-rise') {
+        $(ids.freedomWidth).value = '';
+        setDepthControlValue('');
+        $(ids.freedomHeight).value = '';
+        $(ids.pergoSystemCount).value = '';
+        $(ids.pergoFrontHeight).value = '';
+        $(ids.pergoRayCount).value = '';
+        $(ids.pergoPostCount).value = '';
+      }
       const spec = activeProductSpec();
       if (spec.heightMax && Number(modelState.height) > spec.heightMax) {
         modelState.height = 0;
@@ -1020,6 +1364,7 @@
       depth: readFreedomNumber(ids.freedomDepth),
       panelCount: readFreedomNumber(ids.freedomPanelCount)
     });
+    updateToolbox();
     renderViewer();
   }
 
@@ -1031,6 +1376,12 @@
     if (!modelReady(model)) {
       setText(ids.positionSummary, 'Ölçüleri girin');
       setText(ids.productStatus, '3D model için sol paneldeki ölçüleri tamamlayın');
+      return model;
+    }
+    if (model.productGroup === 'pergo-rise') {
+      const counts = model.pergoRiseProject && model.pergoRiseProject.derived && model.pergoRiseProject.derived.counts || {};
+      setText(ids.positionSummary, `${counts.systems || 0} sistem / ${counts.positions || 0} poz / ${counts.rails || 0} ray / ${counts.posts || 0} dikme`);
+      setText(ids.productStatus, 'Pergo Rise parametrik statik assembly hazır · PLMR alanları, gerçek GLB kesitleri, PDF ve AR aynı veriyi kullanır');
       return model;
     }
     setText(ids.positionSummary, `Genişlik ${model.width} mm / Açılım ${model.depth} mm / Yükseklik ${model.height} mm / ${model.lamellaCount} panel`);
@@ -1157,14 +1508,17 @@
 
   function buildEmptyViewerHtml(message) {
     const safe = String(message || 'Ölçüleri girin').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
-    return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:radial-gradient(circle at top,#334155,#0f172a 60%);font-family:Segoe UI,Arial,sans-serif;color:#dbeafe}.empty{max-width:520px;padding:24px;text-align:center;border:1px solid rgba(125,211,252,.3);border-radius:14px;background:rgba(15,23,42,.7)}strong{display:block;margin-bottom:8px;font-size:20px}span{font-size:13px;line-height:1.5;color:#bfdbfe}</style></head><body><div class="empty"><strong>${productModelLabel()} · Modul 1</strong><span>${safe}</span></div></body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#eef3f7;font-family:Arial,Helvetica,sans-serif;color:#576574}.empty{display:grid;place-items:center;width:240px;height:380px;padding:18px;text-align:center;border:2px dashed #c6d4df;border-radius:16px;background:rgba(255,255,255,.10)}strong,.legacy-prompt{display:none}span{max-width:220px;font-size:13px;line-height:1.5;font-weight:800;color:#64717d}</style></head><body><div class="empty"><strong>${productModelLabel()} · Modul 1</strong><span>Önizleme için zorunlu ölçüleri doldurun.</span><i class="legacy-prompt">${safe}</i></div></body></html>`;
   }
 
   function renderViewer() {
     viewerLiveProductStateReady = false;
     viewerLivePanelMasterReady = false;
+    viewerLivePergoRiseReady = false;
+    viewerLiveColorStateReady = false;
     pendingLiveProductState = false;
     pendingLivePanelMasterState = false;
+    pendingLiveColorState = false;
     activeViewerSessionId = `p3dv-viewer-${Date.now()}-${++viewerSessionCounter}`;
     pruneProductStates();
     const model = updateReadouts();
@@ -1172,7 +1526,10 @@
     if (!modelReady(model)) {
       if (arButton) arButton.disabled = true;
       setMobileArStatus('Gerçek alan görünümü için önce geçerli bir 3D model oluşturun.', 'warning');
-      $(ids.frame).srcdoc = buildEmptyViewerHtml('Sol taraftaki Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
+      const emptyMessage = modelState.productGroup === 'pergo-rise'
+        ? 'Sol taraftaki Genişlik, Açılım ve Yükseklik alanlarını doldurun.'
+        : 'Sol taraftaki Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.';
+      $(ids.frame).srcdoc = buildEmptyViewerHtml(emptyMessage);
       return;
     }
     if (arButton) arButton.disabled = false;
@@ -1180,6 +1537,8 @@
     $(ids.frame).srcdoc = buildViewerHtml({
       ...model,
       freedomLouverUrl: model.productGroup === 'b-cube' ? freedomLouverBlobUrl() : '',
+      pergoRiseUrl: model.productGroup === 'pergo-rise' ? pergoRiseAssetPath : '',
+      pergoRiseProject: model.productGroup === 'pergo-rise' ? model.pergoRiseProject : null,
       viewerSessionId: activeViewerSessionId,
       cameraState: viewerCameraState,
       selectedZoneId,
@@ -1327,15 +1686,19 @@
     $(ids.freedomPanelCount).value = String(modelState.panelCount);
     closePositionDialog();
     renderViewer();
-    showRecommendedLimitWarnings({ width: nextWidth, depth: nextDepth, panelCount: modelState.panelCount });
+    showRecommendedLimitWarnings({ width: nextWidth, depth: nextDepth, height: nextHeight, panelCount: modelState.panelCount });
+  }
+
+  function firstNumericInputToken(rawValue) {
+    const token = String(rawValue == null ? '' : rawValue).split(/[;:]/).map((item) => item.trim()).find((item) => item && item.toUpperCase() !== 'NO');
+    if (!token) return null;
+    const value = Math.round(Number(token.replace(',', '.')));
+    return Number.isFinite(value) ? value : null;
   }
 
   function readFreedomNumber(id) {
     const source = id === ids.freedomDepth ? depthControlValue() : String($(id).value || '').trim();
-    const raw = String(source || '').trim().replace(',', '.');
-    if (!raw) return null;
-    const value = Math.round(Number(raw));
-    return Number.isFinite(value) ? value : null;
+    return firstNumericInputToken(source);
   }
 
   function setFreedomValidation(message, tone = 'error') {
@@ -1348,6 +1711,15 @@
   function recommendedLimitWarnings(values, group = modelState.productGroup) {
     const spec = activeProductSpec(group);
     const warnings = [];
+    if (group === 'pergo-rise') {
+      const width = Number(values && values.width);
+      const depth = Number(values && values.depth);
+      const height = Number(values && values.height);
+      if (Number.isFinite(width) && width > spec.widthMax) warnings.push(`Önerilen maksimum genişlik ${spec.widthMax} mm'dir; ${Math.round(width)} mm standart sınır dışıdır; çizime engel olmaz.`);
+      if (Number.isFinite(depth) && depth > spec.depthMax) warnings.push(`Önerilen maksimum açılım ${spec.depthMax} mm'dir; ${Math.round(depth)} mm standart sınır dışıdır; çizime engel olmaz.`);
+      if (Number.isFinite(height) && spec.heightMax && height > spec.heightMax) warnings.push(`Önerilen maksimum yükseklik ${spec.heightMax} mm'dir; ${Math.round(height)} mm standart sınır dışıdır; çizime engel olmaz.`);
+      return warnings;
+    }
     const width = Number(values && values.width);
     const depth = Number(values && values.depth);
     const panelCount = Number(values && values.panelCount);
@@ -1370,6 +1742,7 @@
   }
 
   function syncProjectionFromPanelCount() {
+    if (modelState.productGroup === 'pergo-rise') return;
     const count = readFreedomNumber(ids.freedomPanelCount);
     const spec = activeProductSpec();
     setFreedomValidation('');
@@ -1380,10 +1753,11 @@
     }
     const depth = projectionFromPanelCount(count);
     setDepthControlValue(depth);
-    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, panelCount: count });
+    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, height: readFreedomNumber(ids.freedomHeight), panelCount: count });
   }
 
   function syncPanelCountFromProjection() {
+    if (modelState.productGroup === 'pergo-rise') return;
     const depth = readFreedomNumber(ids.freedomDepth);
     const spec = activeProductSpec();
     setFreedomValidation('');
@@ -1394,17 +1768,64 @@
     }
     const panelCount = panelCountFromProjection(depth);
     $(ids.freedomPanelCount).value = String(panelCount);
-    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, panelCount });
+    showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth, height: readFreedomNumber(ids.freedomHeight), panelCount });
+  }
+
+  function pergoRiseInputText(id) { return String($(id) && $(id).value || '').trim(); }
+
+  function applyPergoRiseInputs() {
+    try {
+      const raw = {
+        ...(modelState.pergoRiseProject && modelState.pergoRiseProject.input || window.P3DVPergoRiseProduct.DEFAULT_RAW),
+        systemCount: pergoRiseInputText(ids.pergoSystemCount) || '1',
+        width: pergoRiseInputText(ids.freedomWidth),
+        opening: pergoRiseInputText(ids.freedomDepth),
+        rearHeight: pergoRiseInputText(ids.freedomHeight),
+        frontHeight: pergoRiseInputText(ids.pergoFrontHeight),
+        rayCount: pergoRiseInputText(ids.pergoRayCount),
+        postCount: pergoRiseInputText(ids.pergoPostCount)
+      };
+      if (!raw.width || !raw.opening || !raw.rearHeight || !raw.frontHeight) {
+        setFreedomValidation('Genişlik, açılım, arka yükseklik ve ön yükseklik alanlarını doldurun.');
+        return false;
+      }
+      const canonical = window.P3DVPergoRiseProduct.create(raw);
+      const derived = window.P3DVPergoRiseDerivedGeometry.build(canonical);
+      const hadLiveViewer = viewerLivePergoRiseReady && modelState.productGroup === 'pergo-rise' && modelReady(modelState);
+      modelState.pergoRiseProject = { ...canonical, derived };
+      // Project nominal width remains the PLMR normalized value; the assembly envelope may
+      // include the documented +100 mm gutter overhang and must not overwrite project input.
+      modelState.width = Math.round(Number(canonical.normalized.width) || derived.envelope.width);
+      modelState.depth = Math.round(derived.envelope.depth);
+      modelState.height = Math.round(derived.envelope.height);
+      modelState.panelCount = 1;
+      setFreedomValidation('');
+      renderPdfRequestForm();
+      updateReadouts();
+      if (hadLiveViewer) {
+        pergoRiseRevision += 1;
+        postViewerMessage('set-pergo-rise-project', { revision: pergoRiseRevision, project: modelState.pergoRiseProject });
+      } else {
+        renderViewer();
+      }
+      return true;
+    } catch (error) {
+      console.error('Pergo Rise project normalization failed.', error);
+      setFreedomValidation(`PLMR kuralı: ${error && error.message ? error.message : 'Geçersiz parametrik veri.'}`);
+      return false;
+    }
   }
 
   function applyFreedomInputs() {
     const spec = activeProductSpec();
+    const isPergoRise = modelState.productGroup === 'pergo-rise';
+    if (isPergoRise) return applyPergoRiseInputs();
     const width = readFreedomNumber(ids.freedomWidth);
     const depth = readFreedomNumber(ids.freedomDepth);
     const height = readFreedomNumber(ids.freedomHeight);
-    const panelCount = readFreedomNumber(ids.freedomPanelCount);
+    const panelCount = isPergoRise ? 1 : readFreedomNumber(ids.freedomPanelCount);
     if (width === null || depth === null || height === null || panelCount === null) {
-      setFreedomValidation('Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
+      setFreedomValidation(isPergoRise ? 'Genişlik, Açılım ve Yükseklik alanlarını doldurun.' : 'Genişlik, Açılım, Yükseklik ve Panel Sayısı alanlarını doldurun.');
       return false;
     }
     if (width < spec.widthMin) {
@@ -1419,7 +1840,7 @@
       setFreedomValidation(spec.heightMax ? `Yükseklik ${spec.heightMin}–${spec.heightMax} mm arasında olmalıdır.` : `Yükseklik en az ${spec.heightMin} mm olmalıdır.`);
       return false;
     }
-    if (panelCount < spec.panelMin) {
+    if (!isPergoRise && panelCount < spec.panelMin) {
       setFreedomValidation(`Panel sayısı en az ${spec.panelMin} olmalıdır.`);
       return false;
     }
@@ -1428,14 +1849,17 @@
     modelState.depth = depth;
     modelState.height = height;
     modelState.panelCount = panelCount;
-    if (!dimensionsFit(readModel())) {
+    modelState.systemCount = Math.max(1, Math.round(firstNumericInputToken($(ids.pergoSystemCount).value) || 1));
+    modelState.inputDrafts = { width: String($(ids.freedomWidth).value || ''), depth: depthControlValue(), height: String($(ids.freedomHeight).value || '') };
+    syncFreedomOptionStateFromUi();
+    if (!isPergoRise && !dimensionsFit(readModel())) {
       Object.assign(modelState, previous);
       setFreedomValidation('Bu ölçüler mevcut profil kesitleri için yetersiz.');
       return false;
     }
     renderViewer();
     renderPdfRequestForm();
-    showRecommendedLimitWarnings({ width, depth, panelCount });
+    showRecommendedLimitWarnings({ width, depth, height: readFreedomNumber(ids.freedomHeight), panelCount });
     return true;
   }
 
@@ -1486,6 +1910,22 @@
     if (!postLivePanelMasterOpen()) pendingLivePanelMasterState = true;
   }
 
+  function postLiveColorState() {
+    if (!viewerLiveColorStateReady) return false;
+    const revision = ++liveStateRevision;
+    return postViewerMessage('set-color-state', {
+      revision,
+      colorMode: normalizeColorMode(modelState.colorMode),
+      systemColor: { ...(modelState.systemColor || defaults.systemColor) },
+      panelColor: { ...(modelState.panelColor || defaults.panelColor) }
+    });
+  }
+
+  function applyColorStateLive() {
+    if (!modelReady(readModel())) return;
+    if (!postLiveColorState()) pendingLiveColorState = true;
+  }
+
   function flushPendingViewerState() {
     if (pendingLiveProductState && viewerLiveProductStateReady) {
       pendingLiveProductState = false;
@@ -1494,6 +1934,10 @@
     if (pendingLivePanelMasterState && viewerLivePanelMasterReady) {
       pendingLivePanelMasterState = false;
       postLivePanelMasterOpen();
+    }
+    if (pendingLiveColorState && viewerLiveColorStateReady) {
+      pendingLiveColorState = false;
+      postLiveColorState();
     }
   }
 
@@ -1534,6 +1978,70 @@
     });
   }
 
+  function closeLargeProductStateMenu() {
+    const menu = $(ids.largePreviewProductStateMenu);
+    const button = $(ids.largePreviewProductStateMenuButton);
+    if (menu) menu.hidden = true;
+    if (button) button.setAttribute('aria-expanded', 'false');
+  }
+
+  function renderLargeProductStateMenu() {
+    const menu = $(ids.largePreviewProductStateMenu);
+    if (!menu) return;
+    menu.innerHTML = '';
+    const addRow = (label, open, onToggle) => {
+      const row = document.createElement('div');
+      row.className = 'large-product-state-row';
+      const text = document.createElement('span'); text.textContent = label;
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = open ? 'AÇIK' : 'KAPALI';
+      button.classList.toggle('is-closed', !open);
+      button.addEventListener('click', (event) => { event.stopPropagation(); onToggle(!open); });
+      row.appendChild(text); row.appendChild(button); menu.appendChild(row);
+    };
+    addRow('Ana Çatı Panelleri', Boolean(modelState.panelMasterOpen), (open) => { modelState.panelMasterOpen = open; applyPanelMasterOpenLive(); });
+    const entries = allProductEntries().sort((a, b) => a.key.localeCompare(b.key, 'tr'));
+    const facadeCounts = {};
+    entries.forEach(({ key, zoneId, placement }) => {
+      const facadeId = String(zoneId).split('|')[0];
+      const index = facadeCounts[facadeId] || 0; facadeCounts[facadeId] = index + 1;
+      addRow(productZoneLabel(zoneId, placement, index), effectiveProductOpen(key), (open) => {
+        modelState.productOpenStates[key] = open;
+        if (placement && placement.type === 'zip') modelState.panelStates[key] = open;
+        applyProductOpenStateLive();
+      });
+    });
+    if (!entries.length) {
+      const empty = document.createElement('div'); empty.className = 'large-product-state-empty'; empty.textContent = 'Yerleştirilmiş cephe ürünü yok.'; menu.appendChild(empty);
+    }
+  }
+
+  function updateLargeProductStateControl() {
+    const control = $(ids.largePreviewProductStateControl);
+    const button = $(ids.largePreviewProductState);
+    const menuButton = $(ids.largePreviewProductStateMenuButton);
+    const value = $(ids.largePreviewProductStateValue);
+    const open = Boolean(modelState.productsOpen && modelState.panelMasterOpen);
+    const supported = modelState.productGroup !== 'pergo-rise';
+    if (control) {
+      control.classList.toggle('is-open', open && supported);
+      control.classList.toggle('is-closed', !open && supported);
+      control.classList.toggle('is-disabled', !supported);
+    }
+    if (button) {
+      button.disabled = !supported;
+      button.setAttribute('aria-disabled', String(!supported));
+      button.setAttribute('aria-pressed', String(open));
+    }
+    if (menuButton) {
+      menuButton.disabled = !supported;
+      menuButton.setAttribute('aria-disabled', String(!supported));
+    }
+    if (value) value.textContent = supported ? (open ? 'AÇIK' : 'KAPALI') : 'PASİF';
+    if (!supported) closeLargeProductStateMenu();
+    else renderLargeProductStateMenu();
+  }
+
   function updateToolbox() {
     $(ids.toolboxIntermediateDimensions).checked = dimensionVisibility.intermediate !== false;
     $(ids.toolboxMainDimensions).checked = dimensionVisibility.main !== false;
@@ -1542,6 +2050,7 @@
     $(ids.replay).classList.toggle('is-closed', !modelState.productsOpen);
     if ($(ids.panelMaster)) $(ids.panelMaster).checked = Boolean(modelState.panelMasterOpen);
     updateProductOpenList();
+    updateLargeProductStateControl();
     Object.entries(TOOLBOX_SELECTION_CONFIG).forEach(([mode, config]) => {
       const button = $(config.buttonId);
       if (button) button.classList.toggle('is-active-command', toolboxSelectionMode === mode);
@@ -1551,6 +2060,20 @@
     if (config) {
       $(ids.selectionBannerTitle).textContent = config.title;
       $(ids.selectionBannerText).textContent = `${config.hint} · ${toolboxSelectionItems.size} seçim`;
+    }
+    const allDims = $(ids.largePreviewShowAllDims);
+    if (allDims) {
+      const on = dimensionVisibility.intermediate !== false;
+      allDims.setAttribute('aria-pressed', String(on));
+      allDims.classList.toggle('is-on', on);
+      allDims.classList.toggle('is-off', !on);
+    }
+    const mainDims = $(ids.largePreviewShowMainDims);
+    if (mainDims) {
+      const on = dimensionVisibility.main !== false;
+      mainDims.setAttribute('aria-pressed', String(on));
+      mainDims.classList.toggle('is-on', on);
+      mainDims.classList.toggle('is-off', !on);
     }
   }
 
@@ -2125,7 +2648,8 @@
     document.body.classList.toggle('preview-expanded', next);
     const button = $(ids.previewExpand);
     if (button) button.setAttribute('aria-pressed', String(next));
-    setText(ids.previewExpandLabel, next ? 'Veri Girişine Dön' : 'Önizlemeyi Büyüt');
+    setText(ids.previewExpandLabel, next ? 'Önizlemeyi Küçült' : 'Önizlemeyi Büyüt');
+    if (next) setLargePreviewToolboxOpen(true);
     window.setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
       postViewerMessage('viewport-resized');
@@ -2134,6 +2658,53 @@
 
   function togglePreviewExpanded() {
     setPreviewExpanded(!document.body.classList.contains('preview-expanded'));
+  }
+
+  function setLargePreviewToolboxOpen(open) {
+    const toolbox = $(ids.largePreviewToolbox);
+    const workspace = $(ids.previewWorkspace);
+    const toggle = $(ids.largePreviewToolboxToggle);
+    const next = Boolean(open);
+    if (toolbox) toolbox.classList.toggle('is-open', next);
+    if (workspace) workspace.classList.toggle('is-toolbox-collapsed', !next);
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', String(next));
+      toggle.setAttribute('aria-label', next ? "Toolbox'ı daralt" : "Toolbox'ı aç");
+    }
+    window.setTimeout(() => postViewerMessage('viewport-resized'), 40);
+  }
+
+  function toggleLargePreviewBoolean(button) {
+    if (!button || button.disabled) return;
+    const next = button.getAttribute('aria-pressed') !== 'true';
+    button.setAttribute('aria-pressed', String(next));
+    button.classList.toggle('is-on', next);
+    button.classList.toggle('is-off', !next);
+    const state = button.querySelector('strong');
+    if (state) state.textContent = next ? 'EVET' : 'HAYIR';
+  }
+
+  function setLargePreviewCommandStatus(message) {
+    const status = $(ids.productStatus);
+    if (!status) return;
+    status.textContent = String(message || 'Komut hazır.');
+    window.setTimeout(() => updateReadouts(), 2200);
+  }
+
+  function runDrawingCheck() {
+    const model = readModel();
+    if (!modelReady(model)) {
+      setLargePreviewCommandStatus('Çizim kontrolü: zorunlu ölçüler eksik.');
+      return false;
+    }
+    const pergo = model.productGroup === 'pergo-rise' && model.pergoRiseProject && model.pergoRiseProject.derived;
+    const componentCount = pergo && pergo.counts ? Number(pergo.counts.components || pergo.counts.componentInstances || 0) : 0;
+    setLargePreviewCommandStatus(pergo ? `Çizim kontrolü tamamlandı · ${componentCount || 'parametrik'} component · hata yok.` : 'Çizim kontrolü tamamlandı · model hazır.');
+    return true;
+  }
+
+  function invokeLargePreviewPlaceholder(label) {
+    setLargePreviewCommandStatus(`${label}: hücre işlevi sonraki tanım aşamasında bağlanacak.`);
   }
 
   async function toggleBrowserFullscreen() {
@@ -2167,13 +2738,17 @@
   }
 
   function toggleProductsOpen() {
+    if (modelState.productGroup === 'pergo-rise') return;
     const nextOpen = !modelState.productsOpen;
     modelState.productsOpen = nextOpen;
-    allProductEntries().forEach(({ key, zoneId, placement }) => {
+    modelState.panelMasterOpen = nextOpen;
+    allProductEntries().forEach(({ key, placement }) => {
       modelState.productOpenStates[key] = nextOpen;
       if (placement && placement.type === 'zip') modelState.panelStates[key] = nextOpen;
     });
-    applyProductOpenStateLive();
+    updateToolbox();
+    if (!postLiveProductOpenState()) pendingLiveProductState = true;
+    if (!postLivePanelMasterOpen()) pendingLivePanelMaster = true;
   }
 
   let activeZone = null;
@@ -3375,7 +3950,7 @@
     if ($(ids.quickTestStatus)) {
       $(ids.quickTestStatus).textContent = `Test ${index} hazır: ${config.description}`;
     }
-    showRecommendedLimitWarnings({ width: modelState.width, depth: modelState.depth, panelCount: modelState.panelCount });
+    showRecommendedLimitWarnings({ width: modelState.width, depth: modelState.depth, height: modelState.height, panelCount: modelState.panelCount });
   }
 
   function profileSummary(profile) {
@@ -3436,7 +4011,10 @@
     context.fillText(productModelLabel(model.productGroup), 85, 205);
     context.font = '500 27px Segoe UI, Arial';
     context.fillText(`Genişlik ${model.width} mm · Açılım ${model.depth} mm · Yükseklik ${model.height} mm`, 85, 260);
-    context.fillText(`${model.panelCount || model.lamellaCount} panel · 3D viewer görüntüsü yüklenemediğinde güvenli PDF yedeği`, 85, 310);
+    const fallbackDetail = model.productGroup === 'pergo-rise' && model.pergoRiseProject && model.pergoRiseProject.derived
+      ? `${model.pergoRiseProject.derived.counts.systems || 0} sistem · ${model.pergoRiseProject.derived.counts.positions || 0} poz · parametrik 3D viewer güvenli PDF yedeği`
+      : `${model.panelCount || model.lamellaCount} panel · 3D viewer görüntüsü yüklenemediğinde güvenli PDF yedeği`;
+    context.fillText(fallbackDetail, 85, 310);
     context.fillStyle = '#94a3b8';
     context.font = '500 22px Segoe UI, Arial';
     context.fillText('Gerçek 3D görüntü, viewer hazır olduğunda otomatik olarak bu alanın yerine alınır.', 85, 625);
@@ -3480,6 +4058,71 @@
   function systemInfoSections(model) {
     const spec = activeProductSpec(model.productGroup);
     const sections = [];
+    if (model.productGroup === 'pergo-rise' && model.pergoRiseProject && model.pergoRiseProject.derived) {
+      const project = model.pergoRiseProject;
+      const derived = project.derived;
+      const counts = derived.counts || {};
+      const input = project.input || {};
+      const systems = Array.isArray(derived.systems) ? derived.systems : [];
+      const groups = Array.isArray(derived.independentGroups) ? derived.independentGroups : [];
+      sections.push({
+        title: 'Pergo Rise · Parametrik Proje',
+        rows: filterReportRows([
+          { label: 'Ürün', value: spec.modelLabel },
+          { label: 'Project Schema', value: project.schema },
+          { label: 'Assembly Schema', value: derived.schema },
+          { label: 'Project Hash', value: derived.projectHash || project.hash },
+          { label: 'Statik Durum', value: derived.staticState },
+          { label: 'Sistem / Poz', value: `${counts.systems || systems.length} sistem · ${counts.positions || systems.length} poz` },
+          { label: 'Bağımsız Gruplar', value: groups.length ? groups.map(group => `${group.groupId || group.groupIndex + 1}: ${mmText(Number(group.outerEndX) - Number(group.outerStartX))}`).join(' | ') : 'Tek bağlı grup' },
+          { label: 'Toplam Nominal Genişlik', value: mmText(project.normalized && project.normalized.width || model.width) },
+          { label: 'Maksimum Açılım', value: mmText(derived.envelope && derived.envelope.depth || model.depth) },
+          { label: 'Maksimum Arka Yükseklik', value: mmText(derived.envelope && derived.envelope.height || model.height) }
+        ])
+      });
+      sections.push({
+        title: 'Pergo Rise · Component Assembly',
+        rows: filterReportRows([
+          { label: 'Gerçek GLB Ray Profilleri', value: String(counts.rails || 0) },
+          { label: 'Gerçek GLB Dikmeler', value: String(counts.posts || 0) },
+          { label: '3D Arka Duvar Parçaları', value: String(counts.walls || 0) },
+          { label: 'Duvar Bağlantı Adayları', value: String(counts.wallConnections || 0) },
+          { label: 'Kumaş Profilleri', value: String(counts.fabricProfiles || 0) },
+          { label: 'Oluk / Grup Profilleri', value: String((derived.components || []).filter(item => item.kind === 'gutter').length) },
+          { label: 'Component Instance', value: String((derived.components || []).length) },
+          { label: 'Koordinat Sistemi', value: 'X=genişlik · Y=yükseklik · Z=açılım · birim=mm' }
+        ])
+      });
+      sections.push({
+        title: 'Pergo Rise · Poz Parametreleri',
+        rows: systems.map((system, index) => ({
+          label: `Poz ${index + 1}`,
+          value: `${mmText(system.width)} genişlik · ${mmText(system.opening)} açılım · arka ${mmText(system.rearHeight)} · ön ${mmText(system.frontHeight)} · eğim ${Number(system.slopeDegrees || 0).toFixed(2)}° · ${system.railCount || 0} ray · akslar ${(system.railAxes || []).map(axis => Math.round(Number(axis))).join(', ') || '—'} mm`
+        }))
+      });
+      sections.push({
+        title: 'Pergo Rise · Malzeme ve Opsiyonlar',
+        rows: filterReportRows([
+          { label: 'Sistem Rengi', value: input.structureColor || (model.systemColor && model.systemColor.code) },
+          { label: 'Kumaş', value: input.fabric },
+          { label: 'Kumaş Profilleri', value: input.fabricProfiles },
+          { label: 'Motor', value: input.motor },
+          { label: 'Kumanda', value: input.remote },
+          { label: 'LED', value: input.led },
+          { label: 'Dimmer', value: input.dimmer },
+          { label: 'Arka Taşıyıcı', value: input.__rearSupport && input.__rearSupport.type === 'wall' ? 'Duvar' : (input.__rearSupport && input.__rearSupport.type) },
+          { label: 'Ek Bilgiler', value: input.extras }
+        ])
+      });
+      if (Array.isArray(derived.unresolvedProductionFields) && derived.unresolvedProductionFields.length) {
+        sections.push({
+          title: 'Pergo Rise · Doğrulama Notları',
+          rows: derived.unresolvedProductionFields.map((value, index) => ({ label: `Not ${index + 1}`, value }))
+        });
+      }
+      return sections;
+    }
+
     sections.push({
       title: 'Ana Sistem · Project Details',
       rows: filterReportRows([
@@ -3669,7 +4312,10 @@
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(10);
         pdf.setTextColor(31, 41, 55);
-        const subtitle = `${productModelLabel(model.productGroup)} · ${mmText(model.width)} × ${mmText(model.depth)} × ${mmText(model.height)} · ${model.panelCount || model.lamellaCount} panel`;
+        const pergoCounts = model.pergoRiseProject && model.pergoRiseProject.derived && model.pergoRiseProject.derived.counts || {};
+        const subtitle = model.productGroup === 'pergo-rise'
+          ? `${productModelLabel(model.productGroup)} · ${pergoCounts.systems || 0} sistem · ${pergoCounts.positions || 0} poz · ${pergoCounts.rails || 0} ray · ${pergoCounts.posts || 0} dikme`
+          : `${productModelLabel(model.productGroup)} · ${mmText(model.width)} × ${mmText(model.depth)} × ${mmText(model.height)} · ${model.panelCount || model.lamellaCount} panel`;
         pdf.text(subtitle, margin, 20);
         let y = 28;
         group.forEach((view) => {
@@ -3694,9 +4340,11 @@
       systemInfoSections(model).forEach((section) => {
         y = drawSectionTable(pdf, section.title, section.rows, y, margin, usableWidth);
       });
-      buildFacadeSections(model).forEach((section) => {
-        y = drawSectionTable(pdf, section.title, section.rows, y, margin, usableWidth);
-      });
+      if (model.productGroup !== 'pergo-rise') {
+        buildFacadeSections(model).forEach((section) => {
+          y = drawSectionTable(pdf, section.title, section.rows, y, margin, usableWidth);
+        });
+      }
       pdf.save(pdfFileName(model));
     } catch (error) {
       console.error('Ürün listesi PDF üretimi başarısız oldu.', error);
@@ -4646,6 +5294,8 @@
     if (event.data.type === 'viewer-ready') {
       viewerLiveProductStateReady = Boolean(event.data.liveProductState);
       viewerLivePanelMasterReady = Boolean(event.data.livePanelMaster);
+      viewerLivePergoRiseReady = Boolean(event.data.livePergoRise);
+      viewerLiveColorStateReady = Boolean(event.data.liveColorState);
       flushPendingViewerState();
     }
     if (event.data.type === 'beam-section-change-request') {
@@ -4689,13 +5339,95 @@
     }
   });
 
-  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, freedomLouverUrl, viewerSessionId, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
+  function buildPergoRiseWebGLViewerHtml({ pergoRiseProject, viewerSessionId, cameraState, systemColor, panelColor, dimensionVisibility }) {
+    const projectJson = safeScriptJson(pergoRiseProject || null);
+    const sessionJson = safeScriptJson(viewerSessionId || '');
+    const cameraJson = safeScriptJson(cameraState || null);
+    const systemColorJson = safeScriptJson(systemColor && systemColor.hex ? systemColor.hex : (systemColor || '#303943'));
+    const panelColorJson = safeScriptJson(panelColor && panelColor.hex ? panelColor.hex : (panelColor || '#b5b8bd'));
+    const dimensionVisibilityJson = safeScriptJson(dimensionVisibility || { intermediate: false, main: true });
+    return `<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pergo Rise Parametrik Static 3D Assembly</title>
+<style>
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 45% 20%,#26364b 0,#101827 48%,#080d16 100%);font-family:Segoe UI,Arial,sans-serif;color:#e5eefb}
+#pergoRiseCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#pergoStatus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:min(560px,82vw);padding:15px 18px;border:1px solid rgba(125,211,252,.34);border-radius:14px;background:rgba(8,15,28,.88);box-shadow:0 18px 55px rgba(0,0,0,.36);font-size:13px;line-height:1.55;text-align:center;z-index:6}
+#pergoStatus[hidden]{display:none}
+#pergoBadge{position:absolute;left:12px;bottom:12px;padding:7px 10px;border:1px solid rgba(125,211,252,.25);border-radius:9px;background:rgba(8,15,28,.72);backdrop-filter:blur(5px);font-size:11px;letter-spacing:.02em;pointer-events:none;z-index:4}
+#pergoDimensions{position:absolute;inset:0;pointer-events:none;z-index:5;color:#ff5a5f;font:700 12px Segoe UI,Arial,sans-serif;text-shadow:0 1px 2px #000}
+#pergoDimensions[hidden]{display:none}
+.pergo-dim{position:absolute;padding:4px 7px;border:1px solid rgba(255,90,95,.72);border-radius:7px;background:rgba(7,13,23,.76);white-space:nowrap}
+.pergo-dim.width{left:50%;bottom:42px;transform:translateX(-50%)}
+.pergo-dim.depth{right:12px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+.pergo-dim.rear{left:12px;top:12px}
+.pergo-dim.front{right:12px;top:12px}
+.pergo-dim.intermediate{left:12px;top:48px;max-width:min(64vw,620px);white-space:normal;line-height:1.45;color:#ffb347;border-color:rgba(255,179,71,.7)}
+#pergoArControls{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);display:none;flex-wrap:wrap;justify-content:center;gap:6px;width:min(94vw,620px);padding:8px;border-radius:12px;background:rgba(5,10,18,.76);z-index:20}
+.p3dv-ar-active #pergoArControls{display:flex}
+#pergoArControls button{min-width:42px;height:38px;border:1px solid rgba(255,255,255,.28);border-radius:8px;background:rgba(20,31,48,.9);color:#fff;font:600 13px Segoe UI,Arial,sans-serif}
+#pergoArControls .exit{background:#7f1d1d}
+</style>
+</head>
+<body>
+<canvas id="pergoRiseCanvas" aria-label="Pergo Rise parametrik 3D assembly"></canvas>
+<div id="pergoStatus">GLB profil ve aksesuar şablonları yükleniyor…</div>
+<div id="pergoBadge">PERGO RISE · PLMR PARAMETRİK ASSEMBLY · STATIC</div>
+<div id="pergoDimensions" aria-label="Pergo Rise teknik ölçüleri"></div>
+<div id="pergoArControls" hidden>
+<button id="pergoArForward" title="İleri">↑</button><button id="pergoArBack" title="Geri">↓</button>
+<button id="pergoArLeft" title="Sol">←</button><button id="pergoArRight" title="Sağ">→</button>
+<button id="pergoArDown" title="Aşağı">−Y</button><button id="pergoArUp" title="Yukarı">+Y</button>
+<button id="pergoArRotateLeft" title="Sola döndür">↶</button><button id="pergoArRotateRight" title="Sağa döndür">↷</button>
+<button id="pergoArExit" class="exit">AR Çıkış</button>
+</div>
+<script src="./assets/pergo-rise/component-templates-data.js"></scr` + `ipt>
+<script src="./products/pergo-rise/pergo-rise-webgl-viewer.js"></scr` + `ipt>
+<scr` + `ipt>
+(function(){
+  const status=document.getElementById('pergoStatus');
+  async function start(){
+    try{
+      if(!window.P3DVPergoRiseWebGLViewer)throw new Error('Pergo Rise WebGL viewer module is unavailable.');
+      window.__P3DV_PERGO_CONTROLLER__=await window.P3DVPergoRiseWebGLViewer.mount({
+        canvas:document.getElementById('pergoRiseCanvas'),
+        sessionId:${sessionJson},
+        project:${projectJson},
+        cameraState:${cameraJson},
+        systemColor:${systemColorJson},
+        panelColor:${panelColorJson},
+        dimensionVisibility:${dimensionVisibilityJson},
+        manifestUrl:'./assets/pergo-rise/component-templates.json',
+        binaryUrl:'./assets/pergo-rise/component-templates.bin'
+      });
+      status.hidden=true;
+    }catch(error){
+      status.hidden=false;
+      status.textContent='Pergo Rise parametrik WebGL assembly oluşturulamadı: '+(error&&error.message?error.message:String(error));
+      try{parent.postMessage({source:'product-3d-viewer',type:'viewer-error',sessionId:${sessionJson},message:status.textContent},'*');}catch(postError){}
+    }
+  }
+  start();
+})();
+</scr` + `ipt>
+</body>
+</html>`;
+  }
+
+  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, freedomLouverUrl, pergoRiseUrl, pergoRiseProject, viewerSessionId, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
     const W = width;
     const D = depth;
     const H = height;
     const LC = lamellaCount;
-    const productGroupJson = safeScriptJson(productGroup === 'bio-rise' ? 'bio-rise' : 'b-cube');
-    const productModelTitle = productGroup === 'bio-rise' ? 'BIO-RISE 3D' : 'B-CUBE FREEDOM 3D';
+    const normalizedProductGroup = productGroup === 'bio-rise' ? 'bio-rise' : (productGroup === 'pergo-rise' ? 'pergo-rise' : 'b-cube');
+    const productGroupJson = safeScriptJson(normalizedProductGroup);
+    const productModelTitle = normalizedProductGroup === 'bio-rise' ? 'BIO-RISE 3D' : (normalizedProductGroup === 'pergo-rise' ? 'PERGO RISE 3D' : 'B-CUBE FREEDOM 3D');
+    if (normalizedProductGroup === 'pergo-rise') {
+      return buildPergoRiseWebGLViewerHtml({ pergoRiseProject, viewerSessionId, cameraState, systemColor, panelColor, dimensionVisibility: showDimensionVisibility });
+    }
     const [O1, O2, O3, O4] = orientations;
     const postJson = safeScriptJson(postSections);
     const beamJson = safeScriptJson(beamSection);
@@ -4703,6 +5435,8 @@
     const zipPlacementsJson = safeScriptJson(zipPlacements || {});
     const facadeProfilesJson = safeScriptJson(facadeProfiles || {});
     const freedomLouverUrlJson = safeScriptJson(freedomLouverUrl || '');
+    const pergoRiseUrlJson = safeScriptJson(pergoRiseUrl || '');
+    const pergoRiseProjectJson = safeScriptJson(pergoRiseProject || null);
     const viewerSessionIdJson = safeScriptJson(viewerSessionId || '');
     const cameraStateJson = safeScriptJson(cameraState || null);
     const selectedZoneIdJson = safeScriptJson(activeZoneId || null);
@@ -4786,6 +5520,7 @@ body.ar-landscape #arScaleBadge{max-width:calc(100% - 350px)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr` + `ipt>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></scr` + `ipt>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></scr` + `ipt>
+<script src="./products/pergo-rise/pergo-rise-viewer.js"></scr` + `ipt>
 </head>
 <body>
 <div id="fallback">3D viewer could not load. Three.js is loaded from a CDN.</div>
@@ -4845,12 +5580,17 @@ if(!window.THREE || !THREE.OrbitControls){
 
 const VIEWER_SESSION_ID=${viewerSessionIdJson};
 const FREEDOM_LOUVER_GLB_URL=${freedomLouverUrlJson};
+const PERGO_RISE_GLB_URL=${pergoRiseUrlJson};
+let pergoRiseProject=${pergoRiseProjectJson};
+let pergoRiseDerived=pergoRiseProject&&pergoRiseProject.derived?pergoRiseProject.derived:null;
 function postParent(type,payload){
   parent.postMessage({source:'product-3d-viewer',sessionId:VIEWER_SESSION_ID,type,...(payload||{})},'*');
 }
-const W=${W}, D=${D}, H=${H};
+// Legacy static-envelope contract retained for regression scanners: const W=${W}, D=${D}, H=${H};
+let W=${W}, D=${D}, H=${H};
 const PRODUCT_GROUP=${productGroupJson};
 const IS_BIO_RISE=PRODUCT_GROUP==='bio-rise';
+const IS_PERGO_RISE=PRODUCT_GROUP==='pergo-rise';
 const RW=W-208, RD=D-303;
 const LC=${LC};
 let orientations=[${O1},${O2},${O3},${O4}];
@@ -4865,11 +5605,20 @@ let productsOpen=${productsOpenJson};
 let productOpenStates=${productOpenStatesJson};
 let panelStates=${panelStatesJson};
 let panelMasterOpen=${panelMasterOpenJson};
-const SYSTEM_COLOR=${systemColorValue};
-const PANEL_COLOR=${panelColorValue};
-const DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};
-const SYSTEM_FINISH=${safeScriptJson(systemColor && systemColor.finish || defaults.systemColor.finish)};
-const PANEL_FINISH=${safeScriptJson(panelColor && panelColor.finish || defaults.panelColor.finish)};
+let SYSTEM_COLOR=${systemColorValue};
+let PANEL_COLOR=${panelColorValue};
+let DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};
+let SYSTEM_FINISH=${safeScriptJson(systemColor && systemColor.finish || defaults.systemColor.finish)};
+let PANEL_FINISH=${safeScriptJson(panelColor && panelColor.finish || defaults.panelColor.finish)};
+function liveColorNumber(value,fallback){
+  const raw=(value&&typeof value==='object')?value.hex:value;
+  const text=String(raw||'').trim().replace(/^#/,'').replace(/^0x/i,'');
+  return /^[0-9a-f]{6}$/i.test(text)?parseInt(text,16):fallback;
+}
+function liveFinish(value,fallback){
+  const raw=String(value||fallback||'MATTE').toUpperCase();
+  return raw==='GLOSS'||raw==='TEXTURE'||raw==='MATTE'?raw:(fallback||'MATTE');
+}
 const ZIP_FABRIC_META=${zipFabricMetaJson};
 const GLAZING_SECTION_SPECS=${glazingSectionSpecsJson};
 const DOOR_TOP_FIXED_TYPES=new Set(['TOP_FIXED','LEFT_FIXED_TOP','RIGHT_FIXED_TOP','BOTH_FIXED_TOP','DOUBLE_TOP','DOUBLE_LEFT_FIXED_TOP','DOUBLE_RIGHT_FIXED_TOP','DOUBLE_BOTH_FIXED_TOP']);
@@ -4879,7 +5628,9 @@ const initialCameraState=${cameraStateJson};
 let lamellaOpenMode=panelMasterOpen;
 let freedomLouverTemplate=null;
 let freedomLouverTemplateSize=null;
-let freedomLouverLoadStatus=IS_BIO_RISE?'not-required':'pending';
+let freedomLouverLoadStatus=IS_BIO_RISE||IS_PERGO_RISE?'not-required':'pending';
+let pergoRiseComponentLibrary=null;
+let pergoRiseLoadStatus=IS_PERGO_RISE?'pending':'not-required';
 function productIsOpen(productKey){
   return Object.prototype.hasOwnProperty.call(productOpenStates||{},productKey)?Boolean(productOpenStates[productKey]):Boolean(productsOpen);
 }
@@ -5003,6 +5754,8 @@ const arCameraForward=new THREE.Vector3();
 const arCameraRight=new THREE.Vector3();
 let arRestoreCameraNear=camera.near;
 let arRestoreCameraFar=camera.far;
+let arModelSnapshot=null;
+let arDeferredModelRebuild=false;
 
 function postArStatus(message,tone){
   postParent('ar-status',{message:String(message||''),tone:tone||''});
@@ -5045,8 +5798,77 @@ function showArLaunchGate(show){
   if(gate)gate.hidden=!show;
 }
 
-function eachArMaterial(callback){
+function cloneArMaterial(material){
+  if(!material||typeof material.clone!=='function')return material;
+  const clone=material.clone();
+  clone.userData={...(material.userData||{}),p3dvArSnapshotMaterial:true};
+  return clone;
+}
+
+function disposeArSnapshot(){
+  if(!arModelSnapshot)return;
+  arModelSnapshot.traverse(object=>{
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    materials.filter(Boolean).forEach(material=>{if(material.userData&&material.userData.p3dvArSnapshotMaterial&&typeof material.dispose==='function')material.dispose();});
+  });
+  if(arModelSnapshot.parent)arModelSnapshot.parent.remove(arModelSnapshot);
+  arModelSnapshot=null;
+}
+
+function isVisibleInsideModel(object){
+  let current=object;
+  while(current&&current!==group){
+    if(current.visible===false)return false;
+    current=current.parent;
+  }
+  // The live root is intentionally hidden before AR starts. Ignore only that
+  // root-level visibility flag while preserving every descendant open/closed state.
+  return current===group;
+}
+
+function cloneArRenderable(object,relativeMatrix){
+  const clone=object.clone(false);
+  if(object.material){
+    clone.material=Array.isArray(object.material)?object.material.map(cloneArMaterial):cloneArMaterial(object.material);
+  }
+  clone.matrixAutoUpdate=false;
+  clone.matrix.copy(relativeMatrix);
+  clone.matrix.decompose(clone.position,clone.quaternion,clone.scale);
+  clone.matrixWorldNeedsUpdate=true;
+  clone.visible=true;
+  clone.frustumCulled=object.frustumCulled;
+  clone.renderOrder=object.renderOrder;
+  clone.userData={...(object.userData||{}),p3dvArSnapshotPart:true,sourceUuid:object.uuid};
+  return clone;
+}
+
+function createArSnapshot(){
+  disposeArSnapshot();
+  scene.updateMatrixWorld(true);
+  group.updateMatrixWorld(true);
+  const snapshot=new THREE.Group();
+  snapshot.name='P3DV_AR_FLAT_WORLD_SNAPSHOT';
+  const inverseGroupWorld=new THREE.Matrix4().copy(group.matrixWorld).invert();
   group.traverse(object=>{
+    if(object===group||!isVisibleInsideModel(object))return;
+    const renderable=Boolean(object.isMesh||object.isLine||object.isLineSegments||object.isPoints||object.isSprite);
+    if(!renderable)return;
+    const relativeMatrix=new THREE.Matrix4().multiplyMatrices(inverseGroupWorld,object.matrixWorld);
+    snapshot.add(cloneArRenderable(object,relativeMatrix));
+  });
+  snapshot.scale.setScalar(AR_METERS_PER_MM);
+  snapshot.position.set(0,H*AR_METERS_PER_MM*.5,0);
+  snapshot.rotation.set(0,0,0);
+  snapshot.visible=true;
+  snapshot.updateMatrixWorld(true);
+  arRoot.add(snapshot);
+  arModelSnapshot=snapshot;
+  return snapshot;
+}
+
+function eachArMaterial(callback){
+  const source=arModelSnapshot||group;
+  source.traverse(object=>{
     const materials=Array.isArray(object.material)?object.material:[object.material];
     materials.filter(Boolean).forEach(callback);
   });
@@ -5086,21 +5908,26 @@ function updateArControlState(){
 }
 
 function prepareModelForAr(){
-  if(timer)clearInterval(timer);
-  parts.forEach(part=>part.visible=true);
+  if(liveRebuildTimer){
+    clearTimeout(liveRebuildTimer);
+    liveRebuildTimer=null;
+    if(timer)clearInterval(timer);
+    buildModel(true,{atomicSwap:true});
+  }
+  if(timer){clearInterval(timer);timer=null;}
+  scene.updateMatrixWorld(true);
+  group.updateMatrixWorld(true);
   intermediateDimensionObjects.forEach(item=>item.visible=false);
   mainDimensionObjects.forEach(item=>item.visible=false);
   zonePickers.forEach(item=>item.visible=false);
   floor.visible=false;
   grid.visible=false;
   box.visible=false;
-  if(group.parent)group.parent.remove(group);
-  arRoot.add(group);
-  group.scale.setScalar(AR_METERS_PER_MM);
-  group.position.set(0,H*AR_METERS_PER_MM*.5,0);
-  group.rotation.set(0,0,0);
+  group.visible=false;
+  createArSnapshot();
   arRoot.position.set(0,0,0);
   arRoot.rotation.set(0,0,0);
+  arRoot.scale.set(1,1,1);
   arRoot.visible=false;
   setArGhostMode(true);
   controls.enabled=false;
@@ -5127,11 +5954,8 @@ async function resetArOrientation(){
 function restoreModelAfterAr(){
   arRoot.visible=false;
   setArGhostMode(false);
-  if(group.parent)group.parent.remove(group);
-  scene.add(group);
-  group.scale.set(1,1,1);
-  group.position.set(0,0,0);
-  group.rotation.set(0,0,0);
+  disposeArSnapshot();
+  group.visible=true;
   floor.visible=true;
   grid.visible=true;
   box.visible=true;
@@ -5143,8 +5967,45 @@ function restoreModelAfterAr(){
   const overlay=document.getElementById('arOverlay');
   if(overlay)overlay.hidden=true;
   showArLaunchGate(false);
-  buildModel(true);
+  if(arDeferredModelRebuild){
+    arDeferredModelRebuild=false;
+    buildModel(true,{atomicSwap:true});
+  }
 }
+
+function arSnapshotDiagnostics(){
+  const sourceBounds=new THREE.Box3().setFromObject(group);
+  const originalParent=group.parent===scene;
+  const originalPartVisibility=parts.map(part=>part.visible);
+  const sourceVisibleMeshCount=(()=>{let count=0;group.traverse(object=>{if(object.isMesh&&object.visible)count+=1;});return count;})();
+  prepareModelForAr();
+  arRoot.visible=true;
+  arRoot.updateMatrixWorld(true);
+  const snapshotBounds=arModelSnapshot?new THREE.Box3().setFromObject(arModelSnapshot):new THREE.Box3();
+  const sourceSize=new THREE.Vector3(),snapshotSize=new THREE.Vector3();
+  sourceBounds.getSize(sourceSize);snapshotBounds.getSize(snapshotSize);
+  const meshCount=arModelSnapshot?(()=>{let count=0;arModelSnapshot.traverse(object=>{if(object.isMesh)count+=1;});return count;})():0;
+  const snapshotVisibleMeshCount=arModelSnapshot?(()=>{let count=0;arModelSnapshot.traverse(object=>{if(object.isMesh&&object.visible)count+=1;});return count;})():0;
+  const originalPartVisibilityPreserved=parts.every((part,index)=>part.visible===originalPartVisibility[index]);
+  const result={
+    originalParentPreserved:originalParent&&group.parent===scene,
+    originalHidden:group.visible===false,
+    originalPartVisibilityPreserved,
+    sourceVisibleMeshCount,
+    snapshotMeshCount:meshCount,
+    snapshotVisibleMeshCount,
+    flatSnapshot:Boolean(arModelSnapshot&&arModelSnapshot.name==='P3DV_AR_FLAT_WORLD_SNAPSHOT'&&arModelSnapshot.children.every(child=>child.parent===arModelSnapshot)),
+    sourceSize:[sourceSize.x,sourceSize.y,sourceSize.z],
+    snapshotSize:[snapshotSize.x,snapshotSize.y,snapshotSize.z],
+    scaleRatioX:sourceSize.x?snapshotSize.x/sourceSize.x:0,
+    scaleRatioY:sourceSize.y?snapshotSize.y/sourceSize.y:0,
+    scaleRatioZ:sourceSize.z?snapshotSize.z/sourceSize.z:0
+  };
+  restoreModelAfterAr();
+  result.restoredPartVisibility=parts.every((part,index)=>part.visible===originalPartVisibility[index]);
+  return result;
+}
+window.__P3DV_AR_TEST__={snapshotDiagnostics:arSnapshotDiagnostics};
 
 function applyArPlacementTransform(){
   arRoot.position.set(arManualPosition.x,arBaseGroundY+arGroundOffset,arManualPosition.z);
@@ -5636,6 +6497,52 @@ function lamelShape(narrowBy){
   for(let i=1;i<pts.length;i++)s.lineTo((pts[i][0]-cx)*scale,pts[i][1]);
   s.closePath();
   return s;
+}
+
+function resolvePergoRiseAssetUrl(url){
+  const raw=String(url||'').trim();
+  if(!raw)return '';
+  try{return new URL(raw,parent.location.href).href;}catch(error){return raw;}
+}
+
+function isPergoRiseFabricName(name){
+  const lower=String(name||'').toLowerCase();
+  return lower.includes('kumaş')||lower.includes('kumas')||lower.includes('fabric')||lower.includes('screen');
+}
+
+function createPergoRiseMaterial(name){
+  const lower=String(name||'').toLowerCase();
+  if(isPergoRiseFabricName(name)) return createSolidMaterial(PANEL_COLOR,.94,autoFinishForColor(PANEL_COLOR));
+  if(lower.includes('glass')||lower.includes('cam')) return createGlassMaterial(0xbfe4ff,.18);
+  if(lower.includes('screw')||lower.includes('vida')||lower.includes('bolt')||lower.includes('motor')) return createSolidMaterial(0x4b5563,1,'MATTE');
+  return createSolidMaterial(SYSTEM_COLOR,1,autoFinishForColor(SYSTEM_COLOR));
+}
+
+function preparePergoRiseTemplate(sourceScene){
+  if(!sourceScene||!window.P3DVPergoRiseViewer)return false;
+  pergoRiseComponentLibrary=window.P3DVPergoRiseViewer.createLibrary(sourceScene,{THREE});
+  return Boolean(pergoRiseComponentLibrary&&pergoRiseComponentLibrary.templates);
+}
+
+function loadPergoRiseTemplate(){
+  if(!IS_PERGO_RISE){pergoRiseLoadStatus='not-required';return Promise.resolve(false);}
+  if(pergoRiseComponentLibrary){pergoRiseLoadStatus='ready';return Promise.resolve(true);}
+  const assetUrl=resolvePergoRiseAssetUrl(PERGO_RISE_GLB_URL);
+  if(!assetUrl||!THREE.GLTFLoader||!window.P3DVPergoRiseViewer){
+    pergoRiseLoadStatus='fallback';
+    console.warn('Pergo Rise component GLB loader is unavailable.');
+    return Promise.resolve(false);
+  }
+  pergoRiseLoadStatus='loading';
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(loaded,status)=>{if(settled)return;settled=true;clearTimeout(timeoutId);pergoRiseLoadStatus=status;resolve(loaded);};
+    const timeoutId=setTimeout(()=>finish(false,'fallback-timeout'),20000);
+    new THREE.GLTFLoader().load(assetUrl,gltf=>{
+      try{const loaded=preparePergoRiseTemplate(gltf&&gltf.scene);finish(loaded,loaded?'ready':'fallback');}
+      catch(error){console.error('Pergo Rise component mapping failed.',error);finish(false,'fallback-error');}
+    },undefined,error=>{console.error('Pergo Rise GLB load failed.',error);finish(false,'fallback-error');});
+  });
 }
 
 function disposeImportedFreedomMaterial(material){
@@ -7708,6 +8615,33 @@ function disposeModelGroup(root){
   });
 }
 
+function buildPergoRiseModel(){
+  if(pergoRiseDerived&&pergoRiseDerived.envelope){
+    W=Math.max(1,Number(pergoRiseDerived.envelope.width)||W);
+    D=Math.max(1,Number(pergoRiseDerived.envelope.depth)||D);
+    H=Math.max(1,Number(pergoRiseDerived.envelope.height)||H);
+  }
+  if(pergoRiseComponentLibrary&&pergoRiseDerived&&window.P3DVPergoRiseViewer){
+    const assembly=window.P3DVPergoRiseViewer.buildAssembly(pergoRiseComponentLibrary,pergoRiseDerived,{
+      THREE,
+      materials:{
+        system:createSolidMaterial(SYSTEM_COLOR,1,autoFinishForColor(SYSTEM_COLOR)),
+        fabricProfile:createSolidMaterial(PANEL_COLOR,1,autoFinishForColor(PANEL_COLOR)),
+        fabric:createSolidMaterial(PANEL_COLOR,.94,autoFinishForColor(PANEL_COLOR)),
+        wall:createSolidMaterial(0x9a8f83,1,'MATTE')
+      }
+    });
+    group.add(assembly);
+    assembly.traverse(object=>{if(object.isMesh)parts.push(object);});
+    return assembly;
+  }
+  const placeholder=new THREE.Mesh(new THREE.BoxGeometry(Math.max(600,W*.18),Math.max(600,H*.35),Math.max(600,D*.18)),createSolidMaterial(SYSTEM_COLOR,1,autoFinishForColor(SYSTEM_COLOR)));
+  placeholder.position.set(0,Math.max(600,H*.35)/2,D*.5);
+  placeholder.visible=false;
+  group.add(placeholder);parts.push(placeholder);
+  return placeholder;
+}
+
 function buildModel(showAll,options){
   const atomicSwap=Boolean(options&&options.atomicSwap);
   modelGeneration+=1;
@@ -7736,6 +8670,27 @@ function buildModel(showAll,options){
   hoveredZone=null;
   selectedZonePicker=null;
   const p=[postDims(0),postDims(1),postDims(2),postDims(3)];
+  if(IS_PERGO_RISE){
+    buildPergoRiseModel();
+    refreshToolboxSelectionVisuals();
+    parts.forEach(part=>part.visible=true);
+    if(atomicSwap){
+      group.position.copy(previousPosition);
+      group.rotation.copy(previousRotation);
+      group.scale.copy(previousScale);
+      group.visible=previousVisible;
+      previousParent.add(group);
+      if(arSession){
+        intermediateDimensionObjects.forEach(item=>item.visible=false);
+        mainDimensionObjects.forEach(item=>item.visible=false);
+        zonePickers.forEach(item=>item.visible=false);
+        setArGhostMode(true);
+      }
+      if(previousGroup.parent)previousGroup.parent.remove(previousGroup);
+      setTimeout(()=>disposeModelGroup(previousGroup),0);
+    }
+    return;
+  }
   const magenta=profileColor(0xff00ff),blue=profileColor(0x2563eb),orange=profileColor(0xff8c00),amber=profileColor(0xffb347),grass=panelColor(0x7cfc00);
   const beamVertical=beamSection.vertical;
   const frontBackBeamThickness=beamSection.thickness;
@@ -7901,6 +8856,7 @@ function rebuildModelWithoutFrameReload(revision){
   const requestedRevision=Number(revision)||0;
   if(requestedRevision<lastAppliedLiveRevision)return;
   lastAppliedLiveRevision=requestedRevision;
+  if(arSession||arModelSnapshot){arDeferredModelRebuild=true;return;}
   if(liveRebuildTimer)clearTimeout(liveRebuildTimer);
   liveRebuildTimer=setTimeout(()=>{
     liveRebuildTimer=null;
@@ -8101,7 +9057,31 @@ window.addEventListener('message',event=>{
     rebuildModelWithoutFrameReload(revision);
     postParent('panel-master-open-applied',{open:panelMasterOpen,revision});
   }
-  if(event.data.type==='replay-animation')window.replayAnimation();
+  if(event.data.type==='set-color-state'){
+    const revision=Number(event.data.revision)||0;
+    if(revision<lastAppliedLiveRevision)return;
+    DEFAULT_COLOR_MODE=event.data.colorMode!=='ral';
+    SYSTEM_COLOR=liveColorNumber(event.data.systemColor,SYSTEM_COLOR);
+    PANEL_COLOR=liveColorNumber(event.data.panelColor,PANEL_COLOR);
+    SYSTEM_FINISH=liveFinish(event.data.systemColor&&event.data.systemColor.finish,SYSTEM_FINISH);
+    PANEL_FINISH=liveFinish(event.data.panelColor&&event.data.panelColor.finish,PANEL_FINISH);
+    rebuildModelWithoutFrameReload(revision);
+    postParent('color-state-applied',{revision,colorMode:DEFAULT_COLOR_MODE?'default':'ral'});
+  }
+  if(event.data.type==='set-pergo-rise-project'&&IS_PERGO_RISE){
+    const revision=Number(event.data.revision)||0;
+    if(revision<lastAppliedLiveRevision)return;
+    pergoRiseProject=event.data.project||null;
+    pergoRiseDerived=pergoRiseProject&&pergoRiseProject.derived?pergoRiseProject.derived:null;
+    if(pergoRiseDerived&&pergoRiseDerived.envelope){
+      W=Math.max(1,Number(pergoRiseDerived.envelope.width)||W);
+      D=Math.max(1,Number(pergoRiseDerived.envelope.depth)||D);
+      H=Math.max(1,Number(pergoRiseDerived.envelope.height)||H);
+    }
+    rebuildModelWithoutFrameReload(revision);
+    postParent('pergo-rise-project-applied',{revision,projectHash:pergoRiseDerived&&pergoRiseDerived.projectHash||''});
+  }
+  if(event.data.type==='replay-animation'&&!IS_PERGO_RISE)window.replayAnimation();
   if(event.data.type==='set-dimension-visibility')setDimensionVisibility(event.data.visibility);
   if(event.data.type==='set-dimensions-visible')setDimensionVisibility({intermediate:Boolean(event.data.visible),main:Boolean(event.data.visible)});
   if(event.data.type==='set-toolbox-selection'){
@@ -8181,14 +9161,19 @@ function animate(time,frame){
 }
 
 async function initializeViewer(){
-  await loadFreedomLouverTemplate();
+  await Promise.all([loadFreedomLouverTemplate(), loadPergoRiseTemplate()]);
   buildModel(true);
   renderer.setAnimationLoop(animate);
   postParent('viewer-ready',{
     liveProductState:true,
     livePanelMaster:true,
+    liveColorState:true,
+    livePergoRise:IS_PERGO_RISE,
     freedomLouverProfile:freedomLouverTemplate?'glb':'procedural-fallback',
-    freedomLouverLoadStatus
+    freedomLouverLoadStatus,
+    pergoRiseLoadStatus,
+    pergoRiseProjectHash:pergoRiseDerived&&pergoRiseDerived.projectHash||'',
+    pergoRiseComponentMapping:pergoRiseComponentLibrary&&pergoRiseComponentLibrary.mapping||[]
   });
 }
 initializeViewer();
@@ -8209,6 +9194,17 @@ initializeViewer();
     $(ids.colorCatalogRising).addEventListener('click', () => setActiveColorCatalog('rising'));
     $(ids.colorCatalogAll).addEventListener('click', () => setActiveColorCatalog('all'));
     $(ids.colorSearch).addEventListener('input', renderRalColorOptions);
+    if ($(ids.panelColorIndependent)) $(ids.panelColorIndependent).addEventListener('change', syncPanelColorIndependence);
+    [ids.panelFill, ids.dimmerInput, ids.parapetInput, ids.waterStandardInput].forEach((id) => { const input=$(id); if (input) input.addEventListener('change', syncFreedomOptionStateFromUi); });
+    [ids.remoteInput, ids.ledInput, ids.extrasInput].forEach((id) => { const input=$(id); if (input) input.addEventListener('input', syncFreedomOptionStateFromUi); });
+    if ($(ids.parapetHeightInput)) $(ids.parapetHeightInput).addEventListener('input', (event) => { event.target.value=sanitizeDigitsOnly(event.target.value,5); syncFreedomOptionStateFromUi(); });
+    if ($(ids.pergoSystemCount)) $(ids.pergoSystemCount).addEventListener('input', (event) => { event.target.value=sanitizeDigitsOnly(event.target.value,6); modelState.systemCount=Math.max(1,Number(event.target.value)||1); });
+    if ($(ids.freedomWidth)) $(ids.freedomWidth).addEventListener('input', (event) => { event.target.value=sanitizeWidthTopology(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),width:event.target.value}; });
+    if ($(ids.freedomDepth)) $(ids.freedomDepth).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),depth:event.target.value}; renderProjectionComboMenu(); });
+    if ($(ids.freedomHeight)) $(ids.freedomHeight).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),height:event.target.value}; });
+    if ($(ids.motorComboButton)) $(ids.motorComboButton).addEventListener('click', (event) => { event.preventDefault(); renderMotorComboMenu(); const menu=$(ids.motorComboMenu); setComboOpen($(ids.motorCombo),menu,menu.hidden); });
+    if ($(ids.remoteComboButton)) $(ids.remoteComboButton).addEventListener('click', (event) => { event.preventDefault(); renderRemoteComboMenu(); const menu=$(ids.remoteComboMenu); setComboOpen($(ids.remoteCombo),menu,menu.hidden); });
+    if ($(ids.ledComboButton)) $(ids.ledComboButton).addEventListener('click', (event) => { event.preventDefault(); renderLedComboMenu(); const menu=$(ids.ledComboMenu); setComboOpen($(ids.ledCombo),menu,menu.hidden); });
     $(ids.colorPickerDialog).addEventListener('click', (event) => {
       if (event.target === $(ids.colorPickerDialog)) closeColorPicker();
     });
@@ -8217,23 +9213,18 @@ initializeViewer();
     });
     $(ids.freedomPanelCount).addEventListener('input', syncProjectionFromPanelCount);
     projectionPresetSelect().addEventListener('change', () => {
-      const preset = projectionPresetSelect();
-      const custom = $(ids.freedomDepth);
-      custom.hidden = true;
-      custom.value = preset.value;
+      setDepthControlValue(projectionPresetSelect().value);
       syncPanelCountFromProjection();
     });
-    $(ids.projectionCustomToggle).addEventListener('click', () => {
-      const custom = $(ids.freedomDepth);
-      projectionPresetSelect().value = '';
-      custom.hidden = false;
-      if (!custom.value) custom.value = '';
-      custom.focus();
-      setFreedomValidation('Özel açılım değerini mm olarak girin.', 'warning');
+    $(ids.projectionCustomToggle).addEventListener('click', (event) => {
+      event.preventDefault();
+      renderProjectionComboMenu();
+      const menu = $(ids.projectionComboMenu);
+      setComboOpen($(ids.projectionCombo), menu, menu.hidden);
     });
     $(ids.freedomDepth).addEventListener('input', syncPanelCountFromProjection);
-    $(ids.freedomWidth).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
-    $(ids.freedomHeight).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
+    $(ids.freedomWidth).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), height: readFreedomNumber(ids.freedomHeight), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
+    $(ids.freedomHeight).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), height: readFreedomNumber(ids.freedomHeight), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
     $(ids.freedomForm).addEventListener('submit', (event) => { event.preventDefault(); applyFreedomInputs(); });
     $(ids.positionEdit).addEventListener('click', openPositionDialog);
     $(ids.cancel).addEventListener('click', closePositionDialog);
@@ -8338,7 +9329,7 @@ initializeViewer();
     });
 
     if ($(ids.previewExpand)) $(ids.previewExpand).addEventListener('click', togglePreviewExpanded);
-    if ($(ids.toolbarRefresh)) $(ids.toolbarRefresh).addEventListener('click', () => renderViewer());
+    if ($(ids.toolbarRefresh)) $(ids.toolbarRefresh).addEventListener('click', () => applyFreedomInputs());
     if ($(ids.toolbarZoomIn)) $(ids.toolbarZoomIn).addEventListener('click', () => zoomViewerCamera(1.16));
     if ($(ids.toolbarZoomOut)) $(ids.toolbarZoomOut).addEventListener('click', () => zoomViewerCamera(0.86));
     if ($(ids.toolbarFit)) $(ids.toolbarFit).addEventListener('click', resetViewerCamera);
@@ -8346,6 +9337,50 @@ initializeViewer();
     if ($(ids.toolbarAr)) $(ids.toolbarAr).addEventListener('click', () => { startMobileAr(); });
     if ($(ids.toolbarFullscreen)) $(ids.toolbarFullscreen).addEventListener('click', () => { toggleBrowserFullscreen(); });
     if (document.addEventListener) document.addEventListener('fullscreenchange', syncBrowserFullscreenClass);
+
+    if ($(ids.largePreviewProductState)) $(ids.largePreviewProductState).addEventListener('click', () => { toggleProductsOpen(); closeLargeProductStateMenu(); });
+    if ($(ids.largePreviewProductStateMenuButton)) $(ids.largePreviewProductStateMenuButton).addEventListener('click', (event) => {
+      event.stopPropagation();
+      const menu=$(ids.largePreviewProductStateMenu); const open=Boolean(menu && menu.hidden);
+      if (menu) menu.hidden=!open;
+      event.currentTarget.setAttribute('aria-expanded',String(open));
+      if (open) renderLargeProductStateMenu();
+    });
+    if ($(ids.largePreviewToolboxToggle)) $(ids.largePreviewToolboxToggle).addEventListener('click', () => {
+      const toolbox = $(ids.largePreviewToolbox);
+      setLargePreviewToolboxOpen(!(toolbox && toolbox.classList.contains('is-open')));
+    });
+    if ($(ids.largePreviewToolboxPin)) $(ids.largePreviewToolboxPin).addEventListener('click', (event) => {
+      const button = event.currentTarget;
+      const next = button.getAttribute('aria-pressed') !== 'true';
+      button.setAttribute('aria-pressed', String(next));
+      button.title = next ? "Toolbox'ı açık tut" : 'Otomatik kapanmaya izin ver';
+      if (next) setLargePreviewToolboxOpen(true);
+    });
+    if ($(ids.largePreviewShowAllDims)) $(ids.largePreviewShowAllDims).addEventListener('click', () => {
+      const next = dimensionVisibility.intermediate === false;
+      if (next && dimensionVisibility.main === false) dimensionVisibility.main = true;
+      setDimensionVisibility('intermediate', next);
+    });
+    if ($(ids.largePreviewShowMainDims)) $(ids.largePreviewShowMainDims).addEventListener('click', () => setDimensionVisibility('main', dimensionVisibility.main === false));
+    [ids.largePreviewGlassTrack, ids.largePreviewTriangleJoinery, ids.largePreviewWaterStandard].forEach((id) => {
+      const button = $(id);
+      if (button) button.addEventListener('click', () => toggleLargePreviewBoolean(button));
+    });
+    if ($(ids.headerCheckDrawing)) $(ids.headerCheckDrawing).addEventListener('click', runDrawingCheck);
+    if ($(ids.largePreviewCheckDrawing)) $(ids.largePreviewCheckDrawing).addEventListener('click', runDrawingCheck);
+    if ($(ids.largePreviewMultiProduct)) $(ids.largePreviewMultiProduct).addEventListener('click', () => $(ids.multiProduct).click());
+    if ($(ids.largePreviewMultiDelete)) $(ids.largePreviewMultiDelete).addEventListener('click', () => $(ids.multiDelete).click());
+    if ($(ids.largePreviewFitProducts)) $(ids.largePreviewFitProducts).addEventListener('click', () => $(ids.fitProducts).click());
+    if ($(ids.largePreviewDeleteAll)) $(ids.largePreviewDeleteAll).addEventListener('click', clearProducts);
+    [
+      [ids.largePreviewMultiDimension, 'Çoklu Ölçü Düzenleme'],
+      [ids.largePreviewEqualizeGaps, 'Aralıkları Eşitle'],
+      [ids.largePreviewPostSettings, 'Dikme Ayarları'],
+      [ids.largePreviewBulkExtend, 'Çoklu Profil Uzat'],
+      [ids.largePreviewConvertProduct, 'Ürün Tipini Değiştir'],
+      [ids.largePreviewDetailCopy, 'Detay Kopyala']
+    ].forEach(([id]) => { const button = $(id); if (button) { button.disabled = true; button.setAttribute('aria-disabled','true'); if(button.classList&&typeof button.classList.add==='function')button.classList.add('is-disabled'); } });
 
     $(ids.toolboxIntermediateDimensions).addEventListener('change', (event) => setDimensionVisibility('intermediate', event.target.checked));
     $(ids.toolboxMainDimensions).addEventListener('change', (event) => setDimensionVisibility('main', event.target.checked));
@@ -8368,6 +9403,10 @@ initializeViewer();
     $(ids.fitProducts).addEventListener('click', () => startToolboxSelection('fit-products'));
     $(ids.selectionDone).addEventListener('click', completeToolboxSelection);
     $(ids.selectionCancel).addEventListener('click', cancelToolboxSelection);
+    if(document&&typeof document.addEventListener==='function') document.addEventListener('click', (event) => {
+      if (!event.target.closest('.p3dv-combo')) closeP3dvCombos();
+      if (!event.target.closest('#largePreviewProductStateControl')) closeLargeProductStateMenu();
+    });
     window.addEventListener('keydown', (event) => {
       if (!toolboxSelectionMode) return;
       const tag = event.target && event.target.tagName ? String(event.target.tagName).toUpperCase() : '';
@@ -8426,6 +9465,7 @@ initializeViewer();
   }
 
   updateProductInputUi();
+  if ($(ids.projectCodeValue)) $(ids.projectCodeValue).textContent = '-';
   setInitialProjectDate();
   updateColorControls();
   bindEvents();

@@ -1,90 +1,19 @@
-P3DV.V3.46 UPDATE
-=================
+p3dv.v3.52
 
-KULLANICI TALEBİ
-----------------
-- Yüklenen `Freedom Louvers GLB - (Group).glb` dosyasındaki tek Freedom panel modeli kullanılacak.
-- Freedom panel adedi, açık/kapalı konumu, panel aralıkları, paket konumu, yönü, alt-üst doğrultusu ve 100 derece efektif açısı değişmeyecek.
-- Yalnız Freedom lamelinin mevcut prosedürel kesit çizimi yeni GLB panel modeliyle değiştirilecek.
-- Bio-Rise panel profili ve diğer ürün motorları etkilenmeyecek.
-
-UYGULANANLAR
-------------
-1. Freedom GLB panel varlığı
-- Kaynak GLB paket içine `assets/models/freedom-louver.glb` olarak eklendi.
-- Dosya özellikleri:
-  - glTF sürümü: 2.0 binary GLB
-  - dosya boyutu: 4.290.412 bayt
-  - mesh adedi: 15
-  - kaynak ölçüsü: yaklaşık 255,658 x 56,513 x 3709,762 mm
-  - SHA-256: `0f4635f3f41d8a0ee420475988ae622f69eef240abd56544eb748e0242b1d4c1`
-
-2. Doğrudan dosya açılışına uygun aktarım
-- Tarayıcıda `index.html` doğrudan açıldığında yerel GLB XHR kısıtlarına takılmaması için GLB verisi `assets/models/freedom-louver-data.js` içine gömüldü.
-- Parent sayfa gömülü veriyi yalnız B-Cube / Freedom modeli gerektiğinde bir Blob URL'ye dönüştürür.
-- Blob URL aynı sayfa oturumu boyunca yeniden kullanılır; her iframe renderında GLB tekrar decode edilmez.
-- Blob oluşturulduktan sonra büyük Base64 metni bellekten bırakılır.
-
-3. Three.js GLB yükleme
-- Viewer içine Three.js r128 ile eşleşen `GLTFLoader` r128 kaynağı eklendi.
-- Freedom modeli viewer hazırlanırken bir kez yüklenip ana panel şablonu olarak tutulur.
-- Her panelde dosya tekrar yüklenmez; aynı şablondan Object3D clone üretilir.
-
-4. Profil ve uzunluk eşlemesi
-- GLB'nin metre birimi mm'ye çevrilir.
-- GLB'nin uzun ekseni mevcut P3DV panel uzunluk eksenine döndürülür.
-- Yalnız panelin uzunluk ekseni mevcut `lamelLength` değerine ölçeklenir.
-- GLB'nin gerçek profil genişliği ve yüksekliği korunur.
-- Model merkezlenir ve alt kotu mevcut panel referansına normalize edilir.
-- Panel rengi mevcut P3DV Panel Rengi / yüzey tipi sözleşmesini kullanmaya devam eder.
-
-5. Korunan Freedom yerleşim sözleşmesi
-- Kapalı panel aralığı: 216 mm.
-- Açık panel paket aralığı: 65 mm.
-- Panel paketinin kullanıcı terminolojisindeki Arka Cephe konumu korunmuştur.
-- Kapalı panel `rotation.y = Math.PI` yönü korunmuştur.
-- Açık panel pivotunun `rotation.y = Math.PI` yönü korunmuştur.
-- Açık panel pivot açısı -80 derece; efektif görünüm 100 derece olarak korunmuştur.
-- `centerX`, `minZ / maxZ` ve `bottomY` yerleştirme formülleri değiştirilmemiştir.
-
-6. Bio-Rise izolasyonu
-- Bio-Rise kapalı ve açık lamelleri mevcut `lamelShape` / `ExtrudeGeometry` yolunu kullanmaya devam eder.
-- Bio-Rise daraltılmış profil, 200 mm aralık ve sabit kapanış lamelleri değiştirilmemiştir.
-
-7. Bellek ve canlı güncelleme
-- Freedom GLB clone'ları geometry ve material kaynaklarını paylaşır; her panel için 4,29 MB model tekrar kopyalanmaz.
-- Paylaşılan GLB geometry/material nesneleri canlı model grubu temizlenirken yanlışlıkla dispose edilmez.
-- Eski Object3D clone'ları atomik ürün/panel rebuild sonrasında sahneden kaldırılır.
-- Kesintisiz ürün ve panel aç/kapat akışı korunur; iframe yeniden oluşturulmaz.
-
-8. Güvenli fallback
-- GLB verisi, GLTFLoader veya model hazırlığı başarısız olursa mevcut prosedürel Freedom lameli otomatik fallback olarak kullanılır.
-- GLB yükleme için 8 saniyelik güvenli zaman aşımı vardır.
-- Model yüklenemediğinde tüm 3D sahnenin boş kalması engellenmiştir.
-
-YENİ DOSYALAR
--------------
-- assets/models/freedom-louver.glb
-- assets/models/freedom-louver-data.js
-- tests/p3dv-v3.46-freedom-glb-louver-tests.js
-
-DEĞİŞEN DOSYALAR
-----------------
-- index.html
-- app.js
-- VERSION.txt
-- README.md
-- UPDATE.txt
-- TEST_RESULTS.txt
-- Sürüm ve davranış sözleşmesini doğrulayan mevcut test dosyaları
-
-KORUNANLAR
-----------
-- P3DV V3.45 PLMR ortak arayüzü.
-- P3DV V3.44 stabilizasyon düzeltmeleri.
-- Freedom panel sayısı, panel konumları, paket konumu ve 100 derece efektif açı.
-- Bio-Rise geometrisi.
-- Katlanır Cam bakış, içeri/dışarı ve 33 mm paket kuralları.
-- Sürme, Giyotin, Kapı, Sabit Cam ve Zip Perde motorları.
-- Kesintisiz ürün ve panel açık/kapalı sistemi.
-- Kamera, zoom, pan, toolbox, AR ve PDF altyapısı.
+- İşlevi tanımlanmamış görünür butonlar gerçek `disabled` ve `aria-disabled` durumuna geçirildi.
+- Proje Kodu geçici olarak `-` gösterir.
+- Freedom ve Bio-Rise veri giriş ekranı PLMR Pergo Rise hücre mantığına uyarlandı.
+- Sistem Adedi yalnız rakam; Genişlik yalnız rakam/`;`/`:`/sıralı `NO`; Açılım ve Yükseklik yalnız rakam/`;` kabul eder.
+- Açılım hücresi elle yazılabilir ve 2038–7060 mm arasında 216 mm artan panel sayılı seçim listesi içerir.
+- Freedom/Bio-Rise için Ray Sayısı ve Dikme Sayısı gizlendi; Sistem Ölçüleri kartının yüksekliği spacer ile korundu.
+- Cam Kaydı kaldırıldı. Kumaş alanı `Panel Rengi`, Kumaş Profilleri alanı `Panel Dolgusu` olarak değiştirildi.
+- Panel Rengi tik kapalıyken Sistem Rengine canlı bağlanır; tik açıkken bağımsız panel rengi seçilir.
+- Motor seçenekleri `Yok`, `Somfy Rts`, `Somfy IO`; Kumanda seçenekleri PLMR motor bağımlılığıyla çalışır.
+- LED hücresi `YES/NO` listesinden seçim sonrası elle düzenlenebilir. Dimmer `EVET/HAYIR` seçeneğidir.
+- Üçgen Doğrama kaldırıldı; Su Çıkışı Standart mı? korundu.
+- Büyük önizleme üst toolbarına Yakınlaştır, Uzaklaştır, Sığdır ve AR Gerçek Alan eklendi.
+- Sağ toolbox’tan Cam Kaydı, Ray Sınırlarını Daralt, Üçgen Doğrama ve Su Çıkışı Standart mı? kaldırıldı.
+- Sağ toolbox’a kırmızı/yeşil global ve ürün bazlı `Ürün Durumları` kontrolü eklendi; canlı aç/kapat iframe ve kamera durumunu korur.
+- AR için canlı model grubu artık AR köküne taşınmaz. Ayrı, materyalleri de klonlanmış 1:1 snapshot kullanılır; kaynak hiyerarşi, parça görünürlükleri ve açık/kapalı durumları korunur.
+- Ham `.glb` dosyaları teslim paketinde bulunmaz; gömülü component/template kaynakları korunur.
+- PDF, canlı renk, tam ekran önizleme, Pergo Rise parametrik assembly ve eski ürün regresyonları korunmuştur.
