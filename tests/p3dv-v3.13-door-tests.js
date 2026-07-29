@@ -28,7 +28,7 @@ assert(Object.keys(embeddedZipTextures).length === 23, 'embedded Zip texture map
 assert(Object.values(embeddedZipTextures).every((value) => /^data:image\/jpeg;base64,/.test(value)), 'embedded Zip texture entries must be JPEG data URIs');
 
 for (const token of [
-  'p3dv.v3.26', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
+  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
   'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Önerilen 2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
   'Dikey Bölme Sayısı', 'Yatay Bölme Sayısı', 'Yatay Bölme Yükseklikleri (mm)',
   'Dikmenin Önü', 'Kapı (Dış Bakış)', 'productDoorTypeInput', 'productDoorTypeTrigger', 'productDoorTypePicker',
@@ -43,8 +43,8 @@ for (const forbidden of ['Yatay Bölme Yerleşim Mantığı', 'Dikmenin Dışı'
 for (const token of [
   "['TOP', 'Üstten']",
   'zipPlacements: {}', 'function allProductEntries', 'function zipProductKey',
-  'let zipPlacements=${zipPlacementsJson};', 'const lamellaOpenMode=panelMasterOpen;',
-  'const lamelOpenAngle=-80;', 'function buildFixedJoineryProduct',
+  'let zipPlacements=${zipPlacementsJson};', 'let lamellaOpenMode=panelMasterOpen;',
+  'const freedomEffectiveOpenAngle=100;', 'const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;', 'function buildFixedJoineryProduct',
   'const verticalProfiles=Math.max(0,verticalDivisions-1);',
   'const horizontalDivisions=Math.max(1,Math.min(10',
   'const zipPlacement=zipPlacements[zone.id];',
@@ -64,7 +64,7 @@ for (const token of [
   "const handleY=zone.bottomY+900;", "const frameFace=50;", "const frameDepth=55;",
   "else if(placement.type==='door')buildDoorProduct(zone,placement);",
   "const SYSTEM_COLOR=${systemColorValue};", "const PANEL_COLOR=${panelColorValue};",
-  "const DEFAULT_COLOR_MODE=${JSON.stringify(colorMode !== 'ral')};",
+  "const DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};",
   "const magenta=profileColor(0xff00ff),blue=profileColor(0x2563eb),orange=profileColor(0xff8c00),amber=profileColor(0xffb347),grass=panelColor(0x7cfc00);",
   "function profileColor(defaultHex){", "function panelColor(defaultHex){",
   "const leafWidth = 1000;", "const sideFixedWidth = 1000;", "const leafHeight = 2500;", "const topFixedHeight = 500;",
@@ -159,7 +159,14 @@ context.global = context;
 vm.runInNewContext(colorSource, context, { filename: 'ral-colors.js' });
 vm.runInNewContext(zipTextureSource, context, { filename: 'zip-fabric-textures.js' });
 vm.runInNewContext(appSource, context, { filename: 'app.js' });
-function message(data) { for (const fn of windowListeners.message || []) fn({ data }); }
+function currentViewerSessionId() {
+  const match = String(el('viewerFrame').srcdoc || '').match(/const VIEWER_SESSION_ID=("(?:\\.|[^"])*");/);
+  return match ? JSON.parse(match[1]) : '';
+}
+function message(data) {
+  const eventData = { sessionId: currentViewerSessionId(), ...data };
+  for (const fn of windowListeners.message || []) fn({ data: eventData, source: el('viewerFrame').contentWindow });
+}
 function viewerHtml() { return el('viewerFrame').srcdoc; }
 function extractJson(html, prefix, suffix) {
   const start = html.indexOf(prefix); assert(start >= 0, `missing ${prefix}`);
@@ -328,7 +335,7 @@ assert(el('toolboxPanelMasterInput').checked === true, 'panels must start open')
 assert(el('toolboxIntermediateDimensionsInput').checked === false, 'intermediate dimensions must start hidden');
 assert(el('toolboxMainDimensionsInput').checked === true, 'main dimensions must start visible');
 assert(el('replayAnimationBtn').textContent === 'Ürünler Açık', 'products must start open');
-assert(initialModelHtml.includes('const productsOpen=true;'), 'global product state must start open in viewer');
+assert(initialModelHtml.includes('let productsOpen=true;'), 'global product state must start open and stay mutable in viewer');
 assert(initialModelHtml.includes('let dimensionVisibility={"intermediate":false,"main":true};'), 'viewer must start with only main dimensions visible');
 el('systemColorTrigger').dispatch('click');
 assert(el('colorPickerDialog').hidden === false, 'system color picker must open');
@@ -389,13 +396,14 @@ const zone = {
   inward:1, cx:0, cz:-2990
 };
 
-// Roof/green panels master: independent from product states, 80-degree lamellas.
+// Roof/green panels master: independent from product states, Freedom effective 100-degree lamellas.
 el('toolboxPanelMasterInput').checked = true;
 el('toolboxPanelMasterInput').dispatch('change');
 let html = viewerHtml();
-assert(html.includes('const panelMasterOpen=true;'), 'panel master state not passed');
-assert(html.includes('const lamellaOpenMode=panelMasterOpen;'), 'lamella master not connected');
-assert(html.includes('const lamelOpenAngle=-80;'), '80-degree lamella contract missing');
+assert(html.includes('let panelMasterOpen=true;'), 'panel master state not passed');
+assert(html.includes('let lamellaOpenMode=panelMasterOpen;'), 'lamella master not connected');
+assert(html.includes('const freedomEffectiveOpenAngle=100;'), 'Freedom effective 100-degree lamella contract missing');
+assert(html.includes('const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;'), 'Freedom pivot angle derivation missing');
 assert(appSource.includes('geo.rotateX(Math.PI);'), 'open lamella 180-degree local mirror missing');
 const closedLamelSource = appSource.slice(appSource.indexOf('function createLamel('), appSource.indexOf('function createOpenedLamel('));
 const openedLamelSource = appSource.slice(appSource.indexOf('function createOpenedLamel('), appSource.indexOf('function setMeshByBounds('));
@@ -552,7 +560,10 @@ message({ source:'product-3d-viewer', type:'toggle-panel-state', zoneId:'right',
 html = viewerHtml();
 const doorStates = extractJson(html, 'let productOpenStates=', ';\nlet panelStates');
 assert(doorStates.right === true, 'door open state was not stored');
-assert(html.includes('Math.PI/4:0;'), 'door open angle must be 45 degrees');
+assert(html.includes('const plannedAngle=axisSign*openV*leafDirection*Math.PI/4;'), 'door planned open angle must be 45 degrees');
+assert(html.includes('const angle=productOpen?plannedAngle:0;'), 'door open state must apply the planned angle');
+assert(html.includes("text:'↻'"), 'door opening symbol missing');
+assert(html.includes('opacity:active?1:.42'), 'passive door leaf symbol must be faded');
 assert(html.includes('const pivot=createDoorPivot(zone,hingeU,hingeV,angle);'), 'door must rotate at a fixed hinge pivot');
 
 // Top-fixed variant exposes its height field and retains a moving lower leaf.
@@ -610,7 +621,8 @@ assert(appSource.includes("const innerV=productDepthCenter(zone,55,0)+zone.inwar
 assert(appSource.includes("normalized.doorOpenDirection = normalized.doorOpenDirection === 'INWARD' ? 'INWARD' : 'OUTWARD';"), 'door opening normalization must preserve inward and outward states');
 assert(appSource.includes("openDirections: [['OUTWARD', 'Dışa'], ['INWARD', 'İçe']]"), 'door form must expose inward and outward choices');
 assert(appSource.includes('const DOOR_TOP_FIXED_TYPES=new Set('), 'door top-fixed type set must exist inside the iframe runtime');
-assert(appSource.includes('A ${radius} ${radius} 0 0 ${sweep}'), 'silhouettes must use curved angular swing arrows');
+assert(!appSource.includes('A ${radius} ${radius} 0 0 ${sweep}'), 'door type silhouettes must not contain the removed green swing arrow');
+assert(!appSource.includes("const accent = '#22c55e';"), 'green silhouette arrow accent must be removed');
 assert(appSource.includes("addDimensionLabelScaled(zone,'Kapı Kanadı '+Math.round(leafHeight)+' mm',dimU,(bottom+leafTop)/2,dimV,0.5,false);"), 'door dimension label scale reduction missing');
 
 

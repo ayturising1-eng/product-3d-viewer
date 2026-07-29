@@ -26,8 +26,26 @@
     panelColor: { code: 'RAL 6018', hex: '#397A36', finish: 'MATTE' }
   };
 
+  const GLAZING_SECTION_SPECS = Object.freeze({
+    '8 MM': Object.freeze({ glassDepth: 8, frameDepth: 12 }),
+    '10 MM': Object.freeze({ glassDepth: 10, frameDepth: 14 }),
+    '12 MM': Object.freeze({ glassDepth: 12, frameDepth: 16 }),
+    'INSULATED GLASS': Object.freeze({ glassDepth: 20, frameDepth: 24 })
+  });
+
   const ids = {
     frame: 'viewerFrame',
+    previewProductLabel: 'previewProductLabel',
+    projectDate: 'plmrProjectDate',
+    previewExpand: 'previewExpandBtn',
+    previewExpandLabel: 'previewExpandLabel',
+    toolbarRefresh: 'toolbarRefreshBtn',
+    toolbarZoomIn: 'toolbarZoomInBtn',
+    toolbarZoomOut: 'toolbarZoomOutBtn',
+    toolbarFit: 'toolbarFitBtn',
+    toolbarPdf: 'toolbarPdfBtn',
+    toolbarAr: 'toolbarArBtn',
+    toolbarFullscreen: 'toolbarFullscreenBtn',
     positionEdit: 'positionEditBtn',
     positionTitle: 'positionTitle',
     positionSummary: 'positionSummary',
@@ -247,6 +265,12 @@
   let viewerCameraState = null;
   let viewerLiveProductStateReady = false;
   let viewerLivePanelMasterReady = false;
+  let viewerSessionCounter = 0;
+  let activeViewerSessionId = '';
+  let pendingLiveProductState = false;
+  let pendingLivePanelMasterState = false;
+  let liveStateRevision = 0;
+  let freedomLouverBlobUrlCache = '';
   let selectedZone = null;
   let selectedZoneId = null;
   let dimensionVisibility = { intermediate: false, main: true };
@@ -929,6 +953,7 @@
     setText(ids.productSubgroup, spec.subgroupLabel);
     setText(ids.positionTitle, `${spec.modelLabel} Poz1`);
     setText(ids.positionDialogTitle, `${spec.modelLabel} Poz1`);
+    setText(ids.previewProductLabel, spec.modelLabel);
     $(ids.frame).title = `${spec.modelLabel} 3D viewer`;
 
     $(ids.freedomWidth).min = String(spec.widthMin);
@@ -1098,6 +1123,38 @@
     });
   }
 
+  function safeScriptJson(value) {
+    return JSON.stringify(value)
+      .replace(/</g, '\\u003C')
+      .replace(/>/g, '\\u003E')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+  }
+
+  function freedomLouverBlobUrl() {
+    if (freedomLouverBlobUrlCache) return freedomLouverBlobUrlCache;
+    const base64 = String(window.P3DV_FREEDOM_LOUVER_GLB_BASE64 || '');
+    if (!base64) return '';
+    try {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      freedomLouverBlobUrlCache = URL.createObjectURL(new Blob([bytes], { type: 'model/gltf-binary' }));
+      window.P3DV_FREEDOM_LOUVER_GLB_BASE64 = '';
+      return freedomLouverBlobUrlCache;
+    } catch (error) {
+      console.error('Freedom louver GLB could not be prepared.', error);
+      return '';
+    }
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (!freedomLouverBlobUrlCache) return;
+    URL.revokeObjectURL(freedomLouverBlobUrlCache);
+    freedomLouverBlobUrlCache = '';
+  });
+
   function buildEmptyViewerHtml(message) {
     const safe = String(message || 'Ölçüleri girin').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
     return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:radial-gradient(circle at top,#334155,#0f172a 60%);font-family:Segoe UI,Arial,sans-serif;color:#dbeafe}.empty{max-width:520px;padding:24px;text-align:center;border:1px solid rgba(125,211,252,.3);border-radius:14px;background:rgba(15,23,42,.7)}strong{display:block;margin-bottom:8px;font-size:20px}span{font-size:13px;line-height:1.5;color:#bfdbfe}</style></head><body><div class="empty"><strong>${productModelLabel()} · Modul 1</strong><span>${safe}</span></div></body></html>`;
@@ -1106,6 +1163,9 @@
   function renderViewer() {
     viewerLiveProductStateReady = false;
     viewerLivePanelMasterReady = false;
+    pendingLiveProductState = false;
+    pendingLivePanelMasterState = false;
+    activeViewerSessionId = `p3dv-viewer-${Date.now()}-${++viewerSessionCounter}`;
     pruneProductStates();
     const model = updateReadouts();
     const arButton = $(ids.mobileAr);
@@ -1119,6 +1179,8 @@
     setMobileArStatus('3D sahne hazırlanıyor. Mobil AR desteği cihazda otomatik kontrol edilir.');
     $(ids.frame).srcdoc = buildViewerHtml({
       ...model,
+      freedomLouverUrl: model.productGroup === 'b-cube' ? freedomLouverBlobUrl() : '',
+      viewerSessionId: activeViewerSessionId,
       cameraState: viewerCameraState,
       selectedZoneId,
       dimensionVisibility: { ...dimensionVisibility },
@@ -1381,40 +1443,58 @@
     return zone ? (primaryPlacement(zone.id) || zipPlacement(zone.id) || null) : null;
   }
 
-  function postLiveProductOpenState() {
+  function postViewerMessage(type, payload = {}) {
     const frame = $(ids.frame);
     const frameWindow = frame && frame.contentWindow;
-    if (!viewerLiveProductStateReady || !frameWindow) return false;
+    if (!frameWindow || !activeViewerSessionId) return false;
     frameWindow.postMessage({
       source: 'product-3d-parent',
-      type: 'set-product-open-state',
+      sessionId: activeViewerSessionId,
+      type,
+      ...payload
+    }, '*');
+    return true;
+  }
+
+  function postLiveProductOpenState() {
+    if (!viewerLiveProductStateReady) return false;
+    const revision = ++liveStateRevision;
+    return postViewerMessage('set-product-open-state', {
+      revision,
       productsOpen: Boolean(modelState.productsOpen),
       productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})),
       panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {}))
-    }, '*');
-    return true;
+    });
   }
 
   function applyProductOpenStateLive() {
     updateToolbox();
-    if (!postLiveProductOpenState()) renderViewer();
+    if (!postLiveProductOpenState()) pendingLiveProductState = true;
   }
 
   function postLivePanelMasterOpen() {
-    const frame = $(ids.frame);
-    const frameWindow = frame && frame.contentWindow;
-    if (!viewerLivePanelMasterReady || !frameWindow) return false;
-    frameWindow.postMessage({
-      source: 'product-3d-parent',
-      type: 'set-panel-master-open',
+    if (!viewerLivePanelMasterReady) return false;
+    const revision = ++liveStateRevision;
+    return postViewerMessage('set-panel-master-open', {
+      revision,
       open: Boolean(modelState.panelMasterOpen)
-    }, '*');
-    return true;
+    });
   }
 
   function applyPanelMasterOpenLive() {
     updateToolbox();
-    if (!postLivePanelMasterOpen()) renderViewer();
+    if (!postLivePanelMasterOpen()) pendingLivePanelMasterState = true;
+  }
+
+  function flushPendingViewerState() {
+    if (pendingLiveProductState && viewerLiveProductStateReady) {
+      pendingLiveProductState = false;
+      postLiveProductOpenState();
+    }
+    if (pendingLivePanelMasterState && viewerLivePanelMasterReady) {
+      pendingLivePanelMasterState = false;
+      postLivePanelMasterOpen();
+    }
   }
 
   const TOOLBOX_SELECTION_CONFIG = {
@@ -1475,14 +1555,10 @@
   }
 
   function postToolboxSelectionState() {
-    const frameWindow = $(ids.frame).contentWindow;
-    if (!frameWindow) return;
-    frameWindow.postMessage({
-      source: 'product-3d-parent',
-      type: 'set-toolbox-selection',
+    postViewerMessage('set-toolbox-selection', {
       mode: toolboxSelectionMode,
       keys: [...toolboxSelectionItems.keys()]
-    }, '*');
+    });
   }
 
   function cancelToolboxSelection() {
@@ -1787,8 +1863,35 @@
     renderViewer();
   }
 
+  function normalizeBeamSectionChange(value) {
+    const vertical = Math.round(Number(value && value.vertical));
+    const thickness = Math.round(Number(value && value.thickness));
+    if (!Number.isFinite(vertical) || !Number.isFinite(thickness) || vertical < 20 || thickness < 20) return null;
+    const candidate = { ...readModel(), beamSection: { vertical, thickness } };
+    return dimensionsFit(candidate) ? { vertical, thickness } : null;
+  }
+
+  function applyBeamSectionChangeFromViewer(value, camera) {
+    const next = normalizeBeamSectionChange(value);
+    if (!next) {
+      window.alert('Bu kiriş profil kesiti mevcut sistem ölçülerine uygun değil.');
+      return false;
+    }
+    if (camera) {
+      const position = Array.isArray(camera.position) ? camera.position.map(Number) : [];
+      const target = Array.isArray(camera.target) ? camera.target.map(Number) : [];
+      if (position.length === 3 && target.length === 3 && [...position, ...target].every(Number.isFinite)) {
+        viewerCameraState = { position, target, zoom: Number.isFinite(Number(camera.zoom)) ? Number(camera.zoom) : 1 };
+      }
+    }
+    modelState.beamSection = next;
+    renderViewer();
+    renderPdfRequestForm();
+    return true;
+  }
+
   function postName(index) {
-    return ['Ön Sol Dikme', 'Ön Sağ Dikme', 'Arka Sol Dikme', 'Arka Sağ Dikme'][index] || `Dikme ${index + 1}`;
+    return ['Arka Sol Dikme', 'Arka Sağ Dikme', 'Ön Sol Dikme', 'Ön Sağ Dikme'][index] || `Dikme ${index + 1}`;
   }
 
   function openPostActionDialog(index) {
@@ -2001,18 +2104,66 @@
     if (!['intermediate', 'main'].includes(kind)) return;
     dimensionVisibility[kind] = Boolean(visible);
     updateToolbox();
-    const frameWindow = $(ids.frame).contentWindow;
-    if (frameWindow) frameWindow.postMessage({
-      source: 'product-3d-parent',
-      type: 'set-dimension-visibility',
+    postViewerMessage('set-dimension-visibility', {
       visibility: { ...dimensionVisibility }
-    }, '*');
+    });
   }
 
   function resetViewerCamera() {
     viewerCameraState = null;
-    const frameWindow = $(ids.frame).contentWindow;
-    if (frameWindow) frameWindow.postMessage({ source: 'product-3d-parent', type: 'reset-camera' }, '*');
+    postViewerMessage('reset-camera');
+  }
+
+  function zoomViewerCamera(factor) {
+    const safeFactor = Number(factor);
+    if (!Number.isFinite(safeFactor) || safeFactor <= 0) return;
+    postViewerMessage('zoom-camera', { factor: safeFactor });
+  }
+
+  function setPreviewExpanded(expanded) {
+    const next = Boolean(expanded);
+    document.body.classList.toggle('preview-expanded', next);
+    const button = $(ids.previewExpand);
+    if (button) button.setAttribute('aria-pressed', String(next));
+    setText(ids.previewExpandLabel, next ? 'Veri Girişine Dön' : 'Önizlemeyi Büyüt');
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      postViewerMessage('viewport-resized');
+    }, 90);
+  }
+
+  function togglePreviewExpanded() {
+    setPreviewExpanded(!document.body.classList.contains('preview-expanded'));
+  }
+
+  async function toggleBrowserFullscreen() {
+    try {
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+      } else {
+        setPreviewExpanded(true);
+        if (document.documentElement && document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      }
+    } catch (error) {
+      console.warn('Tam ekran modu başlatılamadı.', error);
+    }
+  }
+
+  function syncBrowserFullscreenClass() {
+    document.body.classList.toggle('is-browser-fullscreen', Boolean(document.fullscreenElement));
+    window.setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+  }
+
+  function setInitialProjectDate() {
+    const target = $(ids.projectDate);
+    if (!target) return;
+    try {
+      target.textContent = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+    } catch (error) {
+      target.textContent = new Date().toLocaleDateString('tr-TR');
+    }
   }
 
   function toggleProductsOpen() {
@@ -4488,10 +4639,18 @@
   }
 
   window.addEventListener('message', (event) => {
+    const frame = $(ids.frame);
+    if (!frame || event.source !== frame.contentWindow) return;
     if (!event.data || event.data.source !== 'product-3d-viewer') return;
+    if (event.data.sessionId !== activeViewerSessionId) return;
     if (event.data.type === 'viewer-ready') {
       viewerLiveProductStateReady = Boolean(event.data.liveProductState);
       viewerLivePanelMasterReady = Boolean(event.data.livePanelMaster);
+      flushPendingViewerState();
+    }
+    if (event.data.type === 'beam-section-change-request') {
+      applyBeamSectionChangeFromViewer(event.data.beamSection, event.data.camera);
+      return;
     }
     if (event.data.type === 'ar-status') {
       setMobileArStatus(event.data.message || 'AR durumu güncellendi.', event.data.tone || '');
@@ -4530,31 +4689,33 @@
     }
   });
 
-  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
+  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, freedomLouverUrl, viewerSessionId, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
     const W = width;
     const D = depth;
     const H = height;
     const LC = lamellaCount;
-    const productGroupJson = JSON.stringify(productGroup === 'bio-rise' ? 'bio-rise' : 'b-cube');
+    const productGroupJson = safeScriptJson(productGroup === 'bio-rise' ? 'bio-rise' : 'b-cube');
     const productModelTitle = productGroup === 'bio-rise' ? 'BIO-RISE 3D' : 'B-CUBE FREEDOM 3D';
     const [O1, O2, O3, O4] = orientations;
-    const postJson = JSON.stringify(postSections);
-    const beamJson = JSON.stringify(beamSection);
-    const placementsJson = JSON.stringify(placements || {});
-    const zipPlacementsJson = JSON.stringify(zipPlacements || {});
-    const facadeProfilesJson = JSON.stringify(facadeProfiles || {});
-    const cameraStateJson = JSON.stringify(cameraState || null);
-    const selectedZoneIdJson = JSON.stringify(activeZoneId || null);
-    const dimensionVisibilityJson = JSON.stringify({
+    const postJson = safeScriptJson(postSections);
+    const beamJson = safeScriptJson(beamSection);
+    const placementsJson = safeScriptJson(placements || {});
+    const zipPlacementsJson = safeScriptJson(zipPlacements || {});
+    const facadeProfilesJson = safeScriptJson(facadeProfiles || {});
+    const freedomLouverUrlJson = safeScriptJson(freedomLouverUrl || '');
+    const viewerSessionIdJson = safeScriptJson(viewerSessionId || '');
+    const cameraStateJson = safeScriptJson(cameraState || null);
+    const selectedZoneIdJson = safeScriptJson(activeZoneId || null);
+    const dimensionVisibilityJson = safeScriptJson({
       intermediate: !showDimensionVisibility || showDimensionVisibility.intermediate !== false,
       main: !showDimensionVisibility || showDimensionVisibility.main !== false
     });
-    const productsOpenJson = JSON.stringify(Boolean(productsOpen));
-    const productOpenStatesJson = JSON.stringify(productOpenStates || {});
-    const panelStatesJson = JSON.stringify(panelStates || {});
-    const panelMasterOpenJson = JSON.stringify(Boolean(panelMasterOpen));
-    const toolboxSelectionModeJson = JSON.stringify(activeSelectionMode || null);
-    const toolboxSelectionKeysJson = JSON.stringify(Array.isArray(activeSelectionKeys) ? activeSelectionKeys : []);
+    const productsOpenJson = safeScriptJson(Boolean(productsOpen));
+    const productOpenStatesJson = safeScriptJson(productOpenStates || {});
+    const panelStatesJson = safeScriptJson(panelStates || {});
+    const panelMasterOpenJson = safeScriptJson(Boolean(panelMasterOpen));
+    const toolboxSelectionModeJson = safeScriptJson(activeSelectionMode || null);
+    const toolboxSelectionKeysJson = safeScriptJson(Array.isArray(activeSelectionKeys) ? activeSelectionKeys : []);
     const zipFabricMeta = {};
     ZIP_FABRIC_CATALOG.forEach((section) => section.pages.forEach((page) => page.items.forEach((item) => {
       const embeddedTextureMap = window.P3DV_ZIP_FABRIC_TEXTURES || {};
@@ -4570,7 +4731,8 @@
         height: item.height
       };
     })));
-    const zipFabricMetaJson = JSON.stringify(zipFabricMeta);
+    const zipFabricMetaJson = safeScriptJson(zipFabricMeta);
+    const glazingSectionSpecsJson = safeScriptJson(GLAZING_SECTION_SPECS);
     const systemColorValue = Number.parseInt(normalizeHexColor(systemColor && systemColor.hex, defaults.systemColor.hex).slice(1), 16);
     const panelColorValue = Number.parseInt(normalizeHexColor(panelColor && panelColor.hex, defaults.panelColor.hex).slice(1), 16);
 
@@ -4623,6 +4785,7 @@ body.ar-landscape #arScaleBadge{max-width:calc(100% - 350px)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr` + `ipt>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></scr` + `ipt>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></scr` + `ipt>
 </head>
 <body>
 <div id="fallback">3D viewer could not load. Three.js is loaded from a CDN.</div>
@@ -4680,6 +4843,11 @@ if(!window.THREE || !THREE.OrbitControls){
   return;
 }
 
+const VIEWER_SESSION_ID=${viewerSessionIdJson};
+const FREEDOM_LOUVER_GLB_URL=${freedomLouverUrlJson};
+function postParent(type,payload){
+  parent.postMessage({source:'product-3d-viewer',sessionId:VIEWER_SESSION_ID,type,...(payload||{})},'*');
+}
 const W=${W}, D=${D}, H=${H};
 const PRODUCT_GROUP=${productGroupJson};
 const IS_BIO_RISE=PRODUCT_GROUP==='bio-rise';
@@ -4699,15 +4867,19 @@ let panelStates=${panelStatesJson};
 let panelMasterOpen=${panelMasterOpenJson};
 const SYSTEM_COLOR=${systemColorValue};
 const PANEL_COLOR=${panelColorValue};
-const DEFAULT_COLOR_MODE=${JSON.stringify(colorMode !== 'ral')};
-const SYSTEM_FINISH=${JSON.stringify(modelState.systemColor.finish)};
-const PANEL_FINISH=${JSON.stringify(modelState.panelColor.finish)};
+const DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};
+const SYSTEM_FINISH=${safeScriptJson(systemColor && systemColor.finish || defaults.systemColor.finish)};
+const PANEL_FINISH=${safeScriptJson(panelColor && panelColor.finish || defaults.panelColor.finish)};
 const ZIP_FABRIC_META=${zipFabricMetaJson};
+const GLAZING_SECTION_SPECS=${glazingSectionSpecsJson};
 const DOOR_TOP_FIXED_TYPES=new Set(['TOP_FIXED','LEFT_FIXED_TOP','RIGHT_FIXED_TOP','BOTH_FIXED_TOP','DOUBLE_TOP','DOUBLE_LEFT_FIXED_TOP','DOUBLE_RIGHT_FIXED_TOP','DOUBLE_BOTH_FIXED_TOP']);
 let toolboxSelectionMode=${toolboxSelectionModeJson};
 let toolboxSelectionKeys=new Set(${toolboxSelectionKeysJson});
 const initialCameraState=${cameraStateJson};
 let lamellaOpenMode=panelMasterOpen;
+let freedomLouverTemplate=null;
+let freedomLouverTemplateSize=null;
+let freedomLouverLoadStatus=IS_BIO_RISE?'not-required':'pending';
 function productIsOpen(productKey){
   return Object.prototype.hasOwnProperty.call(productOpenStates||{},productKey)?Boolean(productOpenStates[productKey]):Boolean(productsOpen);
 }
@@ -4746,12 +4918,11 @@ if(initialCameraState&&Array.isArray(initialCameraState.target)&&initialCameraSt
 controls.enableDamping=true;
 controls.dampingFactor=.08;
 let cameraStateTimer=null;
+function cameraSnapshot(){
+  return {position:camera.position.toArray(),target:controls.target.toArray(),zoom:camera.zoom};
+}
 function publishCameraState(){
-  parent.postMessage({
-    source:'product-3d-viewer',
-    type:'camera-state',
-    camera:{position:camera.position.toArray(),target:controls.target.toArray(),zoom:camera.zoom}
-  },'*');
+  postParent('camera-state',{camera:cameraSnapshot()});
 }
 controls.addEventListener('change',()=>{
   if(cameraStateTimer)clearTimeout(cameraStateTimer);
@@ -4793,6 +4964,9 @@ scene.add(box);
 
 let group=new THREE.Group();
 scene.add(group);
+let modelGeneration=0;
+let liveRebuildTimer=null;
+let lastAppliedLiveRevision=0;
 const raycaster=new THREE.Raycaster();
 const mouse=new THREE.Vector2();
 let intermediateDimensionObjects=[];
@@ -4831,7 +5005,7 @@ let arRestoreCameraNear=camera.near;
 let arRestoreCameraFar=camera.far;
 
 function postArStatus(message,tone){
-  parent.postMessage({source:'product-3d-viewer',type:'ar-status',message:String(message||''),tone:tone||''},'*');
+  postParent('ar-status',{message:String(message||''),tone:tone||''});
 }
 
 function isLikelyIosDevice(){
@@ -5101,7 +5275,7 @@ async function cleanupArSession(){
   arGroundOffset=0;
   await resetArOrientation();
   restoreModelAfterAr();
-  parent.postMessage({source:'product-3d-viewer',type:'ar-session-ended'},'*');
+  postParent('ar-session-ended');
 }
 
 async function beginArSession(){
@@ -5213,7 +5387,7 @@ const arExitBtn=document.getElementById('arExitBtn');
 if(arExitBtn)arExitBtn.addEventListener('click',()=>{if(arSession)arSession.end();});
 
 getArCapabilities().then(capability=>{
-  parent.postMessage({source:'product-3d-viewer',type:'ar-capability',supported:capability.supported,message:capability.message},'*');
+  postParent('ar-capability',{supported:capability.supported,message:capability.message});
 });
 
 function postDims(index){
@@ -5250,8 +5424,10 @@ function editBeamSection(){
     alert('This blue profile section is too large for the current system dimensions.');
     return;
   }
-  beamSection={vertical:next.a,thickness:next.b};
-  buildModel(true);
+  postParent('beam-section-change-request',{
+    beamSection:{vertical:next.a,thickness:next.b},
+    camera:cameraSnapshot()
+  });
 }
 
 function profileColor(defaultHex){
@@ -5288,6 +5464,10 @@ function createTextureFinishMap(){
 }
 
 const finishTextureMap=createTextureFinishMap();
+if(finishTextureMap){
+  finishTextureMap.userData=finishTextureMap.userData||{};
+  finishTextureMap.userData.p3dvShared=true;
+}
 
 function finishMaterialSettings(finish,opacity,color){
   const normalized=(finish==='GLOSS'||finish==='TEXTURE'||finish==='MATTE')?finish:'MATTE';
@@ -5458,6 +5638,145 @@ function lamelShape(narrowBy){
   return s;
 }
 
+function disposeImportedFreedomMaterial(material){
+  if(!material)return;
+  const materials=Array.isArray(material)?material:[material];
+  const textures=new Set();
+  materials.filter(Boolean).forEach(item=>{
+    ['map','alphaMap','aoMap','bumpMap','displacementMap','emissiveMap','envMap','lightMap','metalnessMap','normalMap','roughnessMap'].forEach(key=>{
+      const texture=item[key];
+      if(texture&&typeof texture.dispose==='function'&&!textures.has(texture)){
+        textures.add(texture);
+        texture.dispose();
+      }
+    });
+    if(typeof item.dispose==='function')item.dispose();
+  });
+}
+
+function prepareFreedomLouverTemplate(sourceScene){
+  if(!sourceScene)return false;
+  const source=sourceScene.clone(true);
+  source.scale.multiplyScalar(1000);
+  source.rotateY(Math.PI/2);
+  source.updateMatrixWorld(true);
+  let bounds=new THREE.Box3().setFromObject(source);
+  if(bounds.isEmpty())return false;
+  const center=bounds.getCenter(new THREE.Vector3());
+  source.position.x-=center.x;
+  source.position.y-=bounds.min.y;
+  source.position.z-=center.z;
+  source.updateMatrixWorld(true);
+
+  const sharedMaterial=createSolidMaterial(PANEL_COLOR,1,autoFinishForColor(PANEL_COLOR));
+  sharedMaterial.userData={...(sharedMaterial.userData||{}),p3dvShared:true,p3dvFreedomLouver:true};
+  const replacedMaterials=new Set();
+  source.traverse(obj=>{
+    if(!obj.isMesh)return;
+    const oldMaterials=Array.isArray(obj.material)?obj.material:[obj.material];
+    oldMaterials.filter(Boolean).forEach(material=>replacedMaterials.add(material));
+    obj.material=sharedMaterial;
+    if(obj.geometry){
+      obj.geometry.userData={...(obj.geometry.userData||{}),p3dvShared:true,p3dvFreedomLouver:true};
+    }
+    obj.castShadow=true;
+    obj.receiveShadow=true;
+    obj.userData={...(obj.userData||{}),isLamel:true,isOpenLamel:false,p3dvFreedomLouver:true};
+  });
+  replacedMaterials.forEach(material=>disposeImportedFreedomMaterial(material));
+
+  const wrapper=new THREE.Group();
+  wrapper.add(source);
+  wrapper.updateMatrixWorld(true);
+  bounds=new THREE.Box3().setFromObject(wrapper);
+  const templateSize=bounds.getSize(new THREE.Vector3());
+  if(!(templateSize.x>1&&templateSize.y>1&&templateSize.z>1))return false;
+  wrapper.userData={p3dvFreedomLouverTemplate:true};
+  freedomLouverTemplateSize=templateSize;
+  freedomLouverTemplate=wrapper;
+  return true;
+}
+
+function loadFreedomLouverTemplate(){
+  if(IS_BIO_RISE){
+    freedomLouverLoadStatus='not-required';
+    return Promise.resolve(false);
+  }
+  if(!FREEDOM_LOUVER_GLB_URL||!THREE.GLTFLoader){
+    freedomLouverLoadStatus='fallback';
+    console.warn('Freedom GLB loader is unavailable; procedural louver fallback will be used.');
+    return Promise.resolve(false);
+  }
+  freedomLouverLoadStatus='loading';
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(loaded,status)=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timeoutId);
+      freedomLouverLoadStatus=status;
+      resolve(loaded);
+    };
+    const timeoutId=setTimeout(()=>{
+      console.warn('Freedom GLB load timed out; procedural louver fallback will be used.');
+      finish(false,'fallback-timeout');
+    },8000);
+    const loader=new THREE.GLTFLoader();
+    loader.load(FREEDOM_LOUVER_GLB_URL,gltf=>{
+      if(settled)return;
+      try{
+        const loaded=prepareFreedomLouverTemplate(gltf&&gltf.scene);
+        finish(loaded,loaded?'loaded':'fallback-invalid');
+      }catch(error){
+        console.error('Freedom GLB template preparation failed.',error);
+        finish(false,'fallback-error');
+      }
+    },undefined,error=>{
+      console.error('Freedom GLB load failed; procedural louver fallback will be used.',error);
+      finish(false,'fallback-error');
+    });
+  });
+}
+
+function cloneFreedomLouverObject(name,length,isOpen){
+  if(!freedomLouverTemplate||!freedomLouverTemplateSize)return null;
+  const object=freedomLouverTemplate.clone(true);
+  const nativeLength=Math.max(1,freedomLouverTemplateSize.x);
+  object.scale.x=Math.max(1,Number(length)||nativeLength)/nativeLength;
+  object.name=name;
+  object.userData={name,isPost:false,postIndex:-1,isLamel:true,isOpenLamel:Boolean(isOpen),p3dvFreedomLouver:true};
+  object.traverse(child=>{
+    if(!child.isMesh)return;
+    child.userData={...(child.userData||{}),name,isPost:false,postIndex:-1,isLamel:true,isOpenLamel:Boolean(isOpen),p3dvFreedomLouver:true};
+  });
+  object.updateMatrixWorld(true);
+  return object;
+}
+
+function createFreedomLamel(name,length,color){
+  const object=cloneFreedomLouverObject(name,length,false);
+  if(!object)return createLamel(name,length,color,0);
+  object.visible=false;
+  group.add(object);
+  parts.push(object);
+  return object;
+}
+
+function createOpenedFreedomLamel(name,length,color,angleDeg){
+  const object=cloneFreedomLouverObject(name,length,true);
+  if(!object)return createOpenedLamel(name,length,color,angleDeg,0,false);
+  object.updateMatrixWorld(true);
+  const bbox=new THREE.Box3().setFromObject(object);
+  const pivot=new THREE.Group();
+  object.position.set(-((bbox.min.x+bbox.max.x)/2),-bbox.min.y,-bbox.max.z);
+  object.visible=false;
+  pivot.rotation.x=THREE.MathUtils.degToRad(angleDeg);
+  pivot.add(object);
+  group.add(pivot);
+  parts.push(object);
+  return {pivot,mesh:object,bounds:bbox};
+}
+
 function createLamel(name,length,color,narrowBy){
   const geo=new THREE.ExtrudeGeometry(lamelShape(narrowBy),{depth:length,bevelEnabled:false,steps:1});
   geo.rotateY(Math.PI/2);
@@ -5618,9 +5937,8 @@ function addBottomHungProductBox(zone,cfg,color,opacity,angle,hingeY){
 
 function glazingSectionSpec(placement){
   const thickness=String(placement.glassThickness||'8 MM').toUpperCase();
-  if(thickness==='10 MM')return {glassDepth:10,frameDepth:14};
-  if(thickness==='INSULATED GLASS')return {glassDepth:20,frameDepth:24};
-  return {glassDepth:8,frameDepth:12};
+  const spec=GLAZING_SECTION_SPECS[thickness]||GLAZING_SECTION_SPECS['8 MM'];
+  return {glassDepth:Number(spec.glassDepth),frameDepth:Number(spec.frameDepth)};
 }
 
 function createArrowGeometry(length,shaftWidth,headWidth,headLength,direction,vertical){
@@ -6663,12 +6981,40 @@ function createZipFallbackTexture(fallbackColor,panelWidth,panelHeight,tileMm){
   return configureZipFabricTexture(new THREE.CanvasTexture(canvas),panelWidth,panelHeight,tileMm);
 }
 
+function markOwnedTexture(texture){
+  if(!texture)return texture;
+  texture.userData=texture.userData||{};
+  texture.userData.p3dvOwned=true;
+  return texture;
+}
+
+function materialGenerationActive(material,generation){
+  return Boolean(material)&&!(material.userData&&material.userData.p3dvDisposed)&&generation===modelGeneration;
+}
+
+function applyOwnedMaterialTexture(material,texture,generation){
+  if(!texture)return false;
+  markOwnedTexture(texture);
+  if(!materialGenerationActive(material,generation)){
+    texture.dispose();
+    return false;
+  }
+  const previous=material.map;
+  material.map=texture;
+  if(previous&&previous!==texture&&previous.userData&&previous.userData.p3dvOwned&&!(previous.userData&&previous.userData.p3dvShared)&&typeof previous.dispose==='function'){
+    previous.dispose();
+  }
+  material.needsUpdate=true;
+  return true;
+}
+
 function createZipFabricMaterial(placement,panelWidth,panelHeight){
   const code=String(placement.fabricColor||'');
   const meta=ZIP_FABRIC_META&&ZIP_FABRIC_META[code];
   const fallbackColor=zipFabricCssColor(placement);
   const tileMm=meta&&Number(meta.tileMm)>0?Number(meta.tileMm):500;
-  const fallbackTexture=createZipFallbackTexture(fallbackColor,panelWidth,panelHeight,tileMm);
+  const generation=modelGeneration;
+  const fallbackTexture=markOwnedTexture(createZipFallbackTexture(fallbackColor,panelWidth,panelHeight,tileMm));
   const material=new THREE.MeshBasicMaterial({
     map:fallbackTexture,
     color:fallbackTexture?0xffffff:Number('0x'+fallbackColor.replace('#','')),
@@ -6677,16 +7023,18 @@ function createZipFabricMaterial(placement,panelWidth,panelHeight){
     side:THREE.DoubleSide,
     toneMapped:false
   });
+  material.userData={...(material.userData||{}),p3dvGeneration:generation};
 
   const applyImageTexture=(image)=>{
     try{
       const texture=configureZipFabricTexture(new THREE.Texture(image),panelWidth,panelHeight,tileMm);
-      material.map=texture;
+      if(!applyOwnedMaterialTexture(material,texture,generation))return;
       material.color.setHex(0xffffff);
       material.opacity=1;
       material.transparent=false;
       material.needsUpdate=true;
     }catch(error){
+      if(!materialGenerationActive(material,generation))return;
       material.map=fallbackTexture;
       material.color.setHex(fallbackTexture?0xffffff:Number('0x'+fallbackColor.replace('#','')));
       material.needsUpdate=true;
@@ -6717,17 +7065,19 @@ function createZipFabricMaterial(placement,panelWidth,panelHeight){
         if(!cropCtx)return;
         cropCtx.drawImage(sourceImage,sourceX,sourceY,side,side,0,0,512,512);
         const texture=configureZipFabricTexture(new THREE.CanvasTexture(cropCanvas),panelWidth,panelHeight,tileMm);
-        material.map=texture;
+        if(!applyOwnedMaterialTexture(material,texture,generation))return;
         material.color.setHex(0xffffff);
         material.opacity=1;
         material.transparent=false;
         material.needsUpdate=true;
       }catch(error){
+        if(!materialGenerationActive(material,generation))return;
         material.map=fallbackTexture;
         material.needsUpdate=true;
       }
     };
     sourceImage.onerror=()=>{
+      if(!materialGenerationActive(material,generation))return;
       material.map=fallbackTexture;
       material.needsUpdate=true;
     };
@@ -7327,18 +7677,42 @@ function buildFacadeProducts(p,beamBottomY){
 
 function disposeModelGroup(root){
   if(!root)return;
+  const disposedGeometries=new Set();
+  const disposedMaterials=new Set();
+  const disposedTextures=new Set();
+  const textureKeys=['map','alphaMap','aoMap','bumpMap','displacementMap','emissiveMap','envMap','lightMap','metalnessMap','normalMap','roughnessMap','clearcoatMap','clearcoatNormalMap','clearcoatRoughnessMap','gradientMap','matcap','specularMap'];
   root.traverse(obj=>{
-    if(obj.geometry&&typeof obj.geometry.dispose==='function')obj.geometry.dispose();
+    if(obj.geometry&&typeof obj.geometry.dispose==='function'&&!disposedGeometries.has(obj.geometry)){
+      if(!(obj.geometry.userData&&obj.geometry.userData.p3dvShared)){
+        disposedGeometries.add(obj.geometry);
+        obj.geometry.dispose();
+      }
+    }
     const materials=Array.isArray(obj.material)?obj.material:[obj.material];
     materials.filter(Boolean).forEach(material=>{
-      if(typeof material.dispose==='function')material.dispose();
+      material.userData=material.userData||{};
+      if(material.userData.p3dvShared)return;
+      material.userData.p3dvDisposed=true;
+      textureKeys.forEach(key=>{
+        const texture=material[key];
+        if(!texture||typeof texture.dispose!=='function'||disposedTextures.has(texture))return;
+        if(texture.userData&&texture.userData.p3dvShared)return;
+        disposedTextures.add(texture);
+        texture.dispose();
+      });
+      if(typeof material.dispose==='function'&&!disposedMaterials.has(material)){
+        disposedMaterials.add(material);
+        material.dispose();
+      }
     });
   });
 }
 
 function buildModel(showAll,options){
   const atomicSwap=Boolean(options&&options.atomicSwap);
+  modelGeneration+=1;
   const previousGroup=atomicSwap?group:null;
+  const detachedGroup=!atomicSwap&&group.children.length?new THREE.Group():null;
   const previousParent=previousGroup&&previousGroup.parent?previousGroup.parent:scene;
   const previousPosition=previousGroup?previousGroup.position.clone():null;
   const previousRotation=previousGroup?previousGroup.rotation.clone():null;
@@ -7347,7 +7721,12 @@ function buildModel(showAll,options){
   if(atomicSwap){
     group=new THREE.Group();
   }else{
-    while(group.children.length)group.remove(group.children[0]);
+    while(group.children.length){
+      const child=group.children[0];
+      group.remove(child);
+      if(detachedGroup)detachedGroup.add(child);
+    }
+    if(detachedGroup)disposeModelGroup(detachedGroup);
   }
   parts=[];
   intermediateDimensionObjects=[];
@@ -7362,10 +7741,10 @@ function buildModel(showAll,options){
   const frontBackBeamThickness=beamSection.thickness;
   const sideBeamThickness=IS_BIO_RISE?50:beamSection.thickness;
 
-  addBox({name:'Front Left Post',px:-W/2+p[0].x/2,py:0,pz:-D/2+p[0].z/2,sx:p[0].x,sy:H,sz:p[0].z,idx:0},magenta,true);
-  addBox({name:'Front Right Post',px:W/2-p[1].x/2,py:0,pz:-D/2+p[1].z/2,sx:p[1].x,sy:H,sz:p[1].z,idx:1},magenta,true);
-  addBox({name:'Back Left Post',px:-W/2+p[2].x/2,py:0,pz:D/2-p[2].z/2,sx:p[2].x,sy:H,sz:p[2].z,idx:2},magenta,true);
-  addBox({name:'Back Right Post',px:W/2-p[3].x/2,py:0,pz:D/2-p[3].z/2,sx:p[3].x,sy:H,sz:p[3].z,idx:3},magenta,true);
+  addBox({name:'Arka Sol Dikme',px:-W/2+p[0].x/2,py:0,pz:-D/2+p[0].z/2,sx:p[0].x,sy:H,sz:p[0].z,idx:0},magenta,true);
+  addBox({name:'Arka Sağ Dikme',px:W/2-p[1].x/2,py:0,pz:-D/2+p[1].z/2,sx:p[1].x,sy:H,sz:p[1].z,idx:1},magenta,true);
+  addBox({name:'Ön Sol Dikme',px:-W/2+p[2].x/2,py:0,pz:D/2-p[2].z/2,sx:p[2].x,sy:H,sz:p[2].z,idx:2},magenta,true);
+  addBox({name:'Ön Sağ Dikme',px:W/2-p[3].x/2,py:0,pz:D/2-p[3].z/2,sx:p[3].x,sy:H,sz:p[3].z,idx:3},magenta,true);
 
   const beamCenterY=H/2-beamVertical/2;
   const beamBottomY=beamCenterY-beamVertical/2;
@@ -7476,7 +7855,7 @@ function buildModel(showAll,options){
     const lamelOpenSpacing=65;
     if(lamellaOpenMode){
       for(let i=0;i<lamelCount;i++){
-        const opened=createOpenedLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle,lamelNarrowBy,false);
+        const opened=createOpenedFreedomLamel('Lamella '+(i+1),lamelLength,grass,lamelOpenAngle);
         const backStackMinZ=freedomBackMotorBoxMinZ+(lamelCount-1-i)*lamelOpenSpacing;
         opened.pivot.rotation.y=Math.PI;
         opened.pivot.userData={...(opened.pivot.userData||{}),motorFacade:freedomMotorFacade,motorFacadeLabel:freedomMotorFacadeLabel};
@@ -7484,7 +7863,7 @@ function buildModel(showAll,options){
       }
     }else{
       for(let i=0;i<lamelCount;i++){
-        const lamel=createLamel('Lamella '+(i+1),lamelLength,grass,lamelNarrowBy);
+        const lamel=createFreedomLamel('Lamella '+(i+1),lamelLength,grass);
         lamel.rotation.y=Math.PI;
         const mirroredRearMaxZ=-lamelStartZ-i*lamelSpacing;
         setMeshByBounds(lamel,{centerX:0,maxZ:mirroredRearMaxZ,bottomY:lamelBottomY});
@@ -7518,9 +7897,16 @@ function buildModel(showAll,options){
   }
 }
 
-function rebuildModelWithoutFrameReload(){
-  if(timer)clearInterval(timer);
-  buildModel(true,{atomicSwap:true});
+function rebuildModelWithoutFrameReload(revision){
+  const requestedRevision=Number(revision)||0;
+  if(requestedRevision<lastAppliedLiveRevision)return;
+  lastAppliedLiveRevision=requestedRevision;
+  if(liveRebuildTimer)clearTimeout(liveRebuildTimer);
+  liveRebuildTimer=setTimeout(()=>{
+    liveRebuildTimer=null;
+    if(timer)clearInterval(timer);
+    buildModel(true,{atomicSwap:true});
+  },16);
 }
 
 window.replayAnimation=function replayAnimation(){
@@ -7624,21 +8010,17 @@ renderer.domElement.addEventListener('pointerup',event=>{
     if(zone){
       const picker=zonePickers.find(item=>item.userData.zone.id===zone.id)||null;
       if(picker&&isToolboxZoneEligible(zone,picker.userData.occupied)){
-        parent.postMessage({
-          source:'product-3d-viewer',
-          type:'toggle-toolbox-selection',
+        postParent('toggle-toolbox-selection',{
           item:{kind:'zone',key:toolboxZoneKey(zone),zone:{...zone},occupied:Boolean(picker.userData.occupied)}
-        },'*');
+        });
       }
       return;
     }
     if(obj&&obj.userData.isDividerProfile&&isToolboxProfileEligible(obj.userData.profile)){
       const profile={...obj.userData.profile};
-      parent.postMessage({
-        source:'product-3d-viewer',
-        type:'toggle-toolbox-selection',
+      postParent('toggle-toolbox-selection',{
         item:{kind:'profile',key:toolboxProfileKey(profile),profile}
-      },'*');
+      });
     }
     return;
   }
@@ -7654,32 +8036,32 @@ renderer.domElement.addEventListener('pointerup',event=>{
       selectedZonePicker.userData.selected=true;
       setZoneHighlight(selectedZonePicker,true);
     }
-    parent.postMessage({source:'product-3d-viewer',type:'select-zone',zone:{...zone}},'*');
+    postParent('select-zone',{zone:{...zone}});
     return;
   }
   if(obj&&obj.userData.isDividerProfile){
-    parent.postMessage({source:'product-3d-viewer',type:'select-divider-profile',profile:{...obj.userData.profile}},'*');
+    postParent('select-divider-profile',{profile:{...obj.userData.profile}});
     return;
   }
   if(obj&&obj.userData.isPost){
-    parent.postMessage({source:'product-3d-viewer',type:'select-post',postIndex:obj.userData.postIndex},'*');
+    postParent('select-post',{postIndex:obj.userData.postIndex});
   }
 });
 
 renderer.domElement.addEventListener('contextmenu',event=>{
   if(!toolboxSelectionMode)return;
   event.preventDefault();
-  parent.postMessage({source:'product-3d-viewer',type:'complete-toolbox-selection'},'*');
+  postParent('complete-toolbox-selection');
 });
 
 window.addEventListener('keydown',event=>{
   if(!toolboxSelectionMode)return;
   if(event.key==='Escape'){
     event.preventDefault();
-    parent.postMessage({source:'product-3d-viewer',type:'cancel-toolbox-selection'},'*');
+    postParent('cancel-toolbox-selection');
   }else if(event.key==='Enter'){
     event.preventDefault();
-    parent.postMessage({source:'product-3d-viewer',type:'complete-toolbox-selection'},'*');
+    postParent('complete-toolbox-selection');
   }
 });
 
@@ -7687,33 +8069,37 @@ window.addEventListener('dblclick',event=>{
   const obj=partFromObject(pickVisiblePart(event));
   if(!obj)return;
   if(obj.userData.isTogglePanel&&obj.userData.zoneId){
-    parent.postMessage({
-      source:'product-3d-viewer',
-      type:'toggle-panel-state',
+    postParent('toggle-panel-state',{
       panelKey:obj.userData.panelKey||obj.userData.productKey||obj.userData.zoneId,
       productKey:obj.userData.productKey||obj.userData.panelKey||obj.userData.zoneId,
       zoneId:obj.userData.zoneId,
       open:!Boolean(obj.userData.panelOpen)
-    },'*');
+    });
     return;
   }
   if(obj.userData.isBeam)editBeamSection();
 });
 
 window.addEventListener('message',event=>{
+  if(event.source!==parent)return;
   if(!event.data||event.data.source!=='product-3d-parent')return;
+  if(event.data.sessionId!==VIEWER_SESSION_ID)return;
   if(event.data.type==='set-product-open-state'){
+    const revision=Number(event.data.revision)||0;
+    if(revision<lastAppliedLiveRevision)return;
     productsOpen=Boolean(event.data.productsOpen);
     productOpenStates=event.data.productOpenStates&&typeof event.data.productOpenStates==='object'?{...event.data.productOpenStates}:{};
     panelStates=event.data.panelStates&&typeof event.data.panelStates==='object'?{...event.data.panelStates}:{};
-    rebuildModelWithoutFrameReload();
-    parent.postMessage({source:'product-3d-viewer',type:'product-open-state-applied'},'*');
+    rebuildModelWithoutFrameReload(revision);
+    postParent('product-open-state-applied',{revision});
   }
   if(event.data.type==='set-panel-master-open'){
+    const revision=Number(event.data.revision)||0;
+    if(revision<lastAppliedLiveRevision)return;
     panelMasterOpen=Boolean(event.data.open);
     lamellaOpenMode=panelMasterOpen;
-    rebuildModelWithoutFrameReload();
-    parent.postMessage({source:'product-3d-viewer',type:'panel-master-open-applied',open:panelMasterOpen},'*');
+    rebuildModelWithoutFrameReload(revision);
+    postParent('panel-master-open-applied',{open:panelMasterOpen,revision});
   }
   if(event.data.type==='replay-animation')window.replayAnimation();
   if(event.data.type==='set-dimension-visibility')setDimensionVisibility(event.data.visibility);
@@ -7730,6 +8116,20 @@ window.addEventListener('message',event=>{
     camera.updateProjectionMatrix();
     controls.update();
     publishCameraState();
+  }
+  if(event.data.type==='zoom-camera'){
+    const factor=Number(event.data.factor);
+    if(Number.isFinite(factor)&&factor>0){
+      camera.zoom=Math.max(.35,Math.min(3.5,camera.zoom*factor));
+      camera.updateProjectionMatrix();
+      controls.update();
+      publishCameraState();
+    }
+  }
+  if(event.data.type==='viewport-resized'){
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
   }
 });
 
@@ -7780,9 +8180,18 @@ function animate(time,frame){
   renderer.render(scene,camera);
 }
 
-buildModel(true);
-renderer.setAnimationLoop(animate);
-parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductState:true,livePanelMaster:true},'*');
+async function initializeViewer(){
+  await loadFreedomLouverTemplate();
+  buildModel(true);
+  renderer.setAnimationLoop(animate);
+  postParent('viewer-ready',{
+    liveProductState:true,
+    livePanelMaster:true,
+    freedomLouverProfile:freedomLouverTemplate?'glb':'procedural-fallback',
+    freedomLouverLoadStatus
+  });
+}
+initializeViewer();
 })();
 </scr` + `ipt>
 </body>
@@ -7928,6 +8337,16 @@ parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductSt
       if (event.target === $(ids.zoneActionDialog)) closeZoneActionDialog();
     });
 
+    if ($(ids.previewExpand)) $(ids.previewExpand).addEventListener('click', togglePreviewExpanded);
+    if ($(ids.toolbarRefresh)) $(ids.toolbarRefresh).addEventListener('click', () => renderViewer());
+    if ($(ids.toolbarZoomIn)) $(ids.toolbarZoomIn).addEventListener('click', () => zoomViewerCamera(1.16));
+    if ($(ids.toolbarZoomOut)) $(ids.toolbarZoomOut).addEventListener('click', () => zoomViewerCamera(0.86));
+    if ($(ids.toolbarFit)) $(ids.toolbarFit).addEventListener('click', resetViewerCamera);
+    if ($(ids.toolbarPdf)) $(ids.toolbarPdf).addEventListener('click', () => { exportProductListPdf(); });
+    if ($(ids.toolbarAr)) $(ids.toolbarAr).addEventListener('click', () => { startMobileAr(); });
+    if ($(ids.toolbarFullscreen)) $(ids.toolbarFullscreen).addEventListener('click', () => { toggleBrowserFullscreen(); });
+    if (document.addEventListener) document.addEventListener('fullscreenchange', syncBrowserFullscreenClass);
+
     $(ids.toolboxIntermediateDimensions).addEventListener('change', (event) => setDimensionVisibility('intermediate', event.target.checked));
     $(ids.toolboxMainDimensions).addEventListener('change', (event) => setDimensionVisibility('main', event.target.checked));
     $(ids.toolboxResetCamera).addEventListener('click', resetViewerCamera);
@@ -8007,6 +8426,7 @@ parent.postMessage({source:'product-3d-viewer',type:'viewer-ready',liveProductSt
   }
 
   updateProductInputUi();
+  setInitialProjectDate();
   updateColorControls();
   bindEvents();
   updateToolbox();

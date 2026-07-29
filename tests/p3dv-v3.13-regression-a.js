@@ -9,10 +9,10 @@ const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.26', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
+  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
   'Ürün Grubu', 'B-Cube', 'Bio-Rise', 'Ürün Alt Grup', 'Module', 'Modul 1',
   'productGroupInput', 'productSubgroupValue', 'projectionOptions',
-  'min="2038"', 'list="projectionOptions"', 'freedomWidthLimitNote', 'freedomDepthLimitNote',
+  'min="2038"', 'projectionCustomToggleBtn', 'freedomWidthLimitNote', 'freedomDepthLimitNote',
   'Paneller Açık', 'Zip Perde', 'Sabit Doğrama'
 ]) assert(indexSource.includes(token), `missing HTML token: ${token}`);
 for (const forbidden of ['Freedom Giriş Bilgileri', '>Family<', '<span>Modül 1</span>']) {
@@ -35,7 +35,7 @@ for (const token of [
   'function buildFixedJoineryProduct', 'geo.rotateX(Math.PI);'
 ]) assert(appSource.includes(token), `missing V3.11 code token: ${token}`);
 
-const bioBranchStart = appSource.indexOf('if(IS_BIO_RISE){', appSource.indexOf('function buildModel(showAll)'));
+const bioBranchStart = appSource.indexOf('if(IS_BIO_RISE){', appSource.indexOf('function buildModel(showAll,options)'));
 const bioElse = appSource.indexOf('}else{', bioBranchStart);
 const bioBranch = appSource.slice(bioBranchStart, bioElse);
 assert(bioBranch.includes("createExtrudedGutter('Left Gutter'"), 'Bio-Rise left gutter missing');
@@ -118,7 +118,7 @@ for (const id of [
   'freedomWidthInput','freedomDepthInput','freedomHeightInput','freedomPanelCountInput'
 ]) el(id).tagName = 'INPUT';
 el('productGroupInput').tagName = 'SELECT';
-el('projectionOptions').tagName = 'DATALIST';
+el('projectionOptions').tagName = 'SELECT';
 
 el('productGroupInput').value = 'b-cube';
 el('productTypeInput').value = 'sliding';

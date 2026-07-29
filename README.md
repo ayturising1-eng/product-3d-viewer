@@ -1,8 +1,8 @@
 # Product 3d Viewer
 
-Open-source browser-based 3D product viewer prototype.
+## P3DV V3.46 Freedom GLB Louver Profile
 
-The included Bioclimatic product groups are **B-Cube / Freedom** and **Bio-Rise**, implemented as separate geometry specifications on the same standalone JavaScript / Three.js viewer and product-placement workflow.
+V3.46 preserves the successful V3.45 PLMR interface and all V3.44 stabilization work while replacing only the B-Cube Freedom louver drawing with the supplied binary glTF panel model. The model is loaded once, cloned for all Freedom panels, scaled only along its length axis, and uses the existing panel positions, spacing, rear-facade package location and 100-degree effective opening. Bio-Rise keeps its existing procedural louver geometry. A procedural Freedom fallback remains available if GLTFLoader or the GLB model cannot be loaded.
 
 ## Features
 
@@ -66,6 +66,7 @@ The viewer includes selectable front, rear, left, and right facade openings. Cli
 - Manual panel count from 2 to 12
 - 8 mm glass with 12 mm surrounding frame depth
 - 10 mm glass with 14 mm surrounding frame depth
+- 12 mm glass with 16 mm surrounding frame depth
 - 20 mm insulated glass with 24 mm surrounding frame depth
 - 42 mm lower-profile height for threshold systems
 - 15 mm lower-profile height for flush-bottom systems
@@ -118,7 +119,7 @@ The product models intentionally use simplified technical geometry with outlined
 
 ## Version
 
-Current package: **p3dv.v3.43**
+Current package: **p3dv.v3.46**
 
 ## P3DV V3.16 Kapı Seçimi ve Çizim Düzeltmesi
 
@@ -486,7 +487,7 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Genel aç/kapat düğmesi tüm yerleştirilmiş ürünlerin bireysel durumlarını da aynı değere getirir.
 - AR oturumu sırasında grup konumu, dönüşü, 1:1 ölçeği ve yarı saydam yerleştirme görünümü korunur.
 - Viewer henüz hazır değilse güvenli geriye uyumluluk olarak normal render akışı kullanılır.
-## P3DV V3.43 Kesintisiz Çatı Paneli Aç/Kapat
+## P3DV V3.46 Kesintisiz Çatı Paneli Aç/Kapat
 
 - Toolbox içindeki `Paneller Açık / Kapalı` kontrolü artık 3D iframe'i yeniden yüklemez.
 - Ana uygulama panel ana durumunu viewer'a `set-panel-master-open` mesajıyla gönderir.
@@ -497,3 +498,11 @@ Zip Perde, Dikme Arası seçiliyken aynı bölmede ana ürün bulunursa ölçül
 - Viewer canlı panel güncellemesini desteklemiyorsa güvenli fallback olarak normal render akışı kullanılır.
 - Gerçek Chromium testinde panel kontrolü kapalı ve tekrar açık yapılmış; iframe `srcdoc`, child window ve kamera marker verisi değişmeden iki canlı mesaj alınmıştır.
 
+
+## P3DV V3.46 - PLMR Ortak Arayüzü
+
+- Tarayıcı ve mobil uygulama adı `PLMR | 3D Designer` olarak güncellendi.
+- PLMR logo, favicon, Apple Touch ve manifest ikonları eklendi.
+- Normal çalışma düzeni solda veri kartları, sağda 3D çizim / ön izleme biçimindedir.
+- `Önizlemeyi Büyüt` modunda veri paneli gizlenir ve P3DV toolbox sağ tarafta sabit çalışma paneli olarak açılır.
+- Henüz veri modeli bulunmayan PLMR araçları ve ek opsiyonlar pasif olarak gösterilir; mevcut P3DV motoruna müdahale etmez.

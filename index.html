@@ -1,82 +1,197 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>p3dv.v3.43 · Product 3d Viewer</title>
+  <title>PLMR | 3D Designer</title>
+  <meta name="application-name" content="PLMR | 3D Designer" />
+  <meta name="apple-mobile-web-app-title" content="PLMR 3D" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="PLMR ürünleri için profesyonel 3D tasarım, ürün yerleşimi ve teklif önizleme arayüzü." />
+  <link rel="icon" href="./assets/branding/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/branding/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="./assets/branding/favicon-48.png" />
+  <link rel="apple-touch-icon" href="./assets/branding/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="./styles.css" />
-  <meta name="theme-color" content="#115da8" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>Product 3d Viewer <span class="app-version">p3dv.v3.43</span></h1>
+  <header class="topbar plmr-brandbar">
+    <div class="plmr-brand">
+      <img src="./assets/branding/plmr-logo.png" alt="PLMR" class="plmr-brand-logo" />
+      <span class="plmr-brand-divider" aria-hidden="true"></span>
+      <span class="plmr-brand-title">3D Designer</span>
+    </div>
+    <div class="plmr-brand-meta">
+      <span class="plmr-brand-product">Bioclimatic ürün tasarım sistemi</span>
+      <span class="app-version">p3dv.v3.46</span>
+    </div>
   </header>
 
   <main class="app">
     <div class="viewer-workspace">
-
-      <aside class="freedom-input-panel" aria-label="Ürün bilgileri ve sistem ölçüleri">
-        <div class="freedom-input-head">
-          <strong>Ürün Giriş Bilgileri</strong>
-        </div>
-        <dl class="freedom-product-info">
-          <div><dt>Ürün Ailesi</dt><dd>Bioclimatic</dd></div>
-          <div class="product-info-control"><dt>Ürün Grubu</dt><dd><select id="productGroupInput" aria-label="Ürün Grubu"><option value="b-cube">B-Cube</option><option value="bio-rise">Bio-Rise</option></select></dd></div>
-          <div><dt>Ürün Alt Grup</dt><dd id="productSubgroupValue">Freedom</dd></div>
-          <div><dt>Module</dt><dd>Modul 1</dd></div>
-        </dl>
-        <form id="freedomInputForm" class="freedom-input-form" novalidate>
-          <label>
-            Genişlik
-            <input id="freedomWidthInput" type="number" inputmode="decimal" min="1000" step="1" placeholder="Önerilen maks. 4050 mm" />
-            <small id="freedomWidthLimitNote" class="freedom-limit-note">Önerilen maksimum: 4050 mm · Üzeri uyarıyla çizilir.</small>
-          </label>
-          <label class="projection-field">
-            Açılım
-            <div class="projection-control">
-              <select id="projectionOptions" aria-label="Açılım ve panel sayısı seçenekleri"></select>
-              <button id="projectionCustomToggleBtn" class="projection-custom-toggle" type="button">Özel değer</button>
-              <input id="freedomDepthInput" class="projection-custom-input" type="text" inputmode="decimal" min="2038" placeholder="Önerilen 2038–7060 mm" hidden />
-            </div>
-            <small id="freedomDepthLimitNote" class="freedom-limit-note">Önerilen maksimum: 7060 mm · Üzeri uyarıyla çizilir.</small>
-          </label>
-          <label>
-            Yükseklik
-            <input id="freedomHeightInput" type="number" inputmode="decimal" min="1600" step="1" placeholder="Yükseklik (mm)" />
-          </label>
-          <label>
-            Panel Sayısı
-            <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="7" step="1" placeholder="Önerilen maks. 30 adet" />
-          </label>
-          <small id="productFormulaText" class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
-          <div id="freedomInputValidation" class="freedom-input-validation" aria-live="polite"></div>
-          <button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
-        </form>
-
-        <section class="ral-color-controls" aria-label="RAL renk seçimleri">
-          <div class="ral-color-controls-head">
-            <strong>Renk Seçimi</strong>
-            <div class="color-mode-actions" role="group" aria-label="Renk modu">
-              <button id="defaultColorModeBtn" type="button" class="is-active" aria-pressed="true">Default</button>
-              <button id="ralColorModeBtn" type="button" aria-pressed="false">RAL</button>
-            </div>
+      <aside class="freedom-input-panel" aria-label="Proje, ürün ve sistem bilgileri">
+        <section class="plmr-input-card project-information-card">
+          <div class="plmr-card-head">
+            <strong>1. Proje Bilgileri</strong>
+            <button class="plmr-card-edit" type="button" disabled aria-label="Proje bilgilerini düzenle" title="Bu alan sonraki aşamada etkinleştirilecek">✎</button>
           </div>
-          <button id="systemColorTrigger" type="button" class="ral-color-trigger">
-            <span id="systemColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
-            <span class="ral-color-trigger-copy"><small>Sistem Rengi</small><strong id="systemColorValue">Klasik Sistem Paleti</strong></span>
-            <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
-          </button>
-          <button id="panelColorTrigger" type="button" class="ral-color-trigger">
-            <span id="panelColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
-            <span class="ral-color-trigger-copy"><small>Panel Rengi</small><strong id="panelColorValue">Klasik Panel Yeşili</strong></span>
-            <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
-          </button>
-          <small class="ral-color-note">Default modda dikmeler magenta, kayıtlar mavi, paneller yeşil ve iç oluklar turuncu-sarı klasik renktedir. RAL seçimi kullanıcı isteğiyle etkinleşir.</small>
+          <dl class="plmr-data-list">
+            <div><dt>Müşteri</dt><dd>—</dd></div>
+            <div><dt>Proje</dt><dd>—</dd></div>
+            <div><dt>Proje Kodu</dt><dd>—</dd></div>
+            <div><dt>Revizyon</dt><dd>R01</dd></div>
+            <div><dt>Çizen</dt><dd>—</dd></div>
+            <div><dt>Tarih</dt><dd id="plmrProjectDate">—</dd></div>
+          </dl>
         </section>
 
+        <section class="plmr-input-card product-options-card">
+          <div class="plmr-card-head">
+            <strong>2. Ürün ve Opsiyonlar</strong>
+            <button class="plmr-card-edit" type="button" disabled aria-label="Ürün seçeneklerini düzenle" title="Ürün seçimleri aşağıdaki aktif alanlardan yapılır">✎</button>
+          </div>
+          <div class="freedom-input-head"><strong>Ürün Giriş Bilgileri</strong></div>
+          <dl class="freedom-product-info">
+            <div><dt>Ürün Ailesi</dt><dd>Bioclimatic</dd></div>
+            <div class="product-info-control"><dt>Ürün Grubu</dt><dd><select id="productGroupInput" aria-label="Ürün Grubu"><option value="b-cube">B-Cube</option><option value="bio-rise">Bio-Rise</option></select></dd></div>
+            <div><dt>Ürün Alt Grup</dt><dd id="productSubgroupValue">Freedom</dd></div>
+            <div><dt>Module</dt><dd>Modul 1</dd></div>
+          </dl>
+        </section>
 
+        <section class="plmr-input-card system-dimensions-card">
+          <div class="plmr-card-head">
+            <strong>3. Sistem Ölçüleri (mm)</strong>
+            <button class="plmr-card-edit" type="button" disabled aria-label="Sistem ölçülerini düzenle" title="Ölçüler aşağıdaki aktif alanlardan girilir">✎</button>
+          </div>
+          <form id="freedomInputForm" class="freedom-input-form" novalidate>
+            <label>
+              Genişlik (W)
+              <input id="freedomWidthInput" type="number" inputmode="decimal" min="1000" step="1" placeholder="Önerilen maks. 4050 mm" />
+              <small id="freedomWidthLimitNote" class="freedom-limit-note">Önerilen maksimum: 4050 mm · Üzeri uyarıyla çizilir.</small>
+            </label>
+            <label class="projection-field">
+              Açılım (D)
+              <div class="projection-control">
+                <select id="projectionOptions" aria-label="Açılım ve panel sayısı seçenekleri"></select>
+                <button id="projectionCustomToggleBtn" class="projection-custom-toggle" type="button">Özel değer</button>
+                <input id="freedomDepthInput" class="projection-custom-input" type="text" inputmode="decimal" min="2038" placeholder="Önerilen 2038–7060 mm" hidden />
+              </div>
+              <small id="freedomDepthLimitNote" class="freedom-limit-note">Önerilen maksimum: 7060 mm · Üzeri uyarıyla çizilir.</small>
+            </label>
+            <label>
+              Yükseklik (H)
+              <input id="freedomHeightInput" type="number" inputmode="decimal" min="1600" step="1" placeholder="Yükseklik (mm)" />
+            </label>
+            <label>
+              Panel Sayısı
+              <input id="freedomPanelCountInput" type="number" inputmode="numeric" min="7" step="1" placeholder="Önerilen maks. 30 adet" />
+            </label>
+            <small id="productFormulaText" class="freedom-formula">Açılım = Panel Sayısı × 216 + 580</small>
+            <div id="freedomInputValidation" class="freedom-input-validation" aria-live="polite"></div>
+            <button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
+          </form>
+        </section>
+
+        <section class="plmr-input-card color-material-card">
+          <div class="plmr-card-head"><strong>4. Renk ve Malzeme</strong><span class="plmr-card-state">Aktif</span></div>
+          <section class="ral-color-controls" aria-label="RAL renk seçimleri">
+            <div class="ral-color-controls-head">
+              <strong>Renk Seçimi</strong>
+              <div class="color-mode-actions" role="group" aria-label="Renk modu">
+                <button id="defaultColorModeBtn" type="button" class="is-active" aria-pressed="true">Default</button>
+                <button id="ralColorModeBtn" type="button" aria-pressed="false">RAL</button>
+              </div>
+            </div>
+            <button id="systemColorTrigger" type="button" class="ral-color-trigger">
+              <span id="systemColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
+              <span class="ral-color-trigger-copy"><small>Sistem Rengi</small><strong id="systemColorValue">Klasik Sistem Paleti</strong></span>
+              <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
+            </button>
+            <button id="panelColorTrigger" type="button" class="ral-color-trigger">
+              <span id="panelColorSwatch" class="ral-color-trigger-swatch" aria-hidden="true"></span>
+              <span class="ral-color-trigger-copy"><small>Panel Rengi</small><strong id="panelColorValue">Klasik Panel Yeşili</strong></span>
+              <span class="ral-color-trigger-icon" aria-hidden="true">⌄</span>
+            </button>
+            <small class="ral-color-note">Default modda klasik sistem ve panel renkleri kullanılır. RAL seçimi kullanıcı isteğiyle etkinleşir.</small>
+          </section>
+        </section>
+
+        <section class="plmr-input-card extra-options-card">
+          <div class="plmr-card-head"><strong>5. Ek Opsiyonlar</strong><span class="plmr-card-state is-passive">Hazırlanıyor</span></div>
+          <div class="plmr-passive-options" aria-label="Henüz tanımlanmamış ek opsiyonlar">
+            <label><input type="checkbox" disabled /> LED Aydınlatma</label>
+            <label><input type="checkbox" disabled /> Rüzgâr Sensörü</label>
+            <label><input type="checkbox" disabled /> Yağmur Sensörü</label>
+            <label><input type="checkbox" disabled /> Güneş Sensörü</label>
+            <label><input type="checkbox" disabled /> Isıtıcı</label>
+            <label><input type="checkbox" disabled /> Zip Perde Paketi</label>
+          </div>
+        </section>
       </aside>
-      <section class="viewer-shell" aria-label="3D viewer">
+
+      <section class="viewer-shell" aria-label="3D ürün çizimi ve ön izleme">
+        <div class="viewer-panel-head">
+          <div>
+            <strong>6. <span id="previewProductLabel">B-Cube Freedom</span> Ürün Çizimi (Ön İzleme)</strong>
+            <span>3D görünüm içinde ekleme, düzenleme ve ürün yerleşimi yapın.</span>
+          </div>
+          <span class="viewer-panel-mode">3D</span>
+        </div>
+
+        <div class="plmr-commandbar" role="toolbar" aria-label="Çizim araçları">
+          <button id="toolbarNewBtn" class="plmr-tool-button" type="button" disabled title="Yeni proje işlevi sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">▱</span><span>Yeni</span>
+          </button>
+          <button id="toolbarOpenBtn" class="plmr-tool-button" type="button" disabled title="Proje açma işlevi sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">▰</span><span>Aç</span>
+          </button>
+          <button id="toolbarSaveBtn" class="plmr-tool-button" type="button" disabled title="Kaydetme işlevi sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">▣</span><span>Kaydet</span>
+          </button>
+          <button id="toolbarDxfBtn" class="plmr-tool-button" type="button" disabled title="DXF dışa aktarımı sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon file-icon" aria-hidden="true">DXF</span><span>DXF İndir</span>
+          </button>
+          <button id="toolbarPdfBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon file-icon" aria-hidden="true">PDF</span><span>PDF İndir</span>
+          </button>
+          <span class="plmr-command-divider" aria-hidden="true"></span>
+          <button id="toolbarZoomInBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">⊕</span><span>Yakınlaştır</span>
+          </button>
+          <button id="toolbarZoomOutBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">⊖</span><span>Uzaklaştır</span>
+          </button>
+          <button id="toolbarFitBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">⌗</span><span>Sığdır</span>
+          </button>
+          <button id="toolbarMeasureBtn" class="plmr-tool-button" type="button" disabled title="Bağımsız ölçü aracı sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">↔</span><span>Ölçü</span>
+          </button>
+          <button id="toolbarLayersBtn" class="plmr-tool-button" type="button" disabled title="Katman yönetimi sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">▤</span><span>Katmanlar</span>
+          </button>
+          <button id="toolbarViewBtn" class="plmr-tool-button" type="button" disabled title="Hazır görünüş menüsü sonraki aşamada etkinleştirilecek">
+            <span class="plmr-tool-icon" aria-hidden="true">◉</span><span>Görünüm</span>
+          </button>
+          <button id="toolbarRefreshBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">↻</span><span>Yenile</span>
+          </button>
+          <button id="toolbarArBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">AR</span><span>Gerçek Alan</span>
+          </button>
+          <span class="plmr-command-divider" aria-hidden="true"></span>
+          <button id="previewExpandBtn" class="plmr-tool-button is-primary" type="button" aria-pressed="false">
+            <span class="plmr-tool-icon" aria-hidden="true">⛶</span><span id="previewExpandLabel">Önizlemeyi Büyüt</span>
+          </button>
+          <button id="toolbarFullscreenBtn" class="plmr-tool-button" type="button">
+            <span class="plmr-tool-icon" aria-hidden="true">⛶</span><span>Tam Ekran</span>
+          </button>
+        </div>
+
         <div class="viewer-meta">
           <button id="positionEditBtn" class="position-pill" type="button">
             <strong id="positionTitle">B-Cube Freedom Poz1</strong>
@@ -85,10 +200,7 @@
           <span id="productStatus" class="product-status">Bir cephe alanı seçerek işleme başlayın</span>
         </div>
         <div id="toolboxSelectionBanner" class="toolbox-selection-banner" hidden>
-          <div>
-            <strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong>
-            <span id="toolboxSelectionBannerText">Uygun alanları seçin.</span>
-          </div>
+          <div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div>
           <div class="toolbox-selection-banner-actions">
             <button id="toolboxSelectionDoneBtn" type="button">Tamam · Enter</button>
             <button id="toolboxSelectionCancelBtn" class="ghost" type="button">İptal · Esc</button>
@@ -97,15 +209,11 @@
         <iframe id="viewerFrame" title="Bioclimatic ürün 3D viewer" allow="camera; xr-spatial-tracking; fullscreen"></iframe>
       </section>
 
-      <aside class="viewer-toolbox" aria-label="3D ön izleme araç kutusu">
+      <aside class="viewer-toolbox" aria-label="Büyük ön izleme araç kutusu">
         <div class="toolbox-head">
-          <div>
-            <strong>Toolbox</strong>
-            <span>Büyük ön izleme araçları</span>
-          </div>
-          <span class="toolbox-badge">P3DV</span>
+          <div><strong>Çizim Araçları</strong><span>Büyük ön izleme çalışma alanı</span></div>
+          <span class="toolbox-badge">PLMR</span>
         </div>
-
         <div class="toolbox-section-title">Görünüm</div>
         <div class="dimension-filter" role="group" aria-label="Ölçü görünürlüğü">
           <strong>Ölçü Filtresi</strong>
@@ -125,23 +233,16 @@
           <span id="toolboxProductOpenEmpty" class="product-open-empty">Henüz yerleştirilmiş ürün yok.</span>
           <div id="toolboxProductOpenList" class="product-open-list"></div>
         </div>
-
         <div class="toolbox-separator"></div>
         <div class="toolbox-section-title">Hızlı Testler</div>
         <div class="quick-test-grid" role="group" aria-label="Hazır test senaryoları">
-          <button id="quickTestBtn1" type="button">Test 1</button>
-          <button id="quickTestBtn2" type="button">Test 2</button>
-          <button id="quickTestBtn3" type="button">Test 3</button>
-          <button id="quickTestBtn4" type="button">Test 4</button>
-          <button id="quickTestBtn5" type="button">Test 5</button>
-          <button id="quickTestBtn6" type="button">Test 6</button>
-          <button id="quickTestBtn7" type="button">Test 7</button>
-          <button id="quickTestBtn8" type="button">Test 8</button>
-          <button id="quickTestBtn9" type="button">Test 9</button>
-          <button id="quickTestBtn10" type="button">Test 10</button>
+          <button id="quickTestBtn1" type="button">Test 1</button><button id="quickTestBtn2" type="button">Test 2</button>
+          <button id="quickTestBtn3" type="button">Test 3</button><button id="quickTestBtn4" type="button">Test 4</button>
+          <button id="quickTestBtn5" type="button">Test 5</button><button id="quickTestBtn6" type="button">Test 6</button>
+          <button id="quickTestBtn7" type="button">Test 7</button><button id="quickTestBtn8" type="button">Test 8</button>
+          <button id="quickTestBtn9" type="button">Test 9</button><button id="quickTestBtn10" type="button">Test 10</button>
         </div>
         <div id="quickTestStatus" class="quick-test-status" aria-live="polite">Bir test seçildiğinde model, profiller, düzenlenmiş aralıklar, renkler ve cephe ürünleri otomatik hazırlanır.</div>
-
         <div class="toolbox-separator"></div>
         <div class="toolbox-section-title">Çoklu İşlemler</div>
         <div class="toolbox-actions multi-actions">
@@ -151,11 +252,8 @@
           <button id="multiProfileDeleteBtn" type="button">Çoklu Profil Silme</button>
           <button id="fitProductsBtn" type="button">Ürünleri Alana Uydur</button>
         </div>
-
         <div class="toolbox-separator"></div>
-        <div class="toolbox-actions">
-          <button id="clearProductsBtn" class="danger-tool" type="button">Tüm Ürünleri Sil</button>
-        </div>
+        <div class="toolbox-actions"><button id="clearProductsBtn" class="danger-tool" type="button">Tüm Ürünleri Sil</button></div>
       </aside>
     </div>
   </main>
@@ -702,6 +800,7 @@
   <script src="./ral-colors.js"></script>
   <script src="./zip-fabric-textures.js"></script>
   <script src="./p3dv-pdf.js"></script>
+  <script src="./assets/models/freedom-louver-data.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

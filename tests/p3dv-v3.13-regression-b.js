@@ -9,7 +9,7 @@ const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.26', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
+  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
   'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Önerilen 2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
   'Dikey Bölme Sayısı', 'Yatay Bölme Sayısı', 'Yatay Bölme Yükseklikleri (mm)',
   'Dikmenin Önü'
@@ -20,8 +20,8 @@ for (const forbidden of ['Yatay Bölme Yerleşim Mantığı', 'Dikmenin Dışı'
 for (const token of [
   "['TOP', 'Üstten']",
   'zipPlacements: {}', 'function allProductEntries', 'function zipProductKey',
-  'let zipPlacements=${zipPlacementsJson};', 'const lamellaOpenMode=panelMasterOpen;',
-  'const lamelOpenAngle=-80;', 'function buildFixedJoineryProduct',
+  'let zipPlacements=${zipPlacementsJson};', 'let lamellaOpenMode=panelMasterOpen;',
+  'const freedomEffectiveOpenAngle=100;', 'const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;', 'function buildFixedJoineryProduct',
   'const verticalProfiles=Math.max(0,verticalDivisions-1);',
   'const horizontalDivisions=Math.max(1,Math.min(10',
   'const zipPlacement=zipPlacements[zone.id];',
@@ -121,7 +121,14 @@ const context = { document, window, alert(message) { alerts.push(message); }, co
 context.global = context;
 vm.runInNewContext(colorSource, context, { filename: 'ral-colors.js' });
 vm.runInNewContext(appSource, context, { filename: 'app.js' });
-function message(data) { for (const fn of windowListeners.message || []) fn({ data }); }
+function currentViewerSessionId() {
+  const match = String(el('viewerFrame').srcdoc || '').match(/const VIEWER_SESSION_ID=("(?:\\.|[^"])*");/);
+  return match ? JSON.parse(match[1]) : '';
+}
+function message(data) {
+  const eventData = { sessionId: currentViewerSessionId(), ...data };
+  for (const fn of windowListeners.message || []) fn({ data: eventData, source: el('viewerFrame').contentWindow });
+}
 function viewerHtml() { return el('viewerFrame').srcdoc; }
 function extractJson(html, prefix, suffix) {
   const start = html.indexOf(prefix); assert(start >= 0, `missing ${prefix}`);
@@ -174,13 +181,14 @@ const zone = {
   inward:1, cx:0, cz:-2990
 };
 
-// Roof/green panels master: independent from product states, 80-degree lamellas.
+// Roof/green panels master: independent from product states, Freedom effective 100-degree lamellas.
 el('toolboxPanelMasterInput').checked = true;
 el('toolboxPanelMasterInput').dispatch('change');
 let html = viewerHtml();
-assert(html.includes('const panelMasterOpen=true;'), 'panel master state not passed');
-assert(html.includes('const lamellaOpenMode=panelMasterOpen;'), 'lamella master not connected');
-assert(html.includes('const lamelOpenAngle=-80;'), '80-degree lamella contract missing');
+assert(html.includes('let panelMasterOpen=true;'), 'panel master state not passed');
+assert(html.includes('let lamellaOpenMode=panelMasterOpen;'), 'lamella master not connected');
+assert(html.includes('const freedomEffectiveOpenAngle=100;'), 'Freedom effective 100-degree lamella contract missing');
+assert(html.includes('const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;'), 'Freedom pivot angle derivation missing');
 assert(appSource.includes('geo.rotateX(Math.PI);'), 'open lamella 180-degree local mirror missing');
 const closedLamelSource = appSource.slice(appSource.indexOf('function createLamel('), appSource.indexOf('function createOpenedLamel('));
 const openedLamelSource = appSource.slice(appSource.indexOf('function createOpenedLamel('), appSource.indexOf('function setMeshByBounds('));

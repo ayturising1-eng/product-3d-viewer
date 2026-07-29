@@ -1,59 +1,90 @@
-P3DV.V3.43 UPDATE
+P3DV.V3.46 UPDATE
 =================
 
 KULLANICI TALEBİ
 ----------------
-Ürün aç/kapat sırasında giderilen ekran kararması, çatı panellerinin `Açık / Kapalı` kontrolünde de giderilecek. Panel kontrolüne basıldığında iframe, kamera ve sahne yeniden oluşturulmayacak.
+- Yüklenen `Freedom Louvers GLB - (Group).glb` dosyasındaki tek Freedom panel modeli kullanılacak.
+- Freedom panel adedi, açık/kapalı konumu, panel aralıkları, paket konumu, yönü, alt-üst doğrultusu ve 100 derece efektif açısı değişmeyecek.
+- Yalnız Freedom lamelinin mevcut prosedürel kesit çizimi yeni GLB panel modeliyle değiştirilecek.
+- Bio-Rise panel profili ve diğer ürün motorları etkilenmeyecek.
 
-YAPILANLAR
-----------
-1. Panel ana kontrolünde iframe yenilemesi kaldırıldı
-- `toolboxPanelMasterInput` değişiminde doğrudan `renderViewer()` çağrısı kaldırıldı.
-- Panel durumu önce `modelState.panelMasterOpen` içine kaydedilir.
-- Ardından `applyPanelMasterOpenLive()` üzerinden canlı viewer güncellemesi yapılır.
+UYGULANANLAR
+------------
+1. Freedom GLB panel varlığı
+- Kaynak GLB paket içine `assets/models/freedom-louver.glb` olarak eklendi.
+- Dosya özellikleri:
+  - glTF sürümü: 2.0 binary GLB
+  - dosya boyutu: 4.290.412 bayt
+  - mesh adedi: 15
+  - kaynak ölçüsü: yaklaşık 255,658 x 56,513 x 3709,762 mm
+  - SHA-256: `0f4635f3f41d8a0ee420475988ae622f69eef240abd56544eb748e0242b1d4c1`
 
-2. Parent -> viewer canlı panel mesajı
-- Yeni mesaj türü: `set-panel-master-open`.
-- Mesaj yalnız viewer `livePanelMaster` desteğini bildirdikten sonra gönderilir.
-- Viewer henüz hazır değilse güvenli geriye uyumluluk olarak normal `renderViewer()` fallback'i korunur.
+2. Doğrudan dosya açılışına uygun aktarım
+- Tarayıcıda `index.html` doğrudan açıldığında yerel GLB XHR kısıtlarına takılmaması için GLB verisi `assets/models/freedom-louver-data.js` içine gömüldü.
+- Parent sayfa gömülü veriyi yalnız B-Cube / Freedom modeli gerektiğinde bir Blob URL'ye dönüştürür.
+- Blob URL aynı sayfa oturumu boyunca yeniden kullanılır; her iframe renderında GLB tekrar decode edilmez.
+- Blob oluşturulduktan sonra büyük Base64 metni bellekten bırakılır.
 
-3. Viewer içindeki panel durumu değiştirilebilir hale getirildi
-- `panelMasterOpen` sabit değer yerine canlı güncellenebilir `let` değişkenine çevrildi.
-- `lamellaOpenMode` da canlı güncellenebilir hale getirildi.
-- Mesaj alındığında iki değer birlikte güncellenir.
+3. Three.js GLB yükleme
+- Viewer içine Three.js r128 ile eşleşen `GLTFLoader` r128 kaynağı eklendi.
+- Freedom modeli viewer hazırlanırken bir kez yüklenip ana panel şablonu olarak tutulur.
+- Her panelde dosya tekrar yüklenmez; aynı şablondan Object3D clone üretilir.
 
-4. Ekran kararmadan atomik geometri değişimi
-- Panel açık/kapalı geometrisi mevcut iframe içinde `rebuildModelWithoutFrameReload()` ile hazırlanır.
-- Yeni model grubu arka planda tamamen oluşturulur.
-- Yeni grup sahneye eklendikten sonra eski grup kaldırılır.
-- Renderer, PerspectiveCamera ve OrbitControls yeniden oluşturulmaz.
+4. Profil ve uzunluk eşlemesi
+- GLB'nin metre birimi mm'ye çevrilir.
+- GLB'nin uzun ekseni mevcut P3DV panel uzunluk eksenine döndürülür.
+- Yalnız panelin uzunluk ekseni mevcut `lamelLength` değerine ölçeklenir.
+- GLB'nin gerçek profil genişliği ve yüksekliği korunur.
+- Model merkezlenir ve alt kotu mevcut panel referansına normalize edilir.
+- Panel rengi mevcut P3DV Panel Rengi / yüzey tipi sözleşmesini kullanmaya devam eder.
 
-5. Kamera ve AR durumunun korunması
-- Kamera konumu, hedefi, zoom ve pan aynı kalır.
-- Grup position, rotation, scale ve visible değerleri korunur.
-- AR oturumunda mevcut 1:1 ölçek, manuel konum, dönüş ve ghost görünümü korunur.
+5. Korunan Freedom yerleşim sözleşmesi
+- Kapalı panel aralığı: 216 mm.
+- Açık panel paket aralığı: 65 mm.
+- Panel paketinin kullanıcı terminolojisindeki Arka Cephe konumu korunmuştur.
+- Kapalı panel `rotation.y = Math.PI` yönü korunmuştur.
+- Açık panel pivotunun `rotation.y = Math.PI` yönü korunmuştur.
+- Açık panel pivot açısı -80 derece; efektif görünüm 100 derece olarak korunmuştur.
+- `centerX`, `minZ / maxZ` ve `bottomY` yerleştirme formülleri değiştirilmemiştir.
 
-6. Viewer hazır olma sözleşmesi
-- `viewer-ready` mesajına `livePanelMaster:true` özelliği eklendi.
-- Viewer işlem sonrası `panel-master-open-applied` mesajı gönderir.
+6. Bio-Rise izolasyonu
+- Bio-Rise kapalı ve açık lamelleri mevcut `lamelShape` / `ExtrudeGeometry` yolunu kullanmaya devam eder.
+- Bio-Rise daraltılmış profil, 200 mm aralık ve sabit kapanış lamelleri değiştirilmemiştir.
+
+7. Bellek ve canlı güncelleme
+- Freedom GLB clone'ları geometry ve material kaynaklarını paylaşır; her panel için 4,29 MB model tekrar kopyalanmaz.
+- Paylaşılan GLB geometry/material nesneleri canlı model grubu temizlenirken yanlışlıkla dispose edilmez.
+- Eski Object3D clone'ları atomik ürün/panel rebuild sonrasında sahneden kaldırılır.
+- Kesintisiz ürün ve panel aç/kapat akışı korunur; iframe yeniden oluşturulmaz.
+
+8. Güvenli fallback
+- GLB verisi, GLTFLoader veya model hazırlığı başarısız olursa mevcut prosedürel Freedom lameli otomatik fallback olarak kullanılır.
+- GLB yükleme için 8 saniyelik güvenli zaman aşımı vardır.
+- Model yüklenemediğinde tüm 3D sahnenin boş kalması engellenmiştir.
+
+YENİ DOSYALAR
+-------------
+- assets/models/freedom-louver.glb
+- assets/models/freedom-louver-data.js
+- tests/p3dv-v3.46-freedom-glb-louver-tests.js
+
+DEĞİŞEN DOSYALAR
+----------------
+- index.html
+- app.js
+- VERSION.txt
+- README.md
+- UPDATE.txt
+- TEST_RESULTS.txt
+- Sürüm ve davranış sözleşmesini doğrulayan mevcut test dosyaları
 
 KORUNANLAR
 ----------
-- P3DV V3.42 kesintisiz ürün aç/kapat akışı.
-- P3DV V3.41 kanonik cephe ve Katlanır Cam yön kuralları.
-- Freedom panel konumu, alt/üst yönü ve 100 derece efektif açısı.
-- Bio-Rise panel geometrisi.
-- PDF, AR, renk, ölçü, profil ve Test 1-Test 10 akışları.
-
-DEĞİŞTİRİLEN DOSYALAR
-----------------------
-- app.js
-- index.html
-- README.md
-- VERSION.txt
-- UPDATE.txt
-- TEST_RESULTS.txt
-- tests/p3dv-v3.13-regression-b.js
-- tests/p3dv-v3.13-door-tests.js
-- tests/p3dv-v3.43-live-panel-toggle-tests.js
-- diğer test dosyalarındaki sürüm tokenları
+- P3DV V3.45 PLMR ortak arayüzü.
+- P3DV V3.44 stabilizasyon düzeltmeleri.
+- Freedom panel sayısı, panel konumları, paket konumu ve 100 derece efektif açı.
+- Bio-Rise geometrisi.
+- Katlanır Cam bakış, içeri/dışarı ve 33 mm paket kuralları.
+- Sürme, Giyotin, Kapı, Sabit Cam ve Zip Perde motorları.
+- Kesintisiz ürün ve panel açık/kapalı sistemi.
+- Kamera, zoom, pan, toolbox, AR ve PDF altyapısı.
