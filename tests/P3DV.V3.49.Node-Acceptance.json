@@ -1,0 +1,29 @@
+{
+  "pass": true,
+  "executedAtUtc": "2026-07-29T10:02:00Z",
+  "runtime": "Node.js v22.16.0",
+  "suiteCount": 19,
+  "failedSuites": 0,
+  "totalChecks": 1303,
+  "pergoRiseParametricChecks": 75,
+  "fileModeHotfixChecks": 15,
+  "embeddedComponentBinary": {
+    "bytes": 2137260,
+    "sha256": "c0560813d51ed07da32cb992d4b84a504b31f2b15eea333cf952e9b958dff83d",
+    "losslessMatch": true
+  },
+  "syntaxChecks": [
+    "app.js",
+    "p3dv-pdf.js",
+    "ral-colors.js",
+    "zip-fabric-textures.js",
+    "assets/pergo-rise/component-templates-data.js",
+    "products/pergo-rise/pergo-rise-product.js",
+    "products/pergo-rise/pergo-rise-derived-geometry.js",
+    "products/pergo-rise/pergo-rise-viewer.js",
+    "products/pergo-rise/pergo-rise-webgl-viewer.js",
+    "products/pergo-rise/plmr-runtime/multiPositionRules.js",
+    "products/pergo-rise/plmr-runtime/peri01ExcelBridge.js",
+    "products/pergo-rise/plmr-runtime/peri01Geometry.js"
+  ]
+}

@@ -8,32 +8,30 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 const glbPath = path.join(root, 'assets', 'models', 'freedom-louver.glb');
 const dataPath = path.join(root, 'assets', 'models', 'freedom-louver-data.js');
-const glb = fs.readFileSync(glbPath);
 const dataJs = fs.readFileSync(dataPath, 'utf8');
 let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
-check(html.includes('p3dv.v3.46'), 'V3.46 version token missing from HTML');
+check(html.includes('p3dv.v3.54'), 'V3.46 version token missing from HTML');
 check(html.includes('./assets/models/freedom-louver-data.js'), 'embedded Freedom GLB data script missing');
 check(html.indexOf('./assets/models/freedom-louver-data.js') < html.indexOf('./app.js'), 'Freedom GLB data must load before app.js');
 
-check(glb.length === 4290412, 'Freedom GLB byte length changed unexpectedly');
-check(glb.toString('ascii', 0, 4) === 'glTF', 'Freedom model is not a binary glTF file');
-check(glb.readUInt32LE(4) === 2, 'Freedom GLB must be glTF 2.0');
-check(glb.readUInt32LE(8) === glb.length, 'Freedom GLB header length mismatch');
-const jsonLength = glb.readUInt32LE(12);
-check(glb.toString('ascii', 16, 20) === 'JSON', 'Freedom GLB JSON chunk missing');
-const gltfJson = JSON.parse(glb.toString('utf8', 20, 20 + jsonLength).replace(/\u0000+$/g, '').trim());
-check(Array.isArray(gltfJson.meshes) && gltfJson.meshes.length === 15, 'Freedom GLB must preserve 15 source meshes');
-check(gltfJson.asset && String(gltfJson.asset.version).startsWith('2'), 'Freedom GLB asset version is invalid');
-const sha = crypto.createHash('sha256').update(glb).digest('hex');
-check(sha === '0f4635f3f41d8a0ee420475988ae622f69eef240abd56544eb748e0242b1d4c1', 'Freedom GLB SHA-256 mismatch');
-
+check(!fs.existsSync(glbPath), 'Raw Freedom GLB must not be packaged after embedded template extraction');
 const sandbox = { window: {} };
 vm.runInNewContext(dataJs, sandbox);
 const decoded = Buffer.from(sandbox.window.P3DV_FREEDOM_LOUVER_GLB_BASE64, 'base64');
-check(decoded.equals(glb), 'embedded Freedom GLB data does not match source GLB');
-check(sandbox.window.P3DV_FREEDOM_LOUVER_GLB_META.meshCount === 15, 'embedded GLB metadata mesh count mismatch');
+check(decoded.length === 526740, 'Embedded Freedom GLB byte length changed unexpectedly');
+check(decoded.toString('ascii', 0, 4) === 'glTF', 'Embedded Freedom model is not a binary glTF file');
+check(decoded.readUInt32LE(4) === 2, 'Embedded Freedom GLB must be glTF 2.0');
+check(decoded.readUInt32LE(8) === decoded.length, 'Embedded Freedom GLB header length mismatch');
+const jsonLength = decoded.readUInt32LE(12);
+check(decoded.toString('ascii', 16, 20) === 'JSON', 'Embedded Freedom GLB JSON chunk missing');
+const gltfJson = JSON.parse(decoded.toString('utf8', 20, 20 + jsonLength).replace(/\u0000+$/g, '').trim());
+check(Array.isArray(gltfJson.meshes) && gltfJson.meshes.length === 4, 'Embedded Freedom GLB must contain the 4 optimized shell/cap meshes');
+check(gltfJson.asset && String(gltfJson.asset.version).startsWith('2'), 'Embedded Freedom GLB asset version is invalid');
+const sha = crypto.createHash('sha256').update(decoded).digest('hex');
+check(sha === '7a0206e0de88e235cae06cfbd76c9da347d0e8d673454d00c695f1f488ea5f55', 'Embedded Freedom GLB SHA-256 mismatch');
+check(sandbox.window.P3DV_FREEDOM_LOUVER_GLB_META.meshCount === 4, 'embedded GLB metadata mesh count mismatch');
 check(sandbox.window.P3DV_FREEDOM_LOUVER_GLB_META.sha256 === sha, 'embedded GLB metadata SHA mismatch');
 
 for (const token of [
@@ -84,7 +82,7 @@ check(app.includes("if(!object)return createOpenedLamel(name,length,color,angleD
 console.log(JSON.stringify({
   pass: true,
   checks,
-  glbBytes: glb.length,
+  glbBytes: decoded.length,
   glbMeshes: gltfJson.meshes.length,
   sha256: sha,
   profile: 'Freedom GLB only',

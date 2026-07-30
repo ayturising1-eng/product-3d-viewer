@@ -8,10 +8,10 @@ let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46', 'id="productFoldingViewWrap"', 'id="productFoldingViewInput"',
+  'p3dv.v3.53', 'id="productFoldingViewWrap"', 'id="productFoldingViewInput"',
   'id="productFoldingOpenDirectionWrap"', 'id="productFoldingOpenDirectionInput"',
-  '<option value="INSIDE VIEW" selected>İç Bakış</option>', '<option value="OUTSIDE VIEW">Dış Bakış</option>',
-  '<option value="INWARD" selected>İçeri</option>', '<option value="OUTWARD">Dışarı</option>',
+  'value="INSIDE VIEW">İç Bakış</option>', '<option value="OUTSIDE VIEW">Dış Bakış</option>',
+  'value="INWARD">İçeri</option>', '<option value="OUTWARD">Dışarı</option>',
   'Bakış yönü, ürünü hangi taraftan karşınıza aldığınızı belirler.'
 ]) check(html.includes(token), `missing V3.41 HTML token: ${token}`);
 

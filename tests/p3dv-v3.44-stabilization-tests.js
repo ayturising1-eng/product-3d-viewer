@@ -15,7 +15,7 @@ function sourceRange(startToken, endToken) {
   return app.slice(start, end);
 }
 
-check(html.includes('p3dv.v3.46'), 'V3.44 HTML version token missing');
+check(html.includes('p3dv.v3.53'), 'V3.44 HTML version token missing');
 
 // 1) Canonical 12 mm glazing contract.
 for (const token of [
@@ -103,9 +103,15 @@ const liveContext = {
   activeViewerSessionId: 'session-44',
   viewerLiveProductStateReady: false,
   viewerLivePanelMasterReady: false,
+  viewerLiveColorStateReady: false,
   pendingLiveProductState: false,
   pendingLivePanelMasterState: false,
+  pendingLiveColorState: false,
   liveStateRevision: 0,
+  defaults: { systemColor: { hex:'#7C7D7F', finish:'MATTE' }, panelColor: { hex:'#397A36', finish:'MATTE' } },
+  normalizeColorMode(value) { return value === 'ral' ? 'ral' : 'default'; },
+  readModel() { return { width: 0, depth: 0, height: 0 }; },
+  modelReady() { return false; },
   modelState: {
     productsOpen: false,
     productOpenStates: { front: false },

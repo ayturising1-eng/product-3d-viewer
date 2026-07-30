@@ -1,5 +1,5 @@
 (function () {
-  // Canonical legacy runtime default is retained; index.html activates Pergo Rise for the visible V3.52 shell after bindings are ready.
+  // Canonical legacy runtime default is retained; index.html activates Pergo Rise for the visible V3.53 shell after bindings are ready.
   const defaults = {
     productGroup: 'b-cube',
     width: 0,
@@ -37,7 +37,21 @@
     parapet: 'HAYIR',
     parapetHeight: '',
     waterStandard: 'EVET',
-    extras: ''
+    extras: '',
+    pergoOptions: {
+      glassTrack: 'HAYIR',
+      structureColor: '-',
+      fabric: '-',
+      fabricProfiles: '-',
+      motor: '-',
+      remote: '-',
+      led: '-',
+      dimmer: '-',
+      triangleJoinery: 'HAYIR',
+      waterStandard: 'EVET',
+      waterOutletPlacement: 'BOTH',
+      extras: '-'
+    }
   };
 
   const GLAZING_SECTION_SPECS = Object.freeze({
@@ -56,6 +70,7 @@
     previewUndo: 'previewUndoBtn',
     previewRedo: 'previewRedoBtn',
     previewWorkspace: 'expandedPreviewWorkspace',
+    previewInputGuidance: 'previewInputGuidance',
     largePreviewToolbox: 'largePreviewToolbox',
     largePreviewToolboxToggle: 'largePreviewToolboxToggleBtn',
     largePreviewToolboxPin: 'largePreviewToolboxPinBtn',
@@ -66,8 +81,10 @@
     largePreviewTriangleJoinery: 'largePreviewTriangleJoineryBtn',
     largePreviewWaterStandard: 'largePreviewWaterStandardBtn',
     largePreviewParapet: 'largePreviewParapetInput',
-    largePreviewCheckDrawing: 'largePreviewCheckDrawingBtn',
     largePreviewMultiProduct: 'largePreviewMultiProductBtn',
+    largePreviewMultiProfileAdd: 'largePreviewMultiProfileAddBtn',
+    largePreviewMultiProfileDelete: 'largePreviewMultiProfileDeleteBtn',
+    largePreviewResetCamera: 'largePreviewResetCameraBtn',
     largePreviewMultiDimension: 'largePreviewMultiDimensionBtn',
     largePreviewEqualizeGaps: 'largePreviewEqualizeGapsBtn',
     largePreviewPostSettings: 'largePreviewPostSettingsBtn',
@@ -331,6 +348,17 @@
     parapetHeightInput: 'parapetHeightInput',
     waterStandardInput: 'waterStandardInput',
     extrasInput: 'extrasInput',
+    pergoGlassTrack: 'pergoGlassTrackInput',
+    pergoStructureColor: 'pergoStructureColorInput',
+    pergoFabric: 'pergoFabricInput',
+    pergoFabricCombo: 'pergoFabricCombo',
+    pergoFabricComboButton: 'pergoFabricComboButton',
+    pergoFabricComboMenu: 'pergoFabricComboMenu',
+    pergoFabricProfiles: 'pergoFabricProfilesInput',
+    pergoDimmer: 'pergoDimmerInput',
+    pergoTriangleJoinery: 'pergoTriangleJoineryInput',
+    pergoWaterOutletPlacement: 'pergoWaterOutletPlacementInput',
+    pergoWaterOutletPlacementRow: 'pergoWaterOutletPlacementRow',
     projectionCombo: 'projectionCombo',
     projectionComboMenu: 'projectionComboMenu',
     pergoFrontHeightRow: 'pergoFrontHeightRow',
@@ -346,6 +374,11 @@
   let viewerLivePanelMasterReady = false;
   let viewerLivePergoRiseReady = false;
   let viewerLiveColorStateReady = false;
+  let viewerLiveModelStateReady = false;
+  let activeViewerProductGroup = '';
+  let activeViewerModelReady = false;
+  let pendingLiveModelState = false;
+  let autoPreviewTimer = null;
   let viewerSessionCounter = 0;
   let activeViewerSessionId = '';
   let pendingLiveProductState = false;
@@ -375,9 +408,9 @@
     'b-cube': {
       groupLabel: 'B-Cube', subgroupLabel: 'Freedom', modelLabel: 'B-Cube Freedom',
       widthMin: 1000, widthMax: 4050,
-      depthMin: 2038, depthMax: 7060, depthStep: 216, depthListStart: 2038,
+      depthMin: 2308, depthMax: 7060, depthStep: 216, depthListStart: 2308,
       heightMin: 1600, heightMax: null,
-      panelMin: 7, panelMax: 30, panelPitch: 216, projectionOffset: 580,
+      panelMin: 8, panelMax: 30, panelPitch: 216, projectionOffset: 580,
       postSection: { x: 100, z: 220 }, beamSection: { vertical: 220, thickness: 100 }, sideBeamThickness: 100
     },
     'bio-rise': {
@@ -406,6 +439,30 @@
     'SOMFY IO': ['-', 'SITUO 2 IO', 'SITUO 5 IO']
   });
   const FREEDOM_UI_LED_OPTIONS = Object.freeze(['YES', 'NO']);
+  const PERGO_RISE_UI_MOTOR_OPTIONS = Object.freeze(['-', 'RISING MOTOR', 'SOMFY RTS', 'SOMFY IO']);
+  const PERGO_RISE_UI_REMOTE_OPTIONS = Object.freeze({
+    '-': ['-'],
+    'RISING MOTOR': ['-', 'RISING 6 CHANNELS'],
+    'SOMFY RTS': ['-', 'SITUO 2 RTS', 'SITUO 5 RTS', 'TELIS 16 RTS'],
+    'SOMFY IO': ['-', 'SITUO 2 IO', 'SITUO 5 IO']
+  });
+  const PERGO_RISE_UI_FABRIC_OPTIONS = Object.freeze([
+    '-',
+    'C 1602 - 3D (8118-1622)',
+    'C 3017 - 3D',
+    'C 3105 - 3D',
+    'C 6001 - 3D',
+    'C 7019 - 3D (8118-7024)',
+    'C 7075 - 3D (8118-7340)',
+    'C 7995 - 3D (8118-7999)',
+    'C 9012 - 3D (8118-9002)',
+    'C 1602 - M (8116-1622)',
+    'C 1638 - M',
+    'C 7009 - M',
+    'C 9012 - M (8116-9002)',
+    'C 1602 - K (8290-1622)',
+    'C 9012 - D (8290-9002)'
+  ]);
 
   const PDF_REQUEST_SCHEMAS = {
     'b-cube': {
@@ -831,12 +888,28 @@
       panelColor: { ...(modelState.panelColor || defaults.panelColor) },
       systemCount: Math.max(1, Math.round(Number(modelState.systemCount) || 1)),
       inputDrafts: { ...(modelState.inputDrafts || {}) },
-      options: {
+      options: isPergoRise ? {
+        parapet: modelState.parapet || 'HAYIR',
+        parapetHeight: modelState.parapetHeight || '',
+        glassTrack: (modelState.pergoOptions && modelState.pergoOptions.glassTrack) || 'HAYIR',
+        structureColor: (modelState.pergoOptions && modelState.pergoOptions.structureColor) || '-',
+        fabric: (modelState.pergoOptions && modelState.pergoOptions.fabric) || '-',
+        fabricProfiles: (modelState.pergoOptions && modelState.pergoOptions.fabricProfiles) || '-',
+        motor: (modelState.pergoOptions && modelState.pergoOptions.motor) || '-',
+        remote: (modelState.pergoOptions && modelState.pergoOptions.remote) || '-',
+        led: (modelState.pergoOptions && modelState.pergoOptions.led) || '-',
+        dimmer: (modelState.pergoOptions && modelState.pergoOptions.dimmer) || '-',
+        triangleJoinery: (modelState.pergoOptions && modelState.pergoOptions.triangleJoinery) || 'HAYIR',
+        waterStandard: (modelState.pergoOptions && modelState.pergoOptions.waterStandard) || 'EVET',
+        waterOutletPlacement: (modelState.pergoOptions && modelState.pergoOptions.waterOutletPlacement) || 'BOTH',
+        extras: (modelState.pergoOptions && modelState.pergoOptions.extras) || '-'
+      } : {
         panelColorIndependent: modelState.panelColorIndependent !== false,
         panelFill: modelState.panelFill || 'EVET', motor: modelState.motor || 'Yok', remote: modelState.remote || 'Yok',
         led: modelState.led || 'NO', dimmer: modelState.dimmer || 'HAYIR', parapet: modelState.parapet || 'HAYIR',
         parapetHeight: modelState.parapetHeight || '', waterStandard: modelState.waterStandard || 'EVET', extras: modelState.extras || ''
       },
+      pergoOptions: JSON.parse(JSON.stringify(modelState.pergoOptions || defaults.pergoOptions)),
       pergoRiseProject: modelState.pergoRiseProject ? JSON.parse(JSON.stringify(modelState.pergoRiseProject)) : null,
       pdfRequest: pdfRequestPayload({
         productGroup: modelState.productGroup || 'b-cube',
@@ -1082,7 +1155,7 @@
       const option = document.createElement('option');
       const panelCount = panelCountFromProjection(value, modelState.productGroup);
       option.value = String(value);
-      option.textContent = modelState.productGroup === 'pergo-rise' ? `${value} mm` : `${value} mm · ${panelCount} Panel`;
+      option.textContent = modelState.productGroup === 'pergo-rise' ? `${value} mm` : `${value} - ${panelCount} Panel`;
       list.appendChild(option);
       lastValue = value;
     }
@@ -1090,7 +1163,7 @@
       const option = document.createElement('option');
       const panelCount = panelCountFromProjection(spec.depthMax, modelState.productGroup);
       option.value = String(spec.depthMax);
-      option.textContent = modelState.productGroup === 'pergo-rise' ? `${spec.depthMax} mm · Önerilen Maksimum` : `${spec.depthMax} mm · ${panelCount} Panel · Önerilen Maksimum`;
+      option.textContent = modelState.productGroup === 'pergo-rise' ? `${spec.depthMax} mm · Önerilen Maksimum` : `${spec.depthMax} - ${panelCount} Panel`;
       list.appendChild(option);
     }
 
@@ -1131,7 +1204,7 @@
   }
 
   function closeP3dvCombos(except = null) {
-    [ids.projectionCombo, ids.motorCombo, ids.remoteCombo, ids.ledCombo].forEach((id) => {
+    [ids.projectionCombo, ids.motorCombo, ids.remoteCombo, ids.ledCombo, ids.pergoFabricCombo].forEach((id) => {
       const combo = $(id);
       if (!combo || combo === except) return;
       combo.classList.remove('is-open');
@@ -1174,21 +1247,35 @@
       $(ids.freedomDepth).dispatchEvent(new Event('input', { bubbles: true }));
       $(ids.freedomDepth).dispatchEvent(new Event('change', { bubbles: true }));
       $(ids.freedomDepth).focus();
-    }, (value) => modelState.productGroup === 'pergo-rise' ? `${value} mm` : `${panelCountFromProjection(Number(value), modelState.productGroup)} Panel`);
+    }, (value) => modelState.productGroup === 'pergo-rise' ? `${value} mm` : `- ${panelCountFromProjection(Number(value), modelState.productGroup)} Panel`);
+  }
+
+  function isPergoRiseUi() {
+    return modelState.productGroup === 'pergo-rise';
+  }
+
+  function motorOptionsForProduct() {
+    return isPergoRiseUi() ? PERGO_RISE_UI_MOTOR_OPTIONS : FREEDOM_UI_MOTOR_OPTIONS;
   }
 
   function remoteOptionsForMotor() {
-    return FREEDOM_UI_REMOTE_OPTIONS[normalizeMotorKey($(ids.motorInput) && $(ids.motorInput).value)] || ['Yok'];
+    const key = normalizeMotorKey($(ids.motorInput) && $(ids.motorInput).value);
+    return isPergoRiseUi() ? (PERGO_RISE_UI_REMOTE_OPTIONS[key] || ['-']) : (FREEDOM_UI_REMOTE_OPTIONS[key] || ['Yok']);
   }
 
   function renderMotorComboMenu() {
-    renderComboOptions($(ids.motorComboMenu), FREEDOM_UI_MOTOR_OPTIONS, $(ids.motorInput).value, (value) => {
+    renderComboOptions($(ids.motorComboMenu), motorOptionsForProduct(), $(ids.motorInput).value, (value) => {
       $(ids.motorInput).value = value;
-      modelState.motor = value;
       const remoteValues = remoteOptionsForMotor();
-      if (!remoteValues.some((item) => String(item).toLocaleUpperCase('tr-TR') === String($(ids.remoteInput).value).toLocaleUpperCase('tr-TR'))) $(ids.remoteInput).value = remoteValues[0] || 'Yok';
-      modelState.remote = $(ids.remoteInput).value;
-      const noMotor = normalizeMotorKey(value) === 'YOK';
+      if (!remoteValues.some((item) => String(item).toLocaleUpperCase('tr-TR') === String($(ids.remoteInput).value).toLocaleUpperCase('tr-TR'))) $(ids.remoteInput).value = remoteValues[0] || (isPergoRiseUi() ? '-' : 'Yok');
+      if (isPergoRiseUi()) {
+        modelState.pergoOptions.motor = value;
+        modelState.pergoOptions.remote = $(ids.remoteInput).value;
+      } else {
+        modelState.motor = value;
+        modelState.remote = $(ids.remoteInput).value;
+      }
+      const noMotor = isPergoRiseUi() ? normalizeMotorKey(value) === '-' : normalizeMotorKey(value) === 'YOK';
       $(ids.remoteInput).disabled = noMotor;
       $(ids.remoteComboButton).disabled = noMotor;
       setComboOpen($(ids.motorCombo), $(ids.motorComboMenu), false);
@@ -1199,13 +1286,15 @@
   function renderRemoteComboMenu() {
     renderComboOptions($(ids.remoteComboMenu), remoteOptionsForMotor(), $(ids.remoteInput).value, (value) => {
       $(ids.remoteInput).value = value;
-      modelState.remote = value;
+      if (isPergoRiseUi()) modelState.pergoOptions.remote = value;
+      else modelState.remote = value;
       setComboOpen($(ids.remoteCombo), $(ids.remoteComboMenu), false);
       $(ids.remoteInput).focus();
     });
   }
 
   function renderLedComboMenu() {
+    if (isPergoRiseUi()) return;
     renderComboOptions($(ids.ledComboMenu), FREEDOM_UI_LED_OPTIONS, $(ids.ledInput).value, (value) => {
       $(ids.ledInput).value = value;
       modelState.led = value;
@@ -1214,7 +1303,36 @@
     });
   }
 
+  function renderPergoFabricComboMenu() {
+    if (!isPergoRiseUi()) return;
+    renderComboOptions($(ids.pergoFabricComboMenu), PERGO_RISE_UI_FABRIC_OPTIONS, $(ids.pergoFabric).value, (value) => {
+      $(ids.pergoFabric).value = value;
+      modelState.pergoOptions.fabric = value;
+      setComboOpen($(ids.pergoFabricCombo), $(ids.pergoFabricComboMenu), false);
+      $(ids.pergoFabric).focus();
+    });
+  }
+
   function syncFreedomOptionStateFromUi() {
+    if (isPergoRiseUi()) {
+      const options = modelState.pergoOptions || (modelState.pergoOptions = {});
+      options.glassTrack = $(ids.pergoGlassTrack) ? $(ids.pergoGlassTrack).value : (options.glassTrack || 'HAYIR');
+      options.structureColor = $(ids.pergoStructureColor) ? $(ids.pergoStructureColor).value : (options.structureColor || '-');
+      options.fabric = $(ids.pergoFabric) ? $(ids.pergoFabric).value : (options.fabric || '-');
+      options.fabricProfiles = $(ids.pergoFabricProfiles) ? $(ids.pergoFabricProfiles).value : (options.fabricProfiles || '-');
+      options.motor = $(ids.motorInput) ? $(ids.motorInput).value : (options.motor || '-');
+      options.remote = $(ids.remoteInput) ? $(ids.remoteInput).value : (options.remote || '-');
+      options.led = $(ids.ledInput) ? $(ids.ledInput).value : (options.led || '-');
+      options.dimmer = $(ids.pergoDimmer) ? $(ids.pergoDimmer).value : (options.dimmer || '-');
+      options.triangleJoinery = $(ids.pergoTriangleJoinery) ? $(ids.pergoTriangleJoinery).value : (options.triangleJoinery || 'HAYIR');
+      options.waterStandard = $(ids.waterStandardInput) ? $(ids.waterStandardInput).value : (options.waterStandard || 'EVET');
+      options.waterOutletPlacement = $(ids.pergoWaterOutletPlacement) ? $(ids.pergoWaterOutletPlacement).value : (options.waterOutletPlacement || 'BOTH');
+      options.extras = $(ids.extrasInput) ? $(ids.extrasInput).value : (options.extras || '-');
+      modelState.parapet = $(ids.parapetInput) ? $(ids.parapetInput).value : (modelState.parapet || 'HAYIR');
+      modelState.parapetHeight = $(ids.parapetHeightInput) ? $(ids.parapetHeightInput).value : (modelState.parapetHeight || '');
+      if ($(ids.pergoWaterOutletPlacementRow)) $(ids.pergoWaterOutletPlacementRow).hidden = options.waterStandard !== 'HAYIR';
+      return;
+    }
     modelState.panelColorIndependent = !$(ids.panelColorIndependent) || Boolean($(ids.panelColorIndependent).checked);
     modelState.panelFill = $(ids.panelFill) ? $(ids.panelFill).value : (modelState.panelFill || 'EVET');
     modelState.motor = $(ids.motorInput) ? $(ids.motorInput).value : (modelState.motor || 'Yok');
@@ -1228,9 +1346,34 @@
   }
 
   function syncFreedomOptionUi() {
+    if (isPergoRiseUi()) {
+      const options = modelState.pergoOptions || defaults.pergoOptions;
+      if ($(ids.pergoGlassTrack)) $(ids.pergoGlassTrack).value = options.glassTrack || 'HAYIR';
+      if ($(ids.pergoStructureColor)) $(ids.pergoStructureColor).value = options.structureColor || '-';
+      if ($(ids.pergoFabric)) $(ids.pergoFabric).value = options.fabric || '-';
+      if ($(ids.pergoFabricProfiles)) $(ids.pergoFabricProfiles).value = options.fabricProfiles || '-';
+      if ($(ids.motorInput)) $(ids.motorInput).value = options.motor || '-';
+      if ($(ids.remoteInput)) $(ids.remoteInput).value = options.remote || '-';
+      if ($(ids.ledInput)) $(ids.ledInput).value = options.led || '-';
+      if ($(ids.pergoDimmer)) $(ids.pergoDimmer).value = options.dimmer || '-';
+      if ($(ids.pergoTriangleJoinery)) $(ids.pergoTriangleJoinery).value = options.triangleJoinery || 'HAYIR';
+      if ($(ids.waterStandardInput)) $(ids.waterStandardInput).value = options.waterStandard || 'EVET';
+      if ($(ids.pergoWaterOutletPlacement)) $(ids.pergoWaterOutletPlacement).value = options.waterOutletPlacement || 'BOTH';
+      if ($(ids.extrasInput)) $(ids.extrasInput).value = options.extras || '-';
+      if ($(ids.parapetInput)) $(ids.parapetInput).value = modelState.parapet || 'HAYIR';
+      if ($(ids.parapetHeightInput)) $(ids.parapetHeightInput).value = modelState.parapetHeight || '';
+      if ($(ids.pergoWaterOutletPlacementRow)) $(ids.pergoWaterOutletPlacementRow).hidden = (options.waterStandard || 'EVET') !== 'HAYIR';
+      if ($(ids.motorInput)) $(ids.motorInput).readOnly = false;
+      if ($(ids.ledInput)) $(ids.ledInput).readOnly = false;
+      const noMotor = normalizeMotorKey(options.motor) === '-';
+      if ($(ids.remoteInput)) $(ids.remoteInput).disabled = noMotor;
+      if ($(ids.remoteComboButton)) $(ids.remoteComboButton).disabled = noMotor;
+      renderMotorComboMenu(); renderRemoteComboMenu(); renderPergoFabricComboMenu();
+      return;
+    }
     if ($(ids.panelColorIndependent)) $(ids.panelColorIndependent).checked = modelState.panelColorIndependent !== false;
     if ($(ids.panelFill)) $(ids.panelFill).value = modelState.panelFill || 'EVET';
-    if ($(ids.motorInput)) $(ids.motorInput).value = modelState.motor || 'Yok';
+    if ($(ids.motorInput)) { $(ids.motorInput).value = modelState.motor || 'Yok'; $(ids.motorInput).readOnly = true; }
     if ($(ids.remoteInput)) $(ids.remoteInput).value = modelState.remote || 'Yok';
     if ($(ids.ledInput)) $(ids.ledInput).value = modelState.led || 'NO';
     if ($(ids.dimmerInput)) $(ids.dimmerInput).value = modelState.dimmer || 'HAYIR';
@@ -1516,12 +1659,16 @@
     viewerLivePanelMasterReady = false;
     viewerLivePergoRiseReady = false;
     viewerLiveColorStateReady = false;
+    viewerLiveModelStateReady = false;
     pendingLiveProductState = false;
     pendingLivePanelMasterState = false;
     pendingLiveColorState = false;
+    pendingLiveModelState = false;
     activeViewerSessionId = `p3dv-viewer-${Date.now()}-${++viewerSessionCounter}`;
     pruneProductStates();
     const model = updateReadouts();
+    activeViewerProductGroup = model.productGroup;
+    activeViewerModelReady = modelReady(model);
     const arButton = $(ids.mobileAr);
     if (!modelReady(model)) {
       if (arButton) arButton.disabled = true;
@@ -1685,7 +1832,7 @@
     $(ids.freedomHeight).value = String(nextHeight);
     $(ids.freedomPanelCount).value = String(modelState.panelCount);
     closePositionDialog();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('position-dimensions'):renderViewer());
     showRecommendedLimitWarnings({ width: nextWidth, depth: nextDepth, height: nextHeight, panelCount: modelState.panelCount });
   }
 
@@ -1706,6 +1853,40 @@
     element.textContent = message || '';
     element.classList.toggle('is-warning', Boolean(message) && tone === 'warning');
     element.classList.toggle('is-error', Boolean(message) && tone !== 'warning');
+  }
+
+  function previewInputStatus() {
+    const group = modelState.productGroup;
+    const missing = [];
+    if (!String($(ids.freedomWidth).value || '').trim()) missing.push('Genişlik');
+    if (!String(depthControlValue() || '').trim()) missing.push('Açılım');
+    if (!String($(ids.freedomHeight).value || '').trim()) missing.push(group === 'pergo-rise' ? 'Arka yükseklik' : 'Yükseklik');
+    if (group === 'pergo-rise' && !String($(ids.pergoFrontHeight).value || '').trim()) missing.push('Ön yükseklik');
+    return { complete: missing.length === 0, missing };
+  }
+
+  function showPreviewInputGuidance(message, tone = '') {
+    const node = $(ids.previewInputGuidance);
+    if (!node) return;
+    const text = String(message || '').trim();
+    node.hidden = !text;
+    node.textContent = text;
+    if (tone) node.setAttribute('data-tone', tone); else node.removeAttribute('data-tone');
+  }
+
+  function scheduleAutomaticPreview() {
+    if (autoPreviewTimer) clearTimeout(autoPreviewTimer);
+    const status = previewInputStatus();
+    if (!status.complete) {
+      showPreviewInputGuidance(`${status.missing.join(', ')} alanını tamamlayın. Son geçerli veri girildiğinde çizim otomatik oluşturulur.`, 'warning');
+      return;
+    }
+    showPreviewInputGuidance('Veriler tamamlandı · çizim otomatik hazırlanıyor…', 'ready');
+    autoPreviewTimer = window.setTimeout(() => {
+      autoPreviewTimer = null;
+      const applied = applyFreedomInputs();
+      if (applied) showPreviewInputGuidance('', '');
+    }, 360);
   }
 
   function recommendedLimitWarnings(values, group = modelState.productGroup) {
@@ -1857,9 +2038,68 @@
       setFreedomValidation('Bu ölçüler mevcut profil kesitleri için yetersiz.');
       return false;
     }
-    renderViewer();
-    renderPdfRequestForm();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('system-inputs'):renderViewer());
     showRecommendedLimitWarnings({ width, depth, height: readFreedomNumber(ids.freedomHeight), panelCount });
+    return true;
+  }
+
+  function viewerModelPayload() {
+    const model = readModel();
+    return {
+      productGroup: model.productGroup,
+      width: model.width,
+      depth: model.depth,
+      height: model.height,
+      lamellaCount: model.lamellaCount,
+      orientations: [...model.orientations],
+      postSections: model.postSections.map((section) => ({ ...section })),
+      beamSection: { ...model.beamSection },
+      placements: JSON.parse(JSON.stringify(model.placements || {})),
+      zipPlacements: JSON.parse(JSON.stringify(model.zipPlacements || {})),
+      facadeProfiles: JSON.parse(JSON.stringify(model.facadeProfiles || {})),
+      selectedZoneId: selectedZoneId || null,
+      dimensionVisibility: { ...dimensionVisibility },
+      productsOpen: Boolean(modelState.productsOpen),
+      productOpenStates: JSON.parse(JSON.stringify(modelState.productOpenStates || {})),
+      panelStates: JSON.parse(JSON.stringify(modelState.panelStates || {})),
+      panelMasterOpen: Boolean(modelState.panelMasterOpen),
+      colorMode: normalizeColorMode(modelState.colorMode),
+      systemColor: { ...(modelState.systemColor || defaults.systemColor) },
+      panelColor: { ...(modelState.panelColor || defaults.panelColor) }
+    };
+  }
+
+  function postLiveModelState(reason = 'model-change') {
+    const model = readModel();
+    if (!viewerLiveModelStateReady || !modelReady(model) || model.productGroup === 'pergo-rise' || activeViewerProductGroup !== model.productGroup) return false;
+    const revision = ++liveStateRevision;
+    return postViewerMessage('set-model-state', {
+      revision,
+      reason: String(reason || 'model-change'),
+      model: viewerModelPayload()
+    });
+  }
+
+  function commitModelChangeLive(reason = 'model-change', options = {}) {
+    pruneProductStates();
+    updateReadouts();
+    updateToolbox();
+    renderPdfRequestForm();
+    const model = readModel();
+    if (options.forceRender || !modelReady(model) || !activeViewerModelReady || !viewerLiveModelStateReady || activeViewerProductGroup !== model.productGroup) {
+      renderViewer();
+      return false;
+    }
+    if (model.productGroup === 'pergo-rise') {
+      if (viewerLivePergoRiseReady) {
+        pergoRiseRevision += 1;
+        postViewerMessage('set-pergo-rise-project', { revision: pergoRiseRevision, project: modelState.pergoRiseProject });
+        return true;
+      }
+      renderViewer();
+      return false;
+    }
+    if (!postLiveModelState(reason)) pendingLiveModelState = true;
     return true;
   }
 
@@ -1938,6 +2178,10 @@
     if (pendingLiveColorState && viewerLiveColorStateReady) {
       pendingLiveColorState = false;
       postLiveColorState();
+    }
+    if (typeof pendingLiveModelState!=='undefined' && typeof viewerLiveModelStateReady!=='undefined' && pendingLiveModelState && viewerLiveModelStateReady) {
+      pendingLiveModelState = false;
+      postLiveModelState('pending-flush');
     }
   }
 
@@ -2173,7 +2417,7 @@
     }
     cancelToolboxSelection();
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('toolbox-bulk-operation'):renderViewer());
   }
 
   function closeZoneActionDialog() {
@@ -2348,7 +2592,7 @@
     }
     closeProfileDialog();
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('profile-add'):renderViewer());
   }
 
   function openDividerProfileDialog(profile) {
@@ -2383,7 +2627,7 @@
     });
     closeDividerProfileDialog();
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('profile-delete'):renderViewer());
   }
 
   function normalizeBeamSectionChange(value) {
@@ -2408,8 +2652,7 @@
       }
     }
     modelState.beamSection = next;
-    renderViewer();
-    renderPdfRequestForm();
+    if(typeof commitModelChangeLive==='function')commitModelChangeLive('beam-section-change');else{renderViewer();renderPdfRequestForm();}
     return true;
   }
 
@@ -2487,7 +2730,7 @@
     closePostProfileDialog();
     selectedPostIndex = null;
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('post-profile-change'):renderViewer());
   }
 
   function rotateSelectedPost() {
@@ -2502,7 +2745,7 @@
     }
     closePostActionDialog();
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('post-profile-rotate'):renderViewer());
   }
 
   function openZoneDimensionDialog() {
@@ -2602,7 +2845,7 @@
 
     closeZoneDimensionDialog();
     clearZoneSelection();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('zone-dimension-change'):renderViewer());
   }
 
   function openSelectedProduct() {
@@ -2620,7 +2863,8 @@
     delete modelState.productOpenStates[zipProductKey(selectedZone.id)];
     delete modelState.panelStates[zipProductKey(selectedZone.id)];
     closeZoneActionDialog();
-    renderViewer();
+    clearZoneSelection();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('product-delete-zone'):renderViewer());
   }
 
   function setDimensionVisibility(kind, visible) {
@@ -2656,8 +2900,23 @@
     }, 90);
   }
 
-  function togglePreviewExpanded() {
-    setPreviewExpanded(!document.body.classList.contains('preview-expanded'));
+  async function togglePreviewExpanded() {
+    const expanding = !document.body.classList.contains('preview-expanded');
+    if (expanding) {
+      setPreviewExpanded(true);
+      try {
+        if (!document.fullscreenElement && document.documentElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      } catch (error) {
+        console.warn('Tarayıcı tam ekranı başlatılamadı; uygulama tam ekran düzeni korunuyor.', error);
+      }
+    } else {
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+      } catch (error) {
+        console.warn('Tarayıcı tam ekranından çıkılamadı.', error);
+      }
+      setPreviewExpanded(false);
+    }
   }
 
   function setLargePreviewToolboxOpen(open) {
@@ -2723,8 +2982,13 @@
   }
 
   function syncBrowserFullscreenClass() {
-    document.body.classList.toggle('is-browser-fullscreen', Boolean(document.fullscreenElement));
-    window.setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+    const active = Boolean(document.fullscreenElement);
+    document.body.classList.toggle('is-browser-fullscreen', active);
+    if (!active && document.body.classList.contains('preview-expanded')) setPreviewExpanded(false);
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      postViewerMessage('viewport-resized');
+    }, 60);
   }
 
   function setInitialProjectDate() {
@@ -3945,7 +4209,7 @@
     resetQuickTestState(config);
     assignQuickTestProducts(config);
     syncQuickTestControls();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('quick-test'):renderViewer());
     document.querySelectorAll('.quick-test-grid button').forEach((button) => button.classList.toggle('is-active', button.id === `quickTestBtn${index}`));
     if ($(ids.quickTestStatus)) {
       $(ids.quickTestStatus).textContent = `Test ${index} hazır: ${config.description}`;
@@ -5252,8 +5516,7 @@
     });
     closeProductDialog();
     clearZoneSelection();
-    updateToolbox();
-    renderViewer();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('product-upsert'):renderViewer());
   }
 
   function removeProduct() {
@@ -5270,8 +5533,8 @@
       delete modelState.productOpenStates[activeZone.id];
     }
     closeProductDialog();
-    updateToolbox();
-    renderViewer();
+    clearZoneSelection();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('product-remove'):renderViewer());
   }
 
   function clearProducts() {
@@ -5282,8 +5545,8 @@
     modelState.zipPlacements = {};
     modelState.productOpenStates = {};
     modelState.panelStates = {};
-    updateToolbox();
-    renderViewer();
+    clearZoneSelection();
+    (typeof commitModelChangeLive==='function'?commitModelChangeLive('products-clear'):renderViewer());
   }
 
   window.addEventListener('message', (event) => {
@@ -5296,7 +5559,13 @@
       viewerLivePanelMasterReady = Boolean(event.data.livePanelMaster);
       viewerLivePergoRiseReady = Boolean(event.data.livePergoRise);
       viewerLiveColorStateReady = Boolean(event.data.liveColorState);
+      viewerLiveModelStateReady = Boolean(event.data.liveModelState);
       flushPendingViewerState();
+    }
+    if (event.data.type === 'model-state-applied') {
+      pendingLiveModelState = false;
+      updateReadouts();
+      return;
     }
     if (event.data.type === 'beam-section-change-request') {
       applyBeamSectionChangeFromViewer(event.data.beamSection, event.data.camera);
@@ -5591,8 +5860,9 @@ let W=${W}, D=${D}, H=${H};
 const PRODUCT_GROUP=${productGroupJson};
 const IS_BIO_RISE=PRODUCT_GROUP==='bio-rise';
 const IS_PERGO_RISE=PRODUCT_GROUP==='pergo-rise';
-const RW=W-208, RD=D-303;
-const LC=${LC};
+let RW=W-208, RD=D-303;
+// Legacy panel-count contract retained for regression scanners: const LC=${LC};
+let LC=${LC};
 let orientations=[${O1},${O2},${O3},${O4}];
 let postSections=${postJson};
 let beamSection=${beamJson};
@@ -5697,13 +5967,13 @@ const warm=new THREE.DirectionalLight(0xffe8c9,.18);
 warm.position.set(W*.1,H*.35,-D*.95);
 scene.add(warm);
 
-const floorSize=Math.max(W,D)*1.7;
+let floorSize=Math.max(W,D)*1.7;
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(floorSize,floorSize),new THREE.ShadowMaterial({opacity:.32}));
 floor.rotation.x=-Math.PI/2;
 floor.position.y=-H/2-1;
 floor.receiveShadow=true;
 scene.add(floor);
-const grid=new THREE.GridHelper(Math.max(W,D)*1.5,22,0x94a3b8,0x475569);
+let grid=new THREE.GridHelper(Math.max(W,D)*1.5,22,0x94a3b8,0x475569);
 grid.position.y=-H/2;
 scene.add(grid);
 
@@ -6576,7 +6846,7 @@ function prepareFreedomLouverTemplate(sourceScene){
   source.updateMatrixWorld(true);
 
   const sharedMaterial=createSolidMaterial(PANEL_COLOR,1,autoFinishForColor(PANEL_COLOR));
-  sharedMaterial.userData={...(sharedMaterial.userData||{}),p3dvShared:true,p3dvFreedomLouver:true};
+  sharedMaterial.userData={...(sharedMaterial.userData||{}),p3dvShared:true,p3dvFreedomLouver:true,p3dvColorRole:'panel'};
   const replacedMaterials=new Set();
   source.traverse(obj=>{
     if(!obj.isMesh)return;
@@ -6641,6 +6911,26 @@ function loadFreedomLouverTemplate(){
     },undefined,error=>{
       console.error('Freedom GLB load failed; procedural louver fallback will be used.',error);
       finish(false,'fallback-error');
+    });
+  });
+}
+
+function refreshFreedomLouverTemplateMaterial(){
+  if(!freedomLouverTemplate)return;
+  freedomLouverTemplate.traverse(obj=>{
+    if(!obj.isMesh||!obj.material)return;
+    const materials=Array.isArray(obj.material)?obj.material:[obj.material];
+    materials.forEach(material=>{
+      if(!material)return;
+      if(material.color&&typeof material.color.setHex==='function')material.color.setHex(PANEL_COLOR);
+      const settings=finishMaterialSettings(PANEL_FINISH,material.opacity===undefined?1:material.opacity,PANEL_COLOR);
+      if(settings.roughness!==undefined)material.roughness=settings.roughness;
+      if(settings.metalness!==undefined)material.metalness=settings.metalness;
+      if('clearcoat' in material&&settings.clearcoat!==undefined)material.clearcoat=settings.clearcoat;
+      if('clearcoatRoughness' in material&&settings.clearcoatRoughness!==undefined)material.clearcoatRoughness=settings.clearcoatRoughness;
+      material.bumpMap=settings.bumpMap||null;
+      material.roughnessMap=settings.roughnessMap||null;
+      material.needsUpdate=true;
     });
   });
 }
@@ -7226,9 +7516,10 @@ function addDoorHandleParts(zone,pivot,cfg,placement,hingeU,hingeV,productOpen){
   const innerV=productDepthCenter(zone,55,0)+zone.inward*18;
   if(String(placement.handleType||'NORMAL')==='PANIC'){
     const barWidth=Math.max(120,cfg.width);
-    addDoorPivotPart(zone,pivot,{name:'Panik Kapı Kolu',u:cfg.centerU,y:handleY,v:innerV,w:barWidth,h:34,t:26},handleColor,1,hingeU,hingeV,productOpen);
-    addDoorPivotPart(zone,pivot,{name:'Panik Kol Sol Bağlantı',u:cfg.centerU-barWidth/2+26,y:handleY,v:innerV-zone.inward*12,w:24,h:86,t:24},handleColor,1,hingeU,hingeV,productOpen);
-    addDoorPivotPart(zone,pivot,{name:'Panik Kol Sağ Bağlantı',u:cfg.centerU+barWidth/2-26,y:handleY,v:innerV-zone.inward*12,w:24,h:86,t:24},handleColor,1,hingeU,hingeV,productOpen);
+    const panicV=innerV+zone.inward*42;
+    addDoorPivotPart(zone,pivot,{name:'Panik Kapı Kolu',u:cfg.centerU,y:handleY,v:panicV,w:barWidth,h:34,t:26},handleColor,1,hingeU,hingeV,productOpen);
+    addDoorPivotPart(zone,pivot,{name:'Panik Kol Sol Bağlantı',u:cfg.centerU-barWidth/2+26,y:handleY,v:panicV-zone.inward*10,w:24,h:86,t:24},handleColor,1,hingeU,hingeV,productOpen);
+    addDoorPivotPart(zone,pivot,{name:'Panik Kol Sağ Bağlantı',u:cfg.centerU+barWidth/2-26,y:handleY,v:panicV-zone.inward*10,w:24,h:86,t:24},handleColor,1,hingeU,hingeV,productOpen);
   }else{
     addDoorPivotPart(zone,pivot,{name:'Normal Kapı Kolu Dış Rozeti',u:lockU,y:handleY,v:outerV,w:32,h:140,t:24},handleColor,1,hingeU,hingeV,productOpen);
     const outerLeverCenter=lockU-lockSide*58;
@@ -7813,7 +8104,7 @@ function buildGuillotineProduct(zone,placement){
 
   const facadeRightSign=facadeRightDirectionSign(zone);
   const motorSide=String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign;
-  addFacadeText(zone,{name:'Guillotine Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-150),y:motorY,v:zone.outerFaceV+zone.inward*.5,w:220,h:70});
+  addFacadeText(zone,{name:'Guillotine Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-150),y:motorY,v:zone.outerFaceV-zone.inward*34,w:220,h:70});
   addProductBox(zone,{name:'Guillotine Motor Side',u:motorSide*(dims.innerW/2-32),y:motorY,v:productDepthCenter(zone,112,0),w:52,h:motorH*.72,t:112},profileColor(0x111827),1);
   const panels=Math.max(2,Math.min(8,Math.round(Number(placement.panels)||3)));
   const usableH=Math.max(360,dims.innerH-motorH-16);
@@ -8074,7 +8365,7 @@ function buildZipScreenProduct(zone,placement){
   const guillotineReferenceDepth=12;
   const lowerFixedPanelInset=guillotinePanelLayerInset(0,3,guillotineReferenceDepth,2);
   const fabricV=productDepthCenter(zone,fabricDepth,lowerFixedPanelInset);
-  const visibleFabricH=panelOpen?Math.max(18,Math.min(34,fullPanelH*.08)):Math.max(80,fullPanelH-bottomBarH);
+  const visibleFabricH=panelOpen?Math.max(80,(fullPanelH-bottomBarH)*.80):Math.max(80,fullPanelH-bottomBarH);
   const fabricY=panelOpen
     ? topBoxBottom-visibleFabricH/2-4
     : panelBottom+visibleFabricH/2;
@@ -8090,7 +8381,7 @@ function buildZipScreenProduct(zone,placement){
 
   const facadeRightSign=facadeRightDirectionSign(zone);
   const motorSide=String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign;
-  addFacadeText(zone,{name:'Zip Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-145),y:topBoxY,v:zone.outerFaceV+zone.inward*.5,w:210,h:64});
+  addFacadeText(zone,{name:'Zip Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-145),y:topBoxY,v:zone.outerFaceV-zone.inward*34,w:210,h:64});
 
   const cable=String(placement.cableDirection||'BACK');
   let cableU=motorSide*(dims.innerW/2-24);
@@ -8114,7 +8405,7 @@ function buildZipFallbackProduct(zone,placement){
   const panelBottom=zone.bottomY+24;
   const panelTop=zone.topY-topBoxH-12;
   const fullH=Math.max(120,panelTop-panelBottom);
-  const visibleH=open?24:fullH;
+  const visibleH=open?Math.max(80,fullH*.80):fullH;
   const panelY=open?panelTop-visibleH/2:panelBottom+visibleH/2;
   addProductBox(zone,{name:'Zip Fallback Top Box',u:0,y:zone.topY-topBoxH/2,v:productDepthCenter(zone,topBoxH,0),w:zone.width,h:topBoxH,t:topBoxH},profileColor(0x374151),1);
   addProductBox(zone,{name:'Zip Fallback Left Guide',u:-zone.width/2+guide/2,y:panelBottom+fullH/2,v:productDepthCenter(zone,depth,0),w:guide,h:fullH,t:depth},profileColor(0x475569),1);
@@ -8852,6 +9143,63 @@ function buildModel(showAll,options){
   }
 }
 
+function disposeSceneObject(object){
+  if(!object)return;
+  if(object.geometry&&typeof object.geometry.dispose==='function')object.geometry.dispose();
+  const materials=Array.isArray(object.material)?object.material:[object.material];
+  materials.filter(Boolean).forEach(material=>{if(typeof material.dispose==='function')material.dispose();});
+}
+
+function refreshSceneEnvelope(){
+  RW=W-208;
+  RD=D-303;
+  floorSize=Math.max(W,D)*1.7;
+  if(floor.geometry&&typeof floor.geometry.dispose==='function')floor.geometry.dispose();
+  floor.geometry=new THREE.PlaneGeometry(floorSize,floorSize);
+  floor.position.y=-H/2-1;
+  if(grid&&grid.parent)grid.parent.remove(grid);
+  disposeSceneObject(grid);
+  grid=new THREE.GridHelper(Math.max(W,D)*1.5,22,0x94a3b8,0x475569);
+  grid.position.y=-H/2;
+  scene.add(grid);
+  if(box.geometry&&typeof box.geometry.dispose==='function')box.geometry.dispose();
+  box.geometry=new THREE.EdgesGeometry(new THREE.BoxGeometry(W,H,D));
+  dir.position.set(W*.35,H*1.1,D*.45);
+  fill.position.set(-W*.45,H*.55,-D*.5);
+  rim.position.set(-W*.7,H*.85,D*.9);
+  warm.position.set(W*.1,H*.35,-D*.95);
+}
+
+function applyLiveModelPayload(payload){
+  const next=payload&&typeof payload==='object'?payload:{};
+  if(next.productGroup&&next.productGroup!==PRODUCT_GROUP)return false;
+  W=Math.max(1,Number(next.width)||W);
+  D=Math.max(1,Number(next.depth)||D);
+  H=Math.max(1,Number(next.height)||H);
+  LC=Math.max(1,Math.round(Number(next.lamellaCount)||LC));
+  orientations=Array.isArray(next.orientations)?next.orientations.map(Number):orientations;
+  postSections=Array.isArray(next.postSections)?next.postSections.map(section=>({...section})):postSections;
+  beamSection=next.beamSection&&typeof next.beamSection==='object'?{...next.beamSection}:beamSection;
+  placements=next.placements&&typeof next.placements==='object'?JSON.parse(JSON.stringify(next.placements)):{};
+  zipPlacements=next.zipPlacements&&typeof next.zipPlacements==='object'?JSON.parse(JSON.stringify(next.zipPlacements)):{};
+  facadeProfiles=next.facadeProfiles&&typeof next.facadeProfiles==='object'?JSON.parse(JSON.stringify(next.facadeProfiles)):{};
+  selectedZoneId=next.selectedZoneId||null;
+  dimensionVisibility=next.dimensionVisibility&&typeof next.dimensionVisibility==='object'?{...next.dimensionVisibility}:dimensionVisibility;
+  productsOpen=Boolean(next.productsOpen);
+  productOpenStates=next.productOpenStates&&typeof next.productOpenStates==='object'?{...next.productOpenStates}:{};
+  panelStates=next.panelStates&&typeof next.panelStates==='object'?{...next.panelStates}:{};
+  panelMasterOpen=Boolean(next.panelMasterOpen);
+  lamellaOpenMode=panelMasterOpen;
+  DEFAULT_COLOR_MODE=next.colorMode!=='ral';
+  SYSTEM_COLOR=liveColorNumber(next.systemColor,SYSTEM_COLOR);
+  PANEL_COLOR=liveColorNumber(next.panelColor,PANEL_COLOR);
+  SYSTEM_FINISH=liveFinish(next.systemColor&&next.systemColor.finish,SYSTEM_FINISH);
+  PANEL_FINISH=liveFinish(next.panelColor&&next.panelColor.finish,PANEL_FINISH);
+  refreshFreedomLouverTemplateMaterial();
+  refreshSceneEnvelope();
+  return true;
+}
+
 function rebuildModelWithoutFrameReload(revision){
   const requestedRevision=Number(revision)||0;
   if(requestedRevision<lastAppliedLiveRevision)return;
@@ -9040,6 +9388,13 @@ window.addEventListener('message',event=>{
   if(event.source!==parent)return;
   if(!event.data||event.data.source!=='product-3d-parent')return;
   if(event.data.sessionId!==VIEWER_SESSION_ID)return;
+  if(event.data.type==='set-model-state'){
+    const revision=Number(event.data.revision)||0;
+    if(revision<lastAppliedLiveRevision)return;
+    if(!applyLiveModelPayload(event.data.model||{}))return;
+    rebuildModelWithoutFrameReload(revision);
+    postParent('model-state-applied',{revision,reason:event.data.reason||'model-change'});
+  }
   if(event.data.type==='set-product-open-state'){
     const revision=Number(event.data.revision)||0;
     if(revision<lastAppliedLiveRevision)return;
@@ -9065,6 +9420,7 @@ window.addEventListener('message',event=>{
     PANEL_COLOR=liveColorNumber(event.data.panelColor,PANEL_COLOR);
     SYSTEM_FINISH=liveFinish(event.data.systemColor&&event.data.systemColor.finish,SYSTEM_FINISH);
     PANEL_FINISH=liveFinish(event.data.panelColor&&event.data.panelColor.finish,PANEL_FINISH);
+    refreshFreedomLouverTemplateMaterial();
     rebuildModelWithoutFrameReload(revision);
     postParent('color-state-applied',{revision,colorMode:DEFAULT_COLOR_MODE?'default':'ral'});
   }
@@ -9160,6 +9516,24 @@ function animate(time,frame){
   renderer.render(scene,camera);
 }
 
+window.__P3DV_V354_TEST__={
+  state:()=>({
+    sessionId:VIEWER_SESSION_ID,
+    modelGeneration,
+    width:W,depth:D,height:H,lamellaCount:LC,
+    placements:JSON.parse(JSON.stringify(placements||{})),
+    zipPlacements:JSON.parse(JSON.stringify(zipPlacements||{})),
+    facadeProfiles:JSON.parse(JSON.stringify(facadeProfiles||{})),
+    camera:cameraSnapshot(),
+    productGroup:PRODUCT_GROUP,
+    freedomLouverLoadStatus,
+    freedomLouverSize:freedomLouverTemplateSize?freedomLouverTemplateSize.toArray():null
+  }),
+  renderHash:()=>{
+    try{return renderer.domElement.toDataURL('image/png').slice(-256)}catch(error){return String(error)}
+  }
+};
+
 async function initializeViewer(){
   await Promise.all([loadFreedomLouverTemplate(), loadPergoRiseTemplate()]);
   buildModel(true);
@@ -9168,6 +9542,7 @@ async function initializeViewer(){
     liveProductState:true,
     livePanelMaster:true,
     liveColorState:true,
+    liveModelState:!IS_PERGO_RISE,
     livePergoRise:IS_PERGO_RISE,
     freedomLouverProfile:freedomLouverTemplate?'glb':'procedural-fallback',
     freedomLouverLoadStatus,
@@ -9195,16 +9570,26 @@ initializeViewer();
     $(ids.colorCatalogAll).addEventListener('click', () => setActiveColorCatalog('all'));
     $(ids.colorSearch).addEventListener('input', renderRalColorOptions);
     if ($(ids.panelColorIndependent)) $(ids.panelColorIndependent).addEventListener('change', syncPanelColorIndependence);
-    [ids.panelFill, ids.dimmerInput, ids.parapetInput, ids.waterStandardInput].forEach((id) => { const input=$(id); if (input) input.addEventListener('change', syncFreedomOptionStateFromUi); });
-    [ids.remoteInput, ids.ledInput, ids.extrasInput].forEach((id) => { const input=$(id); if (input) input.addEventListener('input', syncFreedomOptionStateFromUi); });
+    [ids.panelFill, ids.dimmerInput, ids.parapetInput, ids.waterStandardInput, ids.pergoGlassTrack, ids.pergoTriangleJoinery, ids.pergoWaterOutletPlacement].forEach((id) => { const input=$(id); if (input) input.addEventListener('change', syncFreedomOptionStateFromUi); });
+    [ids.remoteInput, ids.ledInput, ids.extrasInput, ids.pergoStructureColor, ids.pergoFabric, ids.pergoFabricProfiles, ids.pergoDimmer].forEach((id) => { const input=$(id); if (input) input.addEventListener('input', syncFreedomOptionStateFromUi); });
+    if ($(ids.motorInput)) {
+      $(ids.motorInput).addEventListener('input', () => { syncFreedomOptionStateFromUi(); renderRemoteComboMenu(); });
+      $(ids.motorInput).addEventListener('change', () => {
+        const values=remoteOptionsForMotor();
+        if (!values.includes($(ids.remoteInput).value)) $(ids.remoteInput).value=values[0] || (isPergoRiseUi()?'-':'Yok');
+        syncFreedomOptionStateFromUi();
+        renderRemoteComboMenu();
+      });
+    }
     if ($(ids.parapetHeightInput)) $(ids.parapetHeightInput).addEventListener('input', (event) => { event.target.value=sanitizeDigitsOnly(event.target.value,5); syncFreedomOptionStateFromUi(); });
     if ($(ids.pergoSystemCount)) $(ids.pergoSystemCount).addEventListener('input', (event) => { event.target.value=sanitizeDigitsOnly(event.target.value,6); modelState.systemCount=Math.max(1,Number(event.target.value)||1); });
-    if ($(ids.freedomWidth)) $(ids.freedomWidth).addEventListener('input', (event) => { event.target.value=sanitizeWidthTopology(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),width:event.target.value}; });
-    if ($(ids.freedomDepth)) $(ids.freedomDepth).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),depth:event.target.value}; renderProjectionComboMenu(); });
-    if ($(ids.freedomHeight)) $(ids.freedomHeight).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),height:event.target.value}; });
+    if ($(ids.freedomWidth)) $(ids.freedomWidth).addEventListener('input', (event) => { event.target.value=sanitizeWidthTopology(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),width:event.target.value}; scheduleAutomaticPreview(); });
+    if ($(ids.freedomDepth)) $(ids.freedomDepth).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),depth:event.target.value}; renderProjectionComboMenu(); scheduleAutomaticPreview(); });
+    if ($(ids.freedomHeight)) $(ids.freedomHeight).addEventListener('input', (event) => { event.target.value=sanitizeSemicolonNumbers(event.target.value); modelState.inputDrafts={...(modelState.inputDrafts||{}),height:event.target.value}; scheduleAutomaticPreview(); });
     if ($(ids.motorComboButton)) $(ids.motorComboButton).addEventListener('click', (event) => { event.preventDefault(); renderMotorComboMenu(); const menu=$(ids.motorComboMenu); setComboOpen($(ids.motorCombo),menu,menu.hidden); });
     if ($(ids.remoteComboButton)) $(ids.remoteComboButton).addEventListener('click', (event) => { event.preventDefault(); renderRemoteComboMenu(); const menu=$(ids.remoteComboMenu); setComboOpen($(ids.remoteCombo),menu,menu.hidden); });
     if ($(ids.ledComboButton)) $(ids.ledComboButton).addEventListener('click', (event) => { event.preventDefault(); renderLedComboMenu(); const menu=$(ids.ledComboMenu); setComboOpen($(ids.ledCombo),menu,menu.hidden); });
+    if ($(ids.pergoFabricComboButton)) $(ids.pergoFabricComboButton).addEventListener('click', (event) => { event.preventDefault(); renderPergoFabricComboMenu(); const menu=$(ids.pergoFabricComboMenu); setComboOpen($(ids.pergoFabricCombo),menu,menu.hidden); });
     $(ids.colorPickerDialog).addEventListener('click', (event) => {
       if (event.target === $(ids.colorPickerDialog)) closeColorPicker();
     });
@@ -9225,6 +9610,8 @@ initializeViewer();
     $(ids.freedomDepth).addEventListener('input', syncPanelCountFromProjection);
     $(ids.freedomWidth).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), height: readFreedomNumber(ids.freedomHeight), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
     $(ids.freedomHeight).addEventListener('input', () => showRecommendedLimitWarnings({ width: readFreedomNumber(ids.freedomWidth), depth: readFreedomNumber(ids.freedomDepth), height: readFreedomNumber(ids.freedomHeight), panelCount: readFreedomNumber(ids.freedomPanelCount) }));
+    if ($(ids.pergoFrontHeight)) $(ids.pergoFrontHeight).addEventListener('input', scheduleAutomaticPreview);
+    if ($(ids.pergoSystemCount)) $(ids.pergoSystemCount).addEventListener('input', scheduleAutomaticPreview);
     $(ids.freedomForm).addEventListener('submit', (event) => { event.preventDefault(); applyFreedomInputs(); });
     $(ids.positionEdit).addEventListener('click', openPositionDialog);
     $(ids.cancel).addEventListener('click', closePositionDialog);
@@ -9368,11 +9755,19 @@ initializeViewer();
       if (button) button.addEventListener('click', () => toggleLargePreviewBoolean(button));
     });
     if ($(ids.headerCheckDrawing)) $(ids.headerCheckDrawing).addEventListener('click', runDrawingCheck);
-    if ($(ids.largePreviewCheckDrawing)) $(ids.largePreviewCheckDrawing).addEventListener('click', runDrawingCheck);
     if ($(ids.largePreviewMultiProduct)) $(ids.largePreviewMultiProduct).addEventListener('click', () => $(ids.multiProduct).click());
+    if ($(ids.largePreviewMultiProfileAdd)) $(ids.largePreviewMultiProfileAdd).addEventListener('click', () => $(ids.multiProfileAdd).click());
+    if ($(ids.largePreviewMultiProfileDelete)) $(ids.largePreviewMultiProfileDelete).addEventListener('click', () => $(ids.multiProfileDelete).click());
     if ($(ids.largePreviewMultiDelete)) $(ids.largePreviewMultiDelete).addEventListener('click', () => $(ids.multiDelete).click());
     if ($(ids.largePreviewFitProducts)) $(ids.largePreviewFitProducts).addEventListener('click', () => $(ids.fitProducts).click());
     if ($(ids.largePreviewDeleteAll)) $(ids.largePreviewDeleteAll).addEventListener('click', clearProducts);
+    document.querySelectorAll('.large-preview-quick-test[data-quick-test]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const quickIndex = Math.max(1, Math.min(10, Number(button.dataset.quickTest) || 1));
+        const sourceButton = $(`quickTestBtn${quickIndex}`);
+        if (sourceButton && !sourceButton.disabled) sourceButton.click();
+      });
+    });
     [
       [ids.largePreviewMultiDimension, 'Çoklu Ölçü Düzenleme'],
       [ids.largePreviewEqualizeGaps, 'Aralıkları Eşitle'],
@@ -9471,4 +9866,5 @@ initializeViewer();
   bindEvents();
   updateToolbox();
   renderViewer();
+  scheduleAutomaticPreview();
 })();

@@ -1,0 +1,295 @@
+{
+  "pass": true,
+  "checks": 31,
+  "results": {
+    "page-title": "PLMR | 3D Designer",
+    "webgl2": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "pergo-instance-count": 15,
+    "pergo-missing-components": [],
+    "normal-toolbar-single-axis": {
+      "toolbarRefreshBtn": {
+        "x": 810,
+        "y": 112,
+        "w": 97.671875,
+        "h": 35,
+        "cy": 129.5
+      },
+      "previewExpandBtn": {
+        "x": 915.671875,
+        "y": 112,
+        "w": 97.328125,
+        "h": 35,
+        "cy": 129.5
+      },
+      "headerCheckDrawingBtn": {
+        "x": 1315.515625,
+        "y": 112,
+        "w": 94.484375,
+        "h": 35,
+        "cy": 129.5
+      },
+      "toolbarPdfBtn": {
+        "x": 1529,
+        "y": 112,
+        "w": 102,
+        "h": 35,
+        "cy": 129.5
+      },
+      "toolbarDxfBtn": {
+        "x": 1639,
+        "y": 112,
+        "w": 105,
+        "h": 35,
+        "cy": 129.5
+      }
+    },
+    "normal-toolbar-refresh-left": true,
+    "normal-toolbar-expand-left": true,
+    "expanded-origin": {
+      "x": 0,
+      "y": 0,
+      "w": 1767,
+      "h": 830
+    },
+    "expanded-fills-viewport": {
+      "x": 0,
+      "y": 0,
+      "w": 1767,
+      "h": 830
+    },
+    "expanded-right-toolbox": {
+      "x": 1448.953125,
+      "y": 47,
+      "w": 318.046875,
+      "h": 783,
+      "display": "block"
+    },
+    "expanded-viewer-size": {
+      "x": 0,
+      "y": 47,
+      "w": 1447.953125,
+      "h": 783
+    },
+    "expand-preserves-iframe": {
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "w": 1767,
+        "h": 830
+      },
+      "toolbox": {
+        "x": 1448.953125,
+        "y": 47,
+        "w": 318.046875,
+        "h": 783,
+        "display": "block"
+      },
+      "frame": {
+        "x": 0,
+        "y": 47,
+        "w": 1447.953125,
+        "h": 783
+      },
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "label": "Önizlemeyi Küçült"
+    },
+    "expanded-label": "Önizlemeyi Küçült",
+    "toolbox-collapse": {
+      "width": 52,
+      "collapsed": true,
+      "sameWindow": true
+    },
+    "shrink-preserves-iframe": {
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}"
+    },
+    "resize-preserves-camera": true,
+    "system-color-no-iframe-reload": {
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "session": "p3dv-viewer-1785331613374-3",
+      "revision": 1,
+      "projectHash": "fnv1a-acbba379",
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}",
+      "palette": {
+        "system": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ],
+        "panel": [
+          0.2235294117647059,
+          0.47843137254901963,
+          0.21176470588235294,
+          1
+        ],
+        "fabricProfile": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ]
+      }
+    },
+    "system-color-no-geometry-rebuild": {
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "session": "p3dv-viewer-1785331613374-3",
+      "revision": 1,
+      "projectHash": "fnv1a-acbba379",
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}",
+      "palette": {
+        "system": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ],
+        "panel": [
+          0.2235294117647059,
+          0.47843137254901963,
+          0.21176470588235294,
+          1
+        ],
+        "fabricProfile": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ]
+      }
+    },
+    "system-color-preserves-camera": true,
+    "panel-color-no-iframe-reload": {
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "session": "p3dv-viewer-1785331613374-3",
+      "revision": 1,
+      "projectHash": "fnv1a-acbba379",
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}",
+      "palette": {
+        "system": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ],
+        "panel": [
+          0.8,
+          0.8117647058823529,
+          0.8156862745098039,
+          1
+        ],
+        "fabricProfile": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ]
+      }
+    },
+    "panel-color-no-geometry-rebuild": {
+      "sameWindow": true,
+      "sameSrcdoc": true,
+      "loadCount": 0,
+      "session": "p3dv-viewer-1785331613374-3",
+      "revision": 1,
+      "projectHash": "fnv1a-acbba379",
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}",
+      "palette": {
+        "system": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ],
+        "panel": [
+          0.8,
+          0.8117647058823529,
+          0.8156862745098039,
+          1
+        ],
+        "fabricProfile": [
+          0.2,
+          0.23137254901960785,
+          0.24313725490196078,
+          1
+        ]
+      }
+    },
+    "panel-color-preserves-camera": true,
+    "system-palette-updated": {
+      "system": [
+        0.2,
+        0.23137254901960785,
+        0.24313725490196078,
+        1
+      ],
+      "panel": [
+        0.2235294117647059,
+        0.47843137254901963,
+        0.21176470588235294,
+        1
+      ],
+      "fabricProfile": [
+        0.2,
+        0.23137254901960785,
+        0.24313725490196078,
+        1
+      ]
+    },
+    "panel-palette-updated": {
+      "system": [
+        0.2,
+        0.23137254901960785,
+        0.24313725490196078,
+        1
+      ],
+      "panel": [
+        0.8,
+        0.8117647058823529,
+        0.8156862745098039,
+        1
+      ],
+      "fabricProfile": [
+        0.2,
+        0.23137254901960785,
+        0.24313725490196078,
+        1
+      ]
+    },
+    "live-color-render-changed": {
+      "before": "57fc0ffa81685a15b1af23cd8d92e99987d0cf2f993bdf48cd96911a7ba49ac3",
+      "after": "be654b966fe50596a370b5e3221a4399ffbb200c6d3332cfdbd884b9698a75d6"
+    },
+    "pdf-download": {
+      "bytes": 46612,
+      "name": "Pergo-Rise-6500x6500x3200-urun-listesi.pdf"
+    },
+    "page-errors": [],
+    "console-errors": [],
+    "request-failures": [],
+    "pdf-pages": 4,
+    "pdf-pergo-content": true
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "requestFailures": [],
+  "artifacts": {
+    "normal": "external-test-artifact/P3DV.V3.51.Normal-Preview.png",
+    "expanded": "external-test-artifact/P3DV.V3.51.Expanded-Preview.png",
+    "colors": "external-test-artifact/P3DV.V3.51.Live-Colors.png",
+    "pdf": "external-test-artifact/P3DV.V3.51.Browser-PDF-Test.pdf"
+  },
+  "schema": "p3dv-browser-acceptance-v1",
+  "version": "p3dv.v3.52",
+  "generatedAtUtc": "2026-07-29T13:28:39Z"
+}

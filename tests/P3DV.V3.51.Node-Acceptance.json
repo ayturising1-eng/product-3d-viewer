@@ -1,0 +1,395 @@
+{
+  "schema": "p3dv-node-acceptance-v1",
+  "version": "p3dv.v3.52",
+  "generatedAtUtc": "2026-07-29T13:28:38Z",
+  "pass": true,
+  "suiteCount": 20,
+  "totalChecks": 1400,
+  "syntaxCount": 33,
+  "suites": [
+    {
+      "file": "p3dv-v3.13-door-tests.js",
+      "pass": true,
+      "checks": 432,
+      "result": {
+        "pass": true,
+        "checks": 432,
+        "htmlBytes": 576215
+      }
+    },
+    {
+      "file": "p3dv-v3.13-regression-a.js",
+      "pass": true,
+      "checks": 73,
+      "result": {
+        "pass": true,
+        "checks": 73,
+        "freedomOptions": 25,
+        "bioRiseOptions": 21,
+        "htmlBytes": 163817
+      }
+    },
+    {
+      "file": "p3dv-v3.13-regression-b.js",
+      "pass": true,
+      "checks": 78,
+      "result": {
+        "pass": true,
+        "checks": 78,
+        "htmlBytes": 165956
+      }
+    },
+    {
+      "file": "p3dv-v3.31-folding-tests.js",
+      "pass": true,
+      "checks": 68,
+      "result": {
+        "pass": true,
+        "checks": 68,
+        "autoPanels5000": 9,
+        "outwardPreserved": "OUTWARD"
+      }
+    },
+    {
+      "file": "p3dv-v3.31-quick-pdf-tests.js",
+      "pass": true,
+      "checks": 43,
+      "result": {
+        "pass": true,
+        "checks": 43,
+        "quickButtons": 10,
+        "localPdfEngineBytes": 11496
+      }
+    },
+    {
+      "file": "p3dv-v3.32-ar-tests.js",
+      "pass": true,
+      "checks": 52,
+      "result": {
+        "pass": true,
+        "checks": 52,
+        "fourMetreScale": 4,
+        "quickButtons": 10,
+        "mode": "manual-ar"
+      }
+    },
+    {
+      "file": "p3dv-v3.33-manual-ar-tests.js",
+      "pass": true,
+      "checks": 41,
+      "result": {
+        "pass": true,
+        "checks": 41,
+        "manualMoveCm": 10,
+        "groundStepCm": 1,
+        "landscapeToggle": true
+      }
+    },
+    {
+      "file": "p3dv-v3.35-freedom-angle-tests.js",
+      "pass": true,
+      "checks": 9,
+      "result": {
+        "pass": true,
+        "checks": 9,
+        "freedomEffectiveAngle": 100,
+        "freedomPivotAngle": -80
+      }
+    },
+    {
+      "file": "p3dv-v3.36-tests.js",
+      "pass": true,
+      "checks": 31,
+      "result": {
+        "pass": true,
+        "checks": 31,
+        "freedomFirstOption": "2038 mm · 7 Panel",
+        "bioRiseFirstOption": "2070 mm · 8 Panel",
+        "foldingGapMm": 33,
+        "freedomMotorFacade": "Arka Cephe"
+      }
+    },
+    {
+      "file": "p3dv-v3.37-view-symbol-tests.js",
+      "pass": true,
+      "checks": 32,
+      "result": {
+        "pass": true,
+        "checks": 32,
+        "passiveDoorSymbolOpacity": 0.42,
+        "foldedGapMm": 33
+      }
+    },
+    {
+      "file": "p3dv-v3.39-position-view-tests.js",
+      "pass": true,
+      "checks": 24,
+      "result": {
+        "pass": true,
+        "checks": 24,
+        "freedomOpenStack": "physical-front/minZ = user Arka Cephe",
+        "facadeSwap": true,
+        "fieldOrder": true
+      }
+    },
+    {
+      "file": "p3dv-v3.41-tests.js",
+      "pass": true,
+      "checks": 85,
+      "result": {
+        "pass": true,
+        "checks": 85,
+        "matrixCount": 12,
+        "facades": [
+          "rear",
+          "front",
+          "left",
+          "right"
+        ],
+        "outwardPreserved": true
+      }
+    },
+    {
+      "file": "p3dv-v3.42-live-toggle-tests.js",
+      "pass": true,
+      "checks": 41,
+      "result": {
+        "pass": true,
+        "checks": 41,
+        "iframeReloadOnToggle": false,
+        "cameraPreserved": true,
+        "atomicGroupSwap": true,
+        "arAware": true
+      }
+    },
+    {
+      "file": "p3dv-v3.43-live-panel-toggle-tests.js",
+      "pass": true,
+      "checks": 40,
+      "result": {
+        "pass": true,
+        "checks": 40,
+        "iframeReloadOnPanelToggle": false,
+        "cameraPreserved": true,
+        "panelStateLiveMessage": true,
+        "atomicGroupSwap": true
+      }
+    },
+    {
+      "file": "p3dv-v3.44-stabilization-tests.js",
+      "pass": true,
+      "checks": 64,
+      "result": {
+        "pass": true,
+        "checks": 64,
+        "glazing12mm": {
+          "glassDepth": 12,
+          "frameDepth": 16
+        },
+        "safeSerialization": true,
+        "beamStateOwner": "parent",
+        "readyQueue": true,
+        "sessionGuard": true,
+        "ownedTextureDispose": true
+      }
+    },
+    {
+      "file": "p3dv-v3.46-freedom-glb-louver-tests.js",
+      "pass": true,
+      "checks": 49,
+      "result": {
+        "pass": true,
+        "checks": 49,
+        "glbBytes": 4290412,
+        "glbMeshes": 15,
+        "sha256": "0f4635f3f41d8a0ee420475988ae622f69eef240abd56544eb748e0242b1d4c1",
+        "profile": "Freedom GLB only",
+        "preserved": [
+          "position",
+          "spacing",
+          "orientation",
+          "100deg",
+          "Bio-Rise"
+        ]
+      }
+    },
+    {
+      "file": "p3dv-v3.49-file-mode-tests.js",
+      "pass": true,
+      "checks": 15,
+      "result": {
+        "pass": true,
+        "checks": 15,
+        "embeddedBytes": 2137260,
+        "embeddedSha256": "c0560813d51ed07da32cb992d4b84a504b31f2b15eea333cf952e9b958dff83d",
+        "mode": "file-safe embedded-first / fetch-fallback"
+      }
+    },
+    {
+      "file": "p3dv-v3.49-pergo-rise-parametric-tests.js",
+      "pass": true,
+      "checks": 74,
+      "result": {
+        "raw": "74 PASS"
+      }
+    },
+    {
+      "file": "p3dv-v3.50-plmr-studio-interface-tests.js",
+      "pass": true,
+      "checks": 47,
+      "result": {
+        "pass": true,
+        "checks": 47,
+        "interface": "PLMR.V.13.92 studio shell",
+        "viewer": "P3DV WebGL preserved"
+      }
+    },
+    {
+      "file": "p3dv-v3.51-large-preview-live-color-protocol-tests.js",
+      "pass": true,
+      "checks": 102,
+      "result": {
+        "pass": true,
+        "checks": 102,
+        "expandedPreview": "viewport-fixed + top toolbar + right toolbox",
+        "liveColors": "postMessage / same iframe",
+        "rawGlbInPackage": false,
+        "protocol": "P3DV Development Protocol"
+      }
+    }
+  ],
+  "syntax": [
+    {
+      "file": "app.js",
+      "pass": true
+    },
+    {
+      "file": "assets/models/freedom-louver-data.js",
+      "pass": true
+    },
+    {
+      "file": "assets/pergo-rise/component-templates-data.js",
+      "pass": true
+    },
+    {
+      "file": "p3dv-pdf.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/pergo-rise-derived-geometry.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/pergo-rise-product.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/pergo-rise-viewer.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/pergo-rise-webgl-viewer.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/plmr-runtime/multiPositionRules.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/plmr-runtime/peri01ExcelBridge.js",
+      "pass": true
+    },
+    {
+      "file": "products/pergo-rise/plmr-runtime/peri01Geometry.js",
+      "pass": true
+    },
+    {
+      "file": "ral-colors.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.13-door-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.13-regression-a.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.13-regression-b.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.31-folding-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.31-quick-pdf-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.32-ar-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.33-manual-ar-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.35-freedom-angle-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.36-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.37-view-symbol-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.39-position-view-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.41-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.42-live-toggle-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.43-live-panel-toggle-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.44-stabilization-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.46-freedom-glb-louver-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.49-file-mode-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.49-pergo-rise-parametric-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.50-plmr-studio-interface-tests.js",
+      "pass": true
+    },
+    {
+      "file": "tests/p3dv-v3.51-large-preview-live-color-protocol-tests.js",
+      "pass": true
+    },
+    {
+      "file": "zip-fabric-textures.js",
+      "pass": true
+    }
+  ]
+}

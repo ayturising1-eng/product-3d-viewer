@@ -7,7 +7,7 @@ const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
-check(html.includes('p3dv.v3.46'), 'V3.43 HTML version token missing');
+check(html.includes('p3dv.v3.53'), 'V3.43 HTML version token missing');
 
 for (const token of [
   'let viewerLivePanelMasterReady = false;',

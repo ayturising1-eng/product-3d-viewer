@@ -9,8 +9,8 @@ const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
-  'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Önerilen 2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
+  'p3dv.v3.53', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
+  'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Örn. 2308 veya 2308;2524"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
   'Dikey Bölme Sayısı', 'Yatay Bölme Sayısı', 'Yatay Bölme Yükseklikleri (mm)',
   'Dikmenin Önü'
 ]) assert(indexSource.includes(token), `missing HTML token: ${token}`);
@@ -112,7 +112,7 @@ el('projectionOptions').tagName = 'DATALIST';
 
 const alerts = [];
 const windowListeners = {};
-const document = { getElementById: el, createElement(tag) { return new El('', tag); } };
+const document = { getElementById: el, createElement(tag) { return new El('', tag); }, querySelectorAll() { return []; }, addEventListener() {}, fullscreenElement: null, documentElement: new El('documentElement') };
 const window = {
   addEventListener(type, fn) { (windowListeners[type] ??= []).push(fn); },
   confirm() { return true; }, alert(message) { alerts.push(message); }

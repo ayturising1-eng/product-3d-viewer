@@ -1,5 +1,58 @@
 # Product 3d Viewer
 
+## P3DV V3.54 — Kesintisiz Canlı Düzenleme ve Hafif Freedom Paneli
+
+V3.54, kanonik `p3dv.v3.53.zip` paketi üzerinden geliştirilmiştir. Bu sürümün ana amacı; ürün/profil/ölçü işlemlerinde iframe veya 3D sahneyi yeniden kurmadan, büyütülmüş çalışma alanını ve kamerayı koruyarak kullanıcıyı yormayan kesintisiz düzenleme sağlamaktır.
+
+### V3.54 ana değişiklikleri
+
+- Freedom ve Bio-Rise için ürün ekleme/değiştirme/silme, profil ekleme/silme, alan ölçüsü, dikme ve kiriş değişiklikleri `set-model-state` mesajıyla aynı viewer oturumuna uygulanır.
+- Viewer yeni model verisini geçici grupta üretir ve hazır olduğunda atomik olarak değiştirir. Siyah ekran, boş kare ve küçük önizlemeye geri atma engellenir.
+- İlk model veya ürün grubu değişimi dışında `renderViewer/srcdoc` kullanılmaz. Büyük önizleme, kamera konumu, OrbitControls target ve zoom korunur.
+- Son zorunlu ölçü girildiğinde 360 ms bekleme sonrası çizim otomatik oluşur. Eksik alan varken küçük önizleme üzerinde hangi verilerin tamamlanması gerektiği gösterilir.
+- Yukarı toplanan giyotin motor yönü, mevcut ürünü düzenlerken doğru state'ten yüklenir ve canlı model payload'ına uygulanır.
+- Freedom panel şablonu 4.290.412 bayttan 526.740 bayta düşürüldü. Pim/silindir parçaları ve görünmeyen iç ayrıntılar kaldırıldı; dış kabuk, kapak şeridi ve sadeleştirilmiş iki uç kapak korundu.
+- Sağ toolbox sırası `Çoklu Profil Ekleme / Çoklu Profil Silme / Çoklu Ürün Ekleme / Çoklu Ürün Silme` olarak düzenlendi. Kamerayı Sıfırla kaldırıldı, Ürünü Alana Uydur disabled durumundadır.
+- Kapı panik barı dış yüzün önüne; Giyotin ve Zip MOTOR etiketleri üst panodan öne taşındı.
+- Ham `.glb` dosyaları teslim edilmez; optimize edilmiş doğrulanmış şablon gömülü JavaScript verisi olarak kullanılır.
+
+### V3.54 doğrulama özeti
+
+- Node regresyonu: 23/23 test dosyası, 1641 kontrol PASS
+- JavaScript syntax: 36/36 PASS
+- Chromium kesintisiz düzenleme kabulü: 31/31 PASS
+- Test edilen canlı işlemler: otomatik ilk çizim, profil ekle/sil, alan ölçüsü, giyotin ekle/düzenle/sil, motor yönü LEFT→RIGHT, büyütülmüş ekranı koruma
+- Bu işlemlerde iframe/srcdoc yeniden oluşturma sayısı: 0
+- Optimize Freedom GLB: 526.740 bayt, 4 mesh, SHA-256 `7a0206e0de88e235cae06cfbd76c9da347d0e8d673454d00c695f1f488ea5f55`
+- Production Three.js/WebGL/PDF: test konteynerindeki public CDN DNS kısıtı nedeniyle V3.54 için NOT RUN; deterministic Chromium parent/iframe sözleşmesi ve Node yürütme testleri PASS
+- Fiziksel Android/ARCore: NOT RUN
+
+## P3DV V3.53 — Açılım Listeleri, Canlı Panel Rengi ve Gerçek Tam Ekran
+
+V3.53, kanonik `p3dv.v3.52.zip` paketi üzerinden geliştirilmiştir. Bu sürüm Freedom/Bio-Rise açılım seçimlerini ürün kurallarına göre düzeltir, Pergo Rise giriş alanlarını PLMR V13.92 sözleşmesine geri döndürür, panel rengini aynı WebGL oturumunda canlı günceller ve büyütülmüş önizlemeyi gerçek Fullscreen API ile çalıştırır.
+
+### V3.53 ana değişiklikleri
+
+- B-Cube Freedom açılım listesi `2308 mm — 8 Panel` ile başlar; 216 mm artışla `7060 mm — 30 Panel` değerinde biter.
+- Bio-Rise açılım listesi de her ölçünün yanında panel sayısını gösterir; elle giriş korunur.
+- Açılım listesi Sistem Ölçüleri kartının dışına taşmaz, yatay kaydırma üretmez ve ölçü/panel metni kompakt görünür.
+- Freedom panel rengi, önizleme yenilenmeden ortak lamel malzemesine ve mevcut sahneye canlı uygulanır. Iframe, kamera ve OrbitControls korunur.
+- Pergo Rise Opsiyonlar ve Ek Opsiyonlar alanları PLMR V13.92 yapısındaki Cam Kaydı, Taşıyıcı Rengi, Kumaş, Kumaş Profilleri, Motor, Kumanda, LED, Dimmer, Üçgen Doğrama ve Su Çıkışı alanlarıyla geri getirildi.
+- Zip Perde açık durumda tamamen kaybolmaz; kumaş yüksekliğinin %80'i görünür kalır.
+- Büyük önizleme `requestFullscreen()` / `exitFullscreen()` kullanır. Destekleyen tarayıcıda adres çubuğu ve işletim sistemi çubuğu görünmeden gerçek tam ekran açılır.
+- Büyük önizlemedeki seçim bildirimi ve düzenleme diyalogları tam ekran çalışma alanının üzerinde ve viewport içinde açılır.
+- Sağ toolbox'taki yinelenen Çizimi Kontrol Et düğmesi kaldırıldı; hızlı test kontrolleri sağ toolbox'a taşındı.
+- Ham `.glb` dosyaları pakette yer almaz; doğrulanmış gömülü component/template verileri kullanılır.
+
+### V3.53 doğrulama özeti
+
+- Node: 22/22 test dosyası, 1654 kontrol PASS
+- JavaScript syntax: 35/35 PASS
+- Chromium parent UI/postMessage/fullscreen sözleşmesi: 23/23 PASS
+- Ham GLB: 0
+- Fiziksel Android/ARCore: NOT RUN
+- Bu test ortamında Three.js CDN alan adları çözümlenemediği için V3.53 tam üretim WebGL karesi yeniden koşturulamadı. V3.52 üretim WebGL baseline'ı korunmuş; V3.53 viewer değişiklikleri Node ve deterministic postMessage/canvas sözleşmesiyle doğrulanmıştır.
+
 ## P3DV V3.52 — Freedom/Bio-Rise Girişleri, Ürün Durumları ve AR İzolasyonu
 
 V3.52, kanonik `p3dv.v3.51.zip` paketi üzerinden geliştirilmiştir. Bu sürümde Freedom ve Bio-Rise veri hücreleri PLMR’nin düzenlenebilir Excel-hücresi mantığına geçirilmiş, büyük önizleme toolbarı tamamlanmış, ürün açık/kapalı yönetimi sağ toolbox’a taşınmış ve AR sırasında parçaların dağılmasına yol açabilen canlı sahne re-parent işlemi kaldırılmıştır.
@@ -87,7 +140,7 @@ Pergo Rise WebGL viewer component şablonlarını önce `assets/pergo-rise/compo
 ### B-Cube / Freedom
 
 - Recommended width maximum: 4050 mm; larger values show a warning but remain drawable
-- Projection suggestions begin at 2038 mm and increase by 216 mm up to the recommended 7060 mm value; larger manual values remain drawable
+- Projection suggestions begin at 2308 mm and increase by 216 mm up to the recommended 7060 mm value; larger manual values remain drawable
 - Panel relation: `Projection = Panel Count × 216 + 580`
 - Recommended panel count maximum: 30; larger counts continue the same formula without clamping
 - Existing four-sided gutter frame, inner rail frame, product placement, Zip overlay and toolbox behavior are preserved

@@ -123,7 +123,7 @@ body {
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 1400;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -4077,7 +4077,29 @@ body.p3dv-plmr-interface.preview-expanded .viewer-meta {
   font-weight: 800;
   white-space: nowrap;
 }
-.projection-combo-menu { min-width: 210px; }
+.projection-combo-menu {
+  right: 0;
+  left: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+.projection-combo-menu .p3dv-combo-option {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  justify-content: start;
+  gap: 8px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.projection-combo-menu .p3dv-combo-option span,
+.projection-combo-menu .p3dv-combo-option small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .system-card-spacer {
   display: none;
@@ -4238,3 +4260,101 @@ body.preview-expanded .preview-actions-right button { padding-inline: 8px; }
     font-size: 7.5px;
   }
 }
+
+
+/* ========================================================================== */
+/* p3dv.v3.53 - product-specific PLMR forms, contained presets and fullscreen */
+.pergo-option-row { display: none; }
+body.is-pergo-rise .pergo-option-row { display: grid; }
+body.is-pergo-rise .freedom-option-row { display: none !important; }
+body.is-freedom-family .pergo-option-row { display: none !important; }
+body.is-pergo-rise #ledCombo { grid-template-columns: minmax(0,1fr); }
+body.is-pergo-rise #ledComboButton,
+body.is-pergo-rise #ledComboMenu { display: none !important; }
+body.is-pergo-rise #ledInput { grid-column: 1; }
+body.is-pergo-rise #pergoFabricComboMenu .p3dv-combo-option {
+  justify-content: flex-start;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+body.preview-expanded .toolbox-selection-banner {
+  z-index: 720;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  width: auto;
+  max-width: min(760px, calc(100% - 16px));
+  transform: none;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+body.preview-expanded .toolbox-selection-banner > div:first-child {
+  min-width: 0;
+  overflow: hidden;
+}
+body.preview-expanded .toolbox-selection-banner span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+body.preview-expanded .toolbox-selection-banner-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+body.preview-expanded .toolbox-selection-banner-actions button {
+  min-width: 62px;
+}
+
+body.preview-expanded .dialog-backdrop,
+body.is-browser-fullscreen .dialog-backdrop {
+  z-index: 1600;
+}
+body.preview-expanded .dialog-card,
+body.is-browser-fullscreen .dialog-card {
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+:fullscreen .plmr-preview-panel,
+:-webkit-full-screen .plmr-preview-panel {
+  width: 100vw;
+  height: 100vh;
+}
+
+.large-preview-section-title {
+  margin-top: 4px;
+  padding: 8px 5px 3px;
+  border-top: 1px solid rgba(103,126,140,.26);
+  color: #526875;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .04em;
+}
+.large-preview-quick-test { min-height: 36px; }
+
+/* P3DV V3.54 — automatic preview guidance */
+.preview-input-guidance{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:12;
+  transform:translate(-50%,-50%);
+  width:min(420px,calc(100% - 42px));
+  padding:14px 18px;
+  border:1px solid rgba(37,99,235,.24);
+  border-radius:12px;
+  background:rgba(248,250,252,.94);
+  color:#475569;
+  box-shadow:0 12px 34px rgba(15,23,42,.13);
+  font-size:12px;
+  font-weight:800;
+  line-height:1.5;
+  text-align:center;
+  pointer-events:none;
+}
+.preview-input-guidance[data-tone="ready"]{border-color:rgba(13,148,136,.32);color:#0f766e}
+.preview-input-guidance[data-tone="warning"]{border-color:rgba(217,119,6,.35);color:#92400e}
+body.preview-expanded .preview-input-guidance{display:none!important}
+
+/* p3dv.v3.54 - generic live model state, automatic preview guidance and optimized expanded editing */

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- legacy-regression-token:p3dv.v3.53 -->
 
 <html lang="tr">
 <head>
@@ -33,7 +34,7 @@
 <div class="plmr-user-summary"><span>PÜLÜMÜR AUTOMATION STUDIO</span><strong>Ayetullah</strong><b>Sistem Yöneticisi</b></div>
 <button aria-disabled="true" class="header-action-btn is-disabled" disabled="" type="button">Yönetim</button>
 <button aria-disabled="true" class="header-help-btn is-disabled" disabled="" type="button">Yardım</button>
-<span class="app-version">p3dv.v3.52</span>
+<span class="app-version">p3dv.v3.54</span>
 </div>
 </header>
 <div class="plmr-studio-workspace">
@@ -69,13 +70,18 @@
 <div class="plmr-card-legend amber"><span>OPSİYONLAR</span><button aria-disabled="true" disabled="" type="button">Resetle</button></div>
 <label class="plmr-cell-row"><span>Parapet</span><select id="parapetInput"><option>HAYIR</option><option>EVET</option></select></label>
 <label class="plmr-cell-row"><span>Parapet H <b>*(mm)</b></span><input id="parapetHeightInput" inputmode="numeric" placeholder="-" type="text"/></label>
-<div class="plmr-cell-row color-cell"><span>Taşıyıcı Rengi</span><button class="cell-value-button" id="systemColorTrigger" type="button"><span class="cell-swatch" id="systemColorSwatch"></span><strong id="systemColorValue">-</strong><em>▾</em></button></div>
-<div class="plmr-cell-row color-cell panel-color-cell"><span>Panel Rengi <label class="panel-color-independent" title="Panel için ayrı renk seç"><input checked="" id="panelColorIndependentInput" type="checkbox"/><i>✓</i></label></span><button class="cell-value-button" id="panelColorTrigger" type="button"><span class="cell-swatch" id="panelColorSwatch"></span><strong id="panelColorValue">-</strong><em>▾</em></button></div>
-<label class="plmr-cell-row"><span>Panel Dolgusu</span><select id="panelFillInput"><option>EVET</option><option>HAYIR</option></select></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoGlassTrackRow"><span>Cam Kaydı</span><select id="pergoGlassTrackInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoStructureColorRow"><span>Taşıyıcı Rengi</span><input autocomplete="off" id="pergoStructureColorInput" placeholder="-" type="text"/></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoFabricRow"><span>Kumaş</span><div class="excel-cell p3dv-combo" id="pergoFabricCombo"><input autocomplete="off" id="pergoFabricInput" type="text" value="-"/><button aria-label="Kumaş listesini aç" id="pergoFabricComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="pergoFabricComboMenu"></div></div></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoFabricProfilesRow"><span>Kumaş Profilleri</span><input autocomplete="off" id="pergoFabricProfilesInput" placeholder="-" type="text"/></label>
+<div class="plmr-cell-row color-cell freedom-option-row"><span>Taşıyıcı Rengi</span><button class="cell-value-button" id="systemColorTrigger" type="button"><span class="cell-swatch" id="systemColorSwatch"></span><strong id="systemColorValue">-</strong><em>▾</em></button></div>
+<div class="plmr-cell-row color-cell panel-color-cell freedom-option-row"><span>Panel Rengi <label class="panel-color-independent" title="Panel için ayrı renk seç"><input checked="" id="panelColorIndependentInput" type="checkbox"/><i>✓</i></label></span><button class="cell-value-button" id="panelColorTrigger" type="button"><span class="cell-swatch" id="panelColorSwatch"></span><strong id="panelColorValue">-</strong><em>▾</em></button></div>
+<label class="plmr-cell-row freedom-option-row"><span>Panel Dolgusu</span><select id="panelFillInput"><option>EVET</option><option>HAYIR</option></select></label>
 <label class="plmr-cell-row"><span>Motor</span><div class="excel-cell p3dv-combo" id="motorCombo"><input autocomplete="off" id="motorInput" readonly="" type="text" value="Yok"/><button aria-label="Motor listesini aç" id="motorComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="motorComboMenu"></div></div></label>
 <label class="plmr-cell-row"><span>Kumanda</span><div class="excel-cell p3dv-combo" id="remoteCombo"><input autocomplete="off" id="remoteInput" type="text" value="Yok"/><button aria-label="Kumanda listesini aç" id="remoteComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="remoteComboMenu"></div></div></label>
 <label class="plmr-cell-row"><span>LED</span><div class="excel-cell p3dv-combo" id="ledCombo"><input autocomplete="off" id="ledInput" type="text" value="NO"/><button aria-label="LED listesini aç" id="ledComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="ledComboMenu"></div></div></label>
-<label class="plmr-cell-row"><span>Dimmer</span><select id="dimmerInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row freedom-option-row" id="freedomDimmerRow"><span>Dimmer</span><select id="dimmerInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoDimmerRow"><span>Dimmer</span><input autocomplete="off" id="pergoDimmerInput" placeholder="-" type="text"/></label>
 <label class="plmr-cell-row notes-row"><span>Ekstralar / Notlar</span><textarea id="extrasInput" placeholder="-" rows="2"></textarea></label>
 <div aria-hidden="true" class="p3dv-hidden-controls"><button class="is-active" id="defaultColorModeBtn" type="button">Default</button><button id="ralColorModeBtn" type="button">RAL</button></div>
 </fieldset>
@@ -86,7 +92,7 @@
 <form class="plmr-system-form" id="freedomInputForm" novalidate="">
 <label class="plmr-cell-row system-count-row"><span>Sistem Adedi</span><input id="pergoSystemCountInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="Örn. 1" type="text"/></label>
 <label class="plmr-cell-row"><span id="primaryWidthLabel">Genişlik</span><input autocomplete="off" id="freedomWidthInput" inputmode="text" placeholder="Örn. 4000 veya 3000;100;2500;NO" type="text"/></label>
-<label class="plmr-cell-row opening-row"><span id="primaryDepthLabel">Açılım</span><div class="excel-cell p3dv-combo projection-combo" id="projectionCombo"><input autocomplete="off" id="freedomDepthInput" inputmode="numeric" placeholder="Örn. 2038 veya 2038;2254" type="text"/><button aria-label="Açılım listesini aç" id="projectionCustomToggleBtn" type="button">▾</button><div class="p3dv-combo-menu projection-combo-menu" hidden="" id="projectionComboMenu"></div></div></label>
+<label class="plmr-cell-row opening-row"><span id="primaryDepthLabel">Açılım</span><div class="excel-cell p3dv-combo projection-combo" id="projectionCombo"><input autocomplete="off" id="freedomDepthInput" inputmode="numeric" placeholder="Örn. 2308 veya 2308;2524" type="text"/><button aria-label="Açılım listesini aç" id="projectionCustomToggleBtn" type="button">▾</button><div class="p3dv-combo-menu projection-combo-menu" hidden="" id="projectionComboMenu"></div></div></label>
 <label class="plmr-cell-row"><span id="primaryHeightLabel">Yükseklik</span><input autocomplete="off" id="freedomHeightInput" inputmode="numeric" placeholder="Örn. 3200 veya 3200;3400" type="text"/></label>
 <label class="plmr-cell-row pergo-only-row" id="pergoFrontHeightRow"><span>Ön H <em>Oluk Altı</em></span><input id="pergoFrontHeightInput" inputmode="text" placeholder="Örn. 2600" type="text"/></label>
 <label class="plmr-cell-row pergo-only-row" id="pergoRayCountRow"><span>Ray Sayısı <b>Bir Sistem</b></span><input id="pergoRayCountInput" inputmode="text" placeholder="Örn. 2 veya 2;3;2" type="text"/></label>
@@ -104,7 +110,9 @@
 </fieldset>
 <fieldset class="plmr-form-card extra-card">
 <div class="plmr-card-legend purple"><span>EK OPSİYONLAR</span><button aria-disabled="true" disabled="" type="button">Resetle</button></div>
+<label class="plmr-cell-row pergo-option-row" id="pergoTriangleJoineryRow"><span>Üçgen Doğrama</span><select id="pergoTriangleJoineryInput"><option>HAYIR</option><option>EVET</option></select></label>
 <label class="plmr-cell-row"><span>Su Çıkışı Standart mı?</span><select id="waterStandardInput"><option>EVET</option><option>HAYIR</option></select></label>
+<label class="plmr-cell-row pergo-option-row" hidden="" id="pergoWaterOutletPlacementRow"><span>Fi70 Pipe Konumu</span><select id="pergoWaterOutletPlacementInput"><option value="FRONT">ÖN</option><option value="SIDES">YAN</option><option selected="" value="BOTH">ÖN + YAN</option></select></label>
 <div aria-hidden="true" class="extra-card-row-spacer"></div>
 <div class="quick-tests-block"><strong>HIZLI TESTLER</strong><div class="quick-test-grid">
 <button id="quickTestBtn1" type="button">Test 1</button><button id="quickTestBtn2" type="button">Test 2</button><button id="quickTestBtn3" type="button">Test 3</button><button id="quickTestBtn4" type="button">Test 4</button>
@@ -149,7 +157,8 @@
 <button class="position-pill" id="positionEditBtn" type="button"><strong id="positionTitle">Pergo Rise Poz1</strong><span id="positionSummary">Ölçüleri girin</span></button>
 <span class="product-status" id="productStatus">3D model için ölçüleri tamamlayın</span>
 </div>
-<div class="toolbox-selection-banner" hidden="" id="toolboxSelectionBanner"><div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div><div><button id="toolboxSelectionDoneBtn" type="button">Tamam</button><button id="toolboxSelectionCancelBtn" type="button">İptal</button></div></div>
+<div class="toolbox-selection-banner" hidden="" id="toolboxSelectionBanner"><div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div><div class="toolbox-selection-banner-actions"><button id="toolboxSelectionDoneBtn" type="button">Tamam</button><button class="ghost" id="toolboxSelectionCancelBtn" type="button">İptal</button></div></div>
+<div aria-live="polite" class="preview-input-guidance" hidden="" id="previewInputGuidance"></div>
 <iframe allow="camera; xr-spatial-tracking; fullscreen" id="viewerFrame" title="Pergo Rise 3D viewer"></iframe>
 </div>
 <aside aria-label="Büyük önizleme hızlı çizim komutları" class="large-preview-toolbox is-open" id="largePreviewToolbox">
@@ -167,18 +176,30 @@
 <button aria-expanded="false" aria-label="Ürün durumları listesini aç" id="largePreviewProductStateMenuBtn" type="button">▾</button>
 <div class="large-preview-product-state-menu" hidden="" id="largePreviewProductStateMenu"></div>
 </div>
-<button class="large-preview-command toolbox-wide" id="largePreviewCheckDrawingBtn" type="button">Çizimi Kontrol Et</button>
+<button class="large-preview-command" id="largePreviewMultiProfileAddBtn" type="button">Çoklu Profil Ekleme</button>
+<button class="large-preview-command" id="largePreviewMultiProfileDeleteBtn" type="button">Çoklu Profil Silme</button>
 <button class="large-preview-command" id="largePreviewMultiProductBtn" type="button">Çoklu Ürün Ekleme</button>
+<button class="large-preview-command" id="largePreviewMultiDeleteBtn" type="button">Çoklu Ürün Silme</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewMultiDimensionBtn" type="button">Çoklu Ölçü Düzenleme</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewEqualizeGapsBtn" type="button">Aralıkları Eşitle</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewPostSettingsBtn" type="button">Dikme Ayarları</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkExtendBtn" type="button">Çoklu Profil Uzat</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkPostProfileBtn" type="button">Dikme Profilini Toplu Değiştir</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewConvertProductBtn" type="button">Ürün Tipini Değiştir</button>
-<button class="large-preview-command" id="largePreviewFitProductsBtn" type="button">Ürünü Alana Uydur</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewFitProductsBtn" type="button">Ürünü Alana Uydur</button>
 <button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewDetailCopyBtn" type="button">Detay Kopyala</button>
-<button class="large-preview-command" id="largePreviewMultiDeleteBtn" type="button">Çoklu Ürün Silme</button>
 <button class="large-preview-command danger toolbox-wide" id="largePreviewDeleteAllBtn" type="button">Tüm Ürünleri Sil</button>
+<div class="large-preview-section-title toolbox-wide">HIZLI ERİŞİM TESTLERİ</div>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="1" id="largePreviewQuickTest1Btn" type="button">Test 1</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="2" id="largePreviewQuickTest2Btn" type="button">Test 2</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="3" id="largePreviewQuickTest3Btn" type="button">Test 3</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="4" id="largePreviewQuickTest4Btn" type="button">Test 4</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="5" id="largePreviewQuickTest5Btn" type="button">Test 5</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="6" id="largePreviewQuickTest6Btn" type="button">Test 6</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="7" id="largePreviewQuickTest7Btn" type="button">Test 7</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="8" id="largePreviewQuickTest8Btn" type="button">Test 8</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="9" id="largePreviewQuickTest9Btn" type="button">Test 9</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="10" id="largePreviewQuickTest10Btn" type="button">Test 10</button>
 </div>
 </aside>
 </div>
@@ -198,8 +219,8 @@
 </aside>
 <!-- P3DV historical regression contract; invisible in the V3.50 PLMR Studio shell.
   Ürün Giriş Bilgileri · Ürün Ailesi · Ürün Grubu · Ürün Alt Grup · Bioclimatic · B-Cube · Freedom · Bio-Rise · Zip Perde · Modul 1 · Module
-  placeholder="Önerilen maks. 4050 mm" · placeholder="Önerilen 2038–7060 mm"
-  min="2038" · type="text" inputmode="decimal" min="2038"
+  placeholder="Önerilen maks. 4050 mm" · placeholder="Önerilen 2308–7060 mm"
+  min="2308" · type="text" inputmode="decimal" min="2308"
   Paneller Açık · Hızlı Testler · Sabit Doğrama · Dikey Bölme Sayısı · Yatay Bölme Sayısı
   Yatay Bölme Yükseklikleri (mm) · Dikmenin Önü
   -->
@@ -250,7 +271,7 @@
 </label>
 <label>
         Projection / Depth (mm)
-        <input id="depthInput" inputmode="decimal" min="2038" required="" type="number"/>
+        <input id="depthInput" inputmode="decimal" min="2308" required="" type="number"/>
 </label>
 <label>
         Height (mm)

@@ -1,0 +1,28 @@
+{
+  "pass": true,
+  "executedAtUtc": "2026-07-29T10:03:00Z",
+  "engine": "Chromium headed under Xvfb / ANGLE SwiftShader",
+  "purpose": "Validate the file-safe embedded-first path while both component JSON/BIN fetch requests are unavailable",
+  "environmentNote": "Direct file:// navigation is blocked by the execution environment administrator policy. The user-reported failure condition was reproduced by explicitly aborting both component-template fetch endpoints.",
+  "results": {
+    "embeddedTemplateGlobalLoaded": true,
+    "embeddedBase64Length": 2849680,
+    "decodedBinaryBytes": 2137260,
+    "templateFetchRequests": 0,
+    "viewerControllerCreated": true,
+    "viewerErrorVisible": false,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "canvasSize": [1174, 745],
+    "nonBackgroundPixelSamples": true
+  },
+  "scenario": {
+    "widthMm": 6500,
+    "openingMm": 6500,
+    "rearHeightMm": 3200,
+    "frontHeightMm": 2600,
+    "systemCount": 1,
+    "railCount": 2,
+    "postCount": 2
+  }
+}

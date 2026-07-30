@@ -28,8 +28,8 @@ assert(Object.keys(embeddedZipTextures).length === 23, 'embedded Zip texture map
 assert(Object.values(embeddedZipTextures).every((value) => /^data:image\/jpeg;base64,/.test(value)), 'embedded Zip texture entries must be JPEG data URIs');
 
 for (const token of [
-  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
-  'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Önerilen 2038–7060 mm"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
+  'p3dv.v3.53', 'Ürün Giriş Bilgileri', 'Bioclimatic', 'B-Cube', 'Freedom', 'Modul 1',
+  'placeholder="Önerilen maks. 4050 mm"', 'placeholder="Örn. 2308 veya 2308;2524"', 'projectionOptions', 'Paneller Açık', 'toolboxPanelMasterInput', 'Sabit Doğrama',
   'Dikey Bölme Sayısı', 'Yatay Bölme Sayısı', 'Yatay Bölme Yükseklikleri (mm)',
   'Dikmenin Önü', 'Kapı (Dış Bakış)', 'productDoorTypeInput', 'productDoorTypeTrigger', 'productDoorTypePicker',
   'productDoorTypeCards', 'productDoorHandleTypeInput', 'productDoorTopFixedHeightInput',
@@ -63,8 +63,8 @@ for (const token of [
   'function buildDoorProduct', 'function addMovingDoorLeaf', 'function addFixedDoorLeaf',
   "const handleY=zone.bottomY+900;", "const frameFace=50;", "const frameDepth=55;",
   "else if(placement.type==='door')buildDoorProduct(zone,placement);",
-  "const SYSTEM_COLOR=${systemColorValue};", "const PANEL_COLOR=${panelColorValue};",
-  "const DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};",
+  "let SYSTEM_COLOR=${systemColorValue};", "let PANEL_COLOR=${panelColorValue};",
+  "let DEFAULT_COLOR_MODE=${safeScriptJson(colorMode !== 'ral')};",
   "const magenta=profileColor(0xff00ff),blue=profileColor(0x2563eb),orange=profileColor(0xff8c00),amber=profileColor(0xffb347),grass=panelColor(0x7cfc00);",
   "function profileColor(defaultHex){", "function panelColor(defaultHex){",
   "const leafWidth = 1000;", "const sideFixedWidth = 1000;", "const leafHeight = 2500;", "const topFixedHeight = 500;",
@@ -149,7 +149,7 @@ el('projectionOptions').tagName = 'DATALIST';
 
 const alerts = [];
 const windowListeners = {};
-const document = { getElementById: el, createElement(tag) { return new El('', tag); } };
+const document = { getElementById: el, createElement(tag) { return new El('', tag); }, querySelectorAll() { return []; }, addEventListener() {}, fullscreenElement: null, documentElement: new El('documentElement') };
 const window = {
   addEventListener(type, fn) { (windowListeners[type] ??= []).push(fn); },
   confirm() { return true; }, alert(message) { alerts.push(message); }
@@ -316,16 +316,16 @@ checkGuillotineMotorDirectionRuntime(initialModelHtml);
 checkDoorSilhouetteRuntime();
 
 
-// V3.25 default startup contract and RAL selector flow.
+// V3.25 default startup contract and V3.51 live RAL selector flow.
 assert(el('systemColorValue').textContent === 'Klasik Sistem Paleti', 'startup system color must use the classic default palette');
 assert(el('panelColorValue').textContent === 'Klasik Panel Yeşili', 'startup panel color must use the classic default green');
 assert(el('defaultColorModeBtn').classList.contains('is-active'), 'Default color button must be active on startup');
 assert(!el('ralColorModeBtn').classList.contains('is-active'), 'RAL color button must be inactive on startup');
-assert(initialModelHtml.includes('const DEFAULT_COLOR_MODE=true;'), 'classic default color mode not passed to viewer');
-assert(initialModelHtml.includes(`const SYSTEM_COLOR=${parseInt(ralCatalog.all.find((item) => item.code === 'RAL 9006').hex.slice(1), 16)};`), 'stored RAL system color must remain available');
-assert(initialModelHtml.includes(`const PANEL_COLOR=${parseInt(ralCatalog.all.find((item) => item.code === 'RAL 6018').hex.slice(1), 16)};`), 'stored RAL panel color must remain available');
-assert(initialModelHtml.includes(`const SYSTEM_FINISH=${JSON.stringify('MATTE')};`), 'stored system finish not passed to viewer');
-assert(initialModelHtml.includes(`const PANEL_FINISH=${JSON.stringify('MATTE')};`), 'stored panel finish not passed to viewer');
+assert(initialModelHtml.includes('let DEFAULT_COLOR_MODE=true;'), 'classic default color mode not passed to viewer');
+assert(initialModelHtml.includes(`let SYSTEM_COLOR=${parseInt(ralCatalog.all.find((item) => item.code === 'RAL 9006').hex.slice(1), 16)};`), 'stored RAL system color must remain available');
+assert(initialModelHtml.includes(`let PANEL_COLOR=${parseInt(ralCatalog.all.find((item) => item.code === 'RAL 6018').hex.slice(1), 16)};`), 'stored RAL panel color must remain available');
+assert(initialModelHtml.includes(`let SYSTEM_FINISH=${JSON.stringify('MATTE')};`), 'stored system finish not passed to viewer');
+assert(initialModelHtml.includes(`let PANEL_FINISH=${JSON.stringify('MATTE')};`), 'stored panel finish not passed to viewer');
 assert(initialModelHtml.includes('const magenta=profileColor(0xff00ff)'), 'classic magenta post color missing');
 assert(initialModelHtml.includes('blue=profileColor(0x2563eb)'), 'classic blue beam color missing');
 assert(initialModelHtml.includes('orange=profileColor(0xff8c00)'), 'classic orange gutter color missing');
@@ -337,6 +337,17 @@ assert(el('toolboxMainDimensionsInput').checked === true, 'main dimensions must 
 assert(el('replayAnimationBtn').textContent === 'Ürünler Açık', 'products must start open');
 assert(initialModelHtml.includes('let productsOpen=true;'), 'global product state must start open and stay mutable in viewer');
 assert(initialModelHtml.includes('let dimensionVisibility={"intermediate":false,"main":true};'), 'viewer must start with only main dimensions visible');
+
+// The iframe reports live-color support. From this point on, color changes must use postMessage
+// without replacing srcdoc, rebuilding the iframe, or resetting the current camera/session.
+message({ source:'product-3d-viewer', type:'viewer-ready', liveProductState:true, livePanelMaster:true, liveColorState:true, livePergoRise:false });
+const liveColorSrcdoc = viewerHtml();
+const liveColorSession = currentViewerSessionId();
+const colorMessageCountAtStart = el('viewerFrame').messages.length;
+function lastColorMessage() {
+  return [...el('viewerFrame').messages].reverse().find((entry) => entry && entry.type === 'set-color-state');
+}
+
 el('systemColorTrigger').dispatch('click');
 assert(el('colorPickerDialog').hidden === false, 'system color picker must open');
 assert(el('colorPickerTitle').textContent === 'Sistem Rengi Seçin', 'system color picker title mismatch');
@@ -352,12 +363,16 @@ assert(el('colorPickerDialog').hidden === true, 'color picker must close after f
 assert(el('colorFinishDialog').hidden === true, 'finish dialog must close after finish selection');
 assert(el('systemColorValue').textContent === 'RAL 7016 · Parlak', 'system color selection not stored in UI');
 assert(el('ralColorModeBtn').classList.contains('is-active'), 'RAL mode must activate after a RAL finish is selected');
-assert(viewerHtml().includes('const DEFAULT_COLOR_MODE=false;'), 'viewer must switch from classic colors to RAL mode');
-let colorHtml = viewerHtml();
-const ral7016 = ralCatalog.all.find((item) => item.code === 'RAL 7016');
-assert(colorHtml.includes(`const SYSTEM_COLOR=${parseInt(ral7016.hex.slice(1), 16)};`), 'selected system color not propagated to viewer');
-assert(colorHtml.includes(`const SYSTEM_FINISH=${JSON.stringify('GLOSS')};`), 'selected system finish not propagated to viewer');
-assert(colorHtml.includes(`const PANEL_COLOR=${parseInt(ralCatalog.all.find((item) => item.code === 'RAL 6018').hex.slice(1), 16)};`), 'system selection must not alter panel color');
+assert(viewerHtml() === liveColorSrcdoc, 'system color change must not replace iframe srcdoc');
+assert(currentViewerSessionId() === liveColorSession, 'system color change must preserve viewer session');
+let colorMessage = lastColorMessage();
+assert(Boolean(colorMessage), 'system color change must post set-color-state');
+assert(colorMessage.source === 'product-3d-parent', 'live color message source mismatch');
+assert(colorMessage.sessionId === liveColorSession, 'live color message session mismatch');
+assert(colorMessage.colorMode === 'ral', 'live color message must activate RAL mode');
+assert(colorMessage.systemColor.code === 'RAL 7016' && colorMessage.systemColor.finish === 'GLOSS', 'selected system color/finish not propagated live');
+assert(colorMessage.panelColor.code === 'RAL 6018' && colorMessage.panelColor.finish === 'MATTE', 'system selection must not alter panel color');
+
 el('panelColorTrigger').dispatch('click');
 el('colorCatalogAllBtn').dispatch('click');
 assert(el('colorOptionGrid').children.length === 193, 'all RAL filter must render 193 cards');
@@ -372,20 +387,27 @@ const panelTexture = el('colorFinishOptions').children.find((card) => card.inner
 assert(Boolean(panelTexture), 'Texture finish option missing');
 panelTexture.dispatch('click');
 assert(el('panelColorValue').textContent === 'RAL 9016 · Texture', 'panel color selection not stored in UI');
-colorHtml = viewerHtml();
-const ral9016 = ralCatalog.all.find((item) => item.code === 'RAL 9016');
-assert(colorHtml.includes(`const PANEL_COLOR=${parseInt(ral9016.hex.slice(1), 16)};`), 'selected panel color not propagated to viewer');
-assert(colorHtml.includes(`const PANEL_FINISH=${JSON.stringify('TEXTURE')};`), 'selected panel finish not propagated to viewer');
-assert(colorHtml.includes(`const SYSTEM_COLOR=${parseInt(ral7016.hex.slice(1), 16)};`), 'panel selection must not alter system color');
-checkIframeScript(colorHtml);
+assert(viewerHtml() === liveColorSrcdoc, 'panel color change must not replace iframe srcdoc');
+assert(currentViewerSessionId() === liveColorSession, 'panel color change must preserve viewer session');
+colorMessage = lastColorMessage();
+assert(colorMessage.panelColor.code === 'RAL 9016' && colorMessage.panelColor.finish === 'TEXTURE', 'selected panel color/finish not propagated live');
+assert(colorMessage.systemColor.code === 'RAL 7016' && colorMessage.systemColor.finish === 'GLOSS', 'panel selection must not alter system color');
+assert(el('viewerFrame').messages.length > colorMessageCountAtStart, 'live color changes must produce viewer messages');
+checkIframeScript(liveColorSrcdoc);
+
 el('defaultColorModeBtn').dispatch('click');
 assert(el('systemColorValue').textContent === 'Klasik Sistem Paleti', 'Default button must restore classic system palette');
 assert(el('panelColorValue').textContent === 'Klasik Panel Yeşili', 'Default button must restore classic panel palette');
-assert(viewerHtml().includes('const DEFAULT_COLOR_MODE=true;'), 'Default button must restore classic viewer colors');
+assert(viewerHtml() === liveColorSrcdoc, 'Default mode must not replace iframe srcdoc');
+colorMessage = lastColorMessage();
+assert(colorMessage.colorMode === 'default', 'Default button must post classic color mode');
 el('ralColorModeBtn').dispatch('click');
 assert(el('systemColorValue').textContent === 'RAL 7016 · Parlak', 'RAL button must restore the last selected system RAL');
 assert(el('panelColorValue').textContent === 'RAL 9016 · Texture', 'RAL button must restore the last selected panel RAL');
-assert(viewerHtml().includes('const DEFAULT_COLOR_MODE=false;'), 'RAL button must restore RAL viewer colors');
+assert(viewerHtml() === liveColorSrcdoc, 'RAL mode must not replace iframe srcdoc');
+colorMessage = lastColorMessage();
+assert(colorMessage.colorMode === 'ral', 'RAL button must post RAL viewer colors');
+assert(colorMessage.systemColor.code === 'RAL 7016' && colorMessage.panelColor.code === 'RAL 9016', 'RAL button must restore last selected colors live');
 
 const zone = {
   id:'front', facadeId:'front', label:'Ön Cephe', axis:'x', width:3620, height:2938,

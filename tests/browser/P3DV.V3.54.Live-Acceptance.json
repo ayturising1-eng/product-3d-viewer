@@ -1,0 +1,289 @@
+{
+  "pass": true,
+  "passed": 31,
+  "total": 31,
+  "checks": [
+    {
+      "pass": true,
+      "name": "Incomplete-input guidance appears before last required field",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Last required input automatically creates preview",
+      "detail": 2
+    },
+    {
+      "pass": true,
+      "name": "Guidance hides after automatic model creation",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Expanded preview active before editing",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Zone action opens in expanded preview",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Profile add arrives through live model payload",
+      "detail": [
+        {
+          "id": "pf1",
+          "orientation": "vertical",
+          "positionRatio": 0.5,
+          "width": 100,
+          "depth": 100,
+          "type": "100x100",
+          "label": "Dikey Profil 100 × 100"
+        }
+      ]
+    },
+    {
+      "pass": true,
+      "name": "Profile add does not rebuild iframe",
+      "detail": 0
+    },
+    {
+      "pass": true,
+      "name": "Profile add stays expanded",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Profile delete arrives through live model payload",
+      "detail": []
+    },
+    {
+      "pass": true,
+      "name": "Profile delete does not rebuild iframe",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Profile delete stays expanded",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Zone dimension change updates live model width",
+      "detail": 3700
+    },
+    {
+      "pass": true,
+      "name": "Dimension change does not rebuild iframe",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Dimension change stays expanded",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Guillotine product added live",
+      "detail": {
+        "type": "guillotine",
+        "series": "A SERIES",
+        "subtype": "UPWARD COLLECTING",
+        "mechanism": "CHAIN",
+        "glassThickness": "8 MM",
+        "glassColor": "TRANSPARENT",
+        "customGlassColor": "",
+        "panels": 3,
+        "foldingView": "INSIDE VIEW",
+        "foldingOpenDirection": "INWARD",
+        "verticalDivisions": 1,
+        "horizontalDivisions": 1,
+        "horizontalHeights": "",
+        "doorType": "",
+        "hingeDirection": "LEFT",
+        "activeLeaf": "RIGHT",
+        "doorOpenDirection": "OUTWARD",
+        "handleType": "NORMAL",
+        "movingLeafHeight": 2200,
+        "topFixedHeight": null,
+        "panelType": "1+2",
+        "motorDirection": "LEFT",
+        "view": "OUTSIDE VIEW",
+        "motorType": "SOMFY RTS",
+        "remoteControl": "1 CHANNEL",
+        "bottomPanelMode": "FIXED",
+        "bottomPanelState": "CLOSED",
+        "bottomPanelHinge": "BOTTOM",
+        "collectionState": "NORMAL"
+      }
+    },
+    {
+      "pass": true,
+      "name": "Initial upward-guillotine motor direction saved as LEFT",
+      "detail": {
+        "type": "guillotine",
+        "series": "A SERIES",
+        "subtype": "UPWARD COLLECTING",
+        "mechanism": "CHAIN",
+        "glassThickness": "8 MM",
+        "glassColor": "TRANSPARENT",
+        "customGlassColor": "",
+        "panels": 3,
+        "foldingView": "INSIDE VIEW",
+        "foldingOpenDirection": "INWARD",
+        "verticalDivisions": 1,
+        "horizontalDivisions": 1,
+        "horizontalHeights": "",
+        "doorType": "",
+        "hingeDirection": "LEFT",
+        "activeLeaf": "RIGHT",
+        "doorOpenDirection": "OUTWARD",
+        "handleType": "NORMAL",
+        "movingLeafHeight": 2200,
+        "topFixedHeight": null,
+        "panelType": "1+2",
+        "motorDirection": "LEFT",
+        "view": "OUTSIDE VIEW",
+        "motorType": "SOMFY RTS",
+        "remoteControl": "1 CHANNEL",
+        "bottomPanelMode": "FIXED",
+        "bottomPanelState": "CLOSED",
+        "bottomPanelHinge": "BOTTOM",
+        "collectionState": "NORMAL"
+      }
+    },
+    {
+      "pass": true,
+      "name": "Product add does not rebuild iframe",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Product add stays expanded",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Existing guillotine opens in edit form",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Edit form loads current LEFT motor direction",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Motor direction changes to RIGHT without deleting product",
+      "detail": {
+        "type": "guillotine",
+        "series": "A SERIES",
+        "subtype": "UPWARD COLLECTING",
+        "mechanism": "CHAIN",
+        "glassThickness": "8 MM",
+        "glassColor": "TRANSPARENT",
+        "customGlassColor": "",
+        "panels": 3,
+        "foldingView": "INSIDE VIEW",
+        "foldingOpenDirection": "INWARD",
+        "verticalDivisions": 1,
+        "horizontalDivisions": 1,
+        "horizontalHeights": "",
+        "doorType": "",
+        "hingeDirection": "LEFT",
+        "activeLeaf": "RIGHT",
+        "doorOpenDirection": "OUTWARD",
+        "handleType": "NORMAL",
+        "movingLeafHeight": 2200,
+        "topFixedHeight": null,
+        "panelType": "1+2",
+        "motorDirection": "RIGHT",
+        "view": "OUTSIDE VIEW",
+        "motorType": "SOMFY RTS",
+        "remoteControl": "1 CHANNEL",
+        "bottomPanelMode": "FIXED",
+        "bottomPanelState": "CLOSED",
+        "bottomPanelHinge": "BOTTOM",
+        "collectionState": "NORMAL"
+      }
+    },
+    {
+      "pass": true,
+      "name": "Product edit does not rebuild iframe",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Delete product action enabled for occupied zone",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Product deletion updates live model",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Product delete does not rebuild iframe",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Product delete stays expanded",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Expanded toolbox command order matches V3.54 request",
+      "detail": [
+        2121453.203125,
+        2121606.09375,
+        2671453.203125,
+        2671606.09375
+      ]
+    },
+    {
+      "pass": true,
+      "name": "Fit-to-area command remains disabled",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Reset-camera command is removed",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "All key edits used generic live model protocol",
+      "detail": [
+        "profile-add",
+        "profile-delete",
+        "zone-dimension-change",
+        "product-upsert",
+        "product-upsert",
+        "product-delete-zone"
+      ]
+    },
+    {
+      "pass": true,
+      "name": "No parent UI page errors",
+      "detail": []
+    }
+  ],
+  "events": [
+    {
+      "type": "console:error",
+      "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED"
+    }
+  ],
+  "reasons": [
+    "profile-add",
+    "profile-delete",
+    "zone-dimension-change",
+    "product-upsert",
+    "product-upsert",
+    "product-delete-zone"
+  ],
+  "viewerTestMode": "deterministic Chromium parent/iframe postMessage contract; no Three.js CDN dependency"
+}

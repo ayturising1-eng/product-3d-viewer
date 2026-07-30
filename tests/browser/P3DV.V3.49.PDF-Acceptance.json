@@ -1,0 +1,27 @@
+{
+  "pass": true,
+  "source": "real Chromium application download",
+  "bytes": 47583,
+  "filename": "Pergo-Rise-10313x4500x3200-urun-listesi.pdf",
+  "pdfHeaderVerified": true,
+  "pages": 4,
+  "pageSizePt": [
+    595,
+    842
+  ],
+  "encrypted": false,
+  "renderDpi": 150,
+  "renderedPages": [
+    "page-1.png",
+    "page-2.png",
+    "page-3.png",
+    "page-4.png"
+  ],
+  "visualInspection": {
+    "clipping": false,
+    "overlap": false,
+    "brokenPage": false,
+    "pergoSpecificReport": true
+  },
+  "physicalArNotPartOfPdfAcceptance": true
+}

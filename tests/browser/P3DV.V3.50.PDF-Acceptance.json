@@ -1,0 +1,13 @@
+{
+  "webgl": "WebGL2",
+  "instances": 15,
+  "suggested_filename": "Pergo-Rise-6500x6500x3200-urun-listesi.pdf",
+  "page_errors": [],
+  "request_failures": [],
+  "pdf_header": true,
+  "bytes": 47379,
+  "pages": 4,
+  "encrypted": false,
+  "sha256": "d919d65889e88b341550c89c70ce5f8ba4e1d1dc9d041a62bf2aff3558916bef",
+  "pass": true
+}

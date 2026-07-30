@@ -1,0 +1,157 @@
+{
+  "pass": true,
+  "passed": 23,
+  "total": 23,
+  "checks": [
+    {
+      "pass": true,
+      "name": "Pergo Rise is initial product",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Pergo Cam Kaydı row restored",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Pergo Üçgen Doğrama row restored",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Freedom color controls isolated from Pergo",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Freedom preset count is 23",
+      "detail": 23
+    },
+    {
+      "pass": true,
+      "name": "Freedom first preset is 2308 - 8 Panel",
+      "detail": "2308\n- 8 Panel"
+    },
+    {
+      "pass": true,
+      "name": "Freedom last preset is 7060 - 30 Panel",
+      "detail": "7060\n- 30 Panel"
+    },
+    {
+      "pass": true,
+      "name": "Opening dropdown has no horizontal scroller",
+      "detail": {
+        "scroll": 143,
+        "client": 143,
+        "left": 600.625,
+        "right": 760.984375,
+        "parentLeft": 471.5,
+        "parentRight": 784
+      }
+    },
+    {
+      "pass": true,
+      "name": "Opening dropdown stays inside system card",
+      "detail": {
+        "scroll": 143,
+        "client": 143,
+        "left": 600.625,
+        "right": 760.984375,
+        "parentLeft": 471.5,
+        "parentRight": 784
+      }
+    },
+    {
+      "pass": true,
+      "name": "Opening and panel text are compact",
+      "detail": 8
+    },
+    {
+      "pass": true,
+      "name": "Bio-Rise first preset includes panel count",
+      "detail": "2070- 8 Panel"
+    },
+    {
+      "pass": true,
+      "name": "Bio-Rise last preset includes panel count",
+      "detail": "6070- 28 Panel"
+    },
+    {
+      "pass": true,
+      "name": "Panel color uses same iframe",
+      "detail": 0
+    },
+    {
+      "pass": true,
+      "name": "Panel color live message changes viewer pixels",
+      "detail": {
+        "before": "0c090b981ad4",
+        "after": "ece3374d5d78"
+      }
+    },
+    {
+      "pass": true,
+      "name": "Expanded preview layout is active",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Browser Fullscreen API is requested once",
+      "detail": 1
+    },
+    {
+      "pass": true,
+      "name": "Duplicate right drawing-check is removed",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Ten quick access controls exist in right toolbox",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Expanded selection banner is visible",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Expanded banner stays inside viewport",
+      "detail": {
+        "box": {
+          "x": 8,
+          "y": 55,
+          "width": 760,
+          "height": 63
+        },
+        "viewport": {
+          "width": 1760,
+          "height": 980
+        }
+      }
+    },
+    {
+      "pass": true,
+      "name": "Zone action dialog opens over expanded preview",
+      "detail": null
+    },
+    {
+      "pass": true,
+      "name": "Expanded dialog z-index is above workspace",
+      "detail": 1600
+    },
+    {
+      "pass": true,
+      "name": "No parent UI page errors",
+      "detail": []
+    }
+  ],
+  "events": [
+    {
+      "type": "console:error",
+      "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED"
+    }
+  ],
+  "viewerTestMode": "deterministic postMessage/canvas contract stub; production Three.js CDN unavailable in test container"
+}

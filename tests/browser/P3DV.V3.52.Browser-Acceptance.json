@@ -1,0 +1,219 @@
+{
+  "schema": "p3dv-browser-acceptance-v2",
+  "version": "p3dv.v3.52",
+  "generatedAtUtc": "2026-07-29T15:34:35Z",
+  "pass": true,
+  "checks": 56,
+  "results": {
+    "project-code-dash": true,
+    "pergo-static-product-status-disabled": true,
+    "disabled-toolbarOpenBtn": true,
+    "disabled-toolbarNewBtn": true,
+    "disabled-toolbarSaveBtn": true,
+    "disabled-previewUndoBtn": true,
+    "disabled-previewRedoBtn": true,
+    "disabled-toolbarDxfBtn": true,
+    "disabled-largePreviewMultiDimensionBtn": true,
+    "disabled-largePreviewEqualizeGapsBtn": true,
+    "disabled-largePreviewPostSettingsBtn": true,
+    "disabled-largePreviewBulkExtendBtn": true,
+    "disabled-largePreviewBulkPostProfileBtn": true,
+    "disabled-largePreviewConvertProductBtn": true,
+    "disabled-largePreviewDetailCopyBtn": true,
+    "freedom-rows-hidden-with-spacer": {
+      "freedom": true,
+      "front": "none",
+      "ray": "none",
+      "post": "none",
+      "spacer": "grid",
+      "statusDisabled": false,
+      "removed": false
+    },
+    "freedom-product-status-active": true,
+    "obsolete-controls-removed": true,
+    "system-count-digits-only": "1234",
+    "width-topology-filter": "3000;100:2500;NO",
+    "opening-filter": "2038;2254",
+    "height-filter": "3000;3200",
+    "projection-option-count": 25,
+    "projection-first": "2038 7 Panel",
+    "projection-last": "7060 30 Panel",
+    "projection-selection": true,
+    "motor-options": [
+      "Yok",
+      "Somfy Rts",
+      "Somfy IO"
+    ],
+    "remote-rts-options": [
+      "-",
+      "SITUO 2 RTS",
+      "SITUO 5 RTS",
+      "TELIS 16 RTS"
+    ],
+    "led-options": [
+      "YES",
+      "NO"
+    ],
+    "led-editable-after-select": true,
+    "product-state-open": true,
+    "product-state-closed": true,
+    "product-state-menu-roof": true,
+    "product-state-no-iframe-reload": {
+      "same": true,
+      "src": true,
+      "loads": 0
+    },
+    "pergo-webgl2": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "pergo-instance-count": 15,
+    "pergo-missing-components": [],
+    "normal-toolbar-single-axis": {
+      "toolbarRefreshBtn": {
+        "x": 810,
+        "cy": 129.5
+      },
+      "previewExpandBtn": {
+        "x": 915.671875,
+        "cy": 129.5
+      },
+      "headerCheckDrawingBtn": {
+        "x": 1315.515625,
+        "cy": 129.5
+      },
+      "toolbarPdfBtn": {
+        "x": 1529,
+        "cy": 129.5
+      },
+      "toolbarDxfBtn": {
+        "x": 1639,
+        "cy": 129.5
+      }
+    },
+    "normal-toolbar-left-actions": true,
+    "expanded-full-viewport": {
+      "x": 0,
+      "y": 0,
+      "w": 1767,
+      "h": 830
+    },
+    "expanded-toolbox": {
+      "w": 318.046875,
+      "h": 783
+    },
+    "expanded-toolbar-single-axis": {
+      "toolbarRefreshBtn": {
+        "x": 9,
+        "cy": 23
+      },
+      "previewExpandBtn": {
+        "x": 109.671875,
+        "cy": 23
+      },
+      "previewUndoBtn": {
+        "x": 212.359375,
+        "cy": 23
+      },
+      "previewRedoBtn": {
+        "x": 281.359375,
+        "cy": 23
+      },
+      "toolbarZoomInBtn": {
+        "x": 350.359375,
+        "cy": 23
+      },
+      "toolbarZoomOutBtn": {
+        "x": 421.890625,
+        "cy": 23
+      },
+      "toolbarFitBtn": {
+        "x": 491.0625,
+        "cy": 23
+      },
+      "toolbarArBtn": {
+        "x": 544.15625,
+        "cy": 23
+      }
+    },
+    "camera-controls-after-history": [
+      212.359375,
+      281.359375,
+      350.359375,
+      421.890625,
+      491.0625,
+      544.15625
+    ],
+    "expand-preserves-iframe": {
+      "p": {
+        "x": 0,
+        "y": 0,
+        "w": 1767,
+        "h": 830
+      },
+      "t": {
+        "w": 318.046875,
+        "h": 783
+      },
+      "b": {
+        "toolbarRefreshBtn": {
+          "x": 9,
+          "cy": 23
+        },
+        "previewExpandBtn": {
+          "x": 109.671875,
+          "cy": 23
+        },
+        "previewUndoBtn": {
+          "x": 212.359375,
+          "cy": 23
+        },
+        "previewRedoBtn": {
+          "x": 281.359375,
+          "cy": 23
+        },
+        "toolbarZoomInBtn": {
+          "x": 350.359375,
+          "cy": 23
+        },
+        "toolbarZoomOutBtn": {
+          "x": 421.890625,
+          "cy": 23
+        },
+        "toolbarFitBtn": {
+          "x": 491.0625,
+          "cy": 23
+        },
+        "toolbarArBtn": {
+          "x": 544.15625,
+          "cy": 23
+        }
+      },
+      "same": true,
+      "loads": 0
+    },
+    "panel-color-linked-disables-picker": true,
+    "linked-panel-follows-system": "RAL 7016 · Mat",
+    "panel-color-independent-enabled": true,
+    "live-color-render-changed": {
+      "before": "57fc0ffa81685a15b1af23cd8d92e99987d0cf2f993bdf48cd96911a7ba49ac3",
+      "after": "be654b966fe50596a370b5e3221a4399ffbb200c6d3332cfdbd884b9698a75d6"
+    },
+    "live-color-no-iframe-reload": {
+      "same": true,
+      "src": true,
+      "loads": 0,
+      "camera": "{\"position\":[-7105.759042323383,5801.182619573122,9360.277183362301],\"target\":[0,1344,2730],\"zoom\":1}"
+    },
+    "live-color-preserves-camera": true,
+    "pergo-ar-api": {
+      "start": true,
+      "cap": true
+    },
+    "pdf-download": 46612,
+    "page-errors": [],
+    "console-errors": [],
+    "request-failures": [],
+    "pdf-pages": 4
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "requestFailures": []
+}

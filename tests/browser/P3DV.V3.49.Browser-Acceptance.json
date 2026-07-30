@@ -1,0 +1,99 @@
+{
+  "pass": true,
+  "executedAtUtc": "2026-07-29T09:44:06Z",
+  "engine": "Chromium headed under Xvfb",
+  "webgl": {
+    "version": "WebGL2",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "templateMappings": 8,
+    "initialInstances": 15,
+    "initialCounts": {
+      "systems": 1,
+      "positions": 1,
+      "rails": 2,
+      "posts": 2,
+      "walls": 1,
+      "wallConnections": 2,
+      "fabricProfiles": 2
+    },
+    "multiCounts": {
+      "systems": 2,
+      "positions": 2,
+      "rails": 4,
+      "posts": 3,
+      "walls": 2,
+      "wallConnections": 4,
+      "fabricProfiles": 4
+    },
+    "independentCounts": {
+      "systems": 3,
+      "positions": 3,
+      "rails": 6,
+      "posts": 5,
+      "walls": 3,
+      "wallConnections": 6,
+      "fabricProfiles": 6
+    },
+    "missingTemplates": [],
+    "iframeSessionPreserved": true,
+    "cameraPreserved": true,
+    "dimensionOverlayVerified": true,
+    "cameraPresetVerified": "top"
+  },
+  "pdf": {
+    "downloadBytes": 47583,
+    "filename": "Pergo-Rise-10313x4500x3200-urun-listesi.pdf",
+    "pages": 4,
+    "pageSize": "A4 595x842 pt",
+    "renderDpi": 150,
+    "rasterInspected": true
+  },
+  "ar": {
+    "apiExposed": true,
+    "millimeterToMeterScale": 0.001,
+    "capability": {
+      "supported": false,
+      "reason": "secure-context",
+      "message": "AR için uygulama HTTPS üzerinden açılmalıdır."
+    },
+    "physicalDeviceImmersiveSessionTested": false
+  },
+  "checks": [
+    "Main P3DV interface loaded",
+    "Real Chromium WebGL2 context created",
+    "WebGL renderer identified",
+    "Single-system PLMR component counts match",
+    "Visible-only wall connection candidates generated",
+    "All initial component instances built from templates",
+    "Eight GLB component templates mapped",
+    "Shape005 uncertainty is explicit and non-production",
+    "Static/no-animation live-viewer policy active",
+    "AR uses exact millimetre-to-metre 1:1 scale",
+    "PLMR main/intermediate dimension summary exposed",
+    "Main technical dimension overlay rendered",
+    "Technical camera presets exposed",
+    "Iframe/contentWindow preserved during dimension update",
+    "Viewer session preserved during dimension update",
+    "Live project hash changed after multi-system update",
+    "Two-position PLMR project applied live",
+    "Multi-system rails/posts/connections match PLMR topology",
+    "Camera/Orbit state preserved on live geometry update",
+    "Multi-system assembly has no missing template",
+    "Independent-group project applied live",
+    "Independent-group component topology built",
+    "Iframe remains stable across independent-group update",
+    "Camera preserved across independent-group update",
+    "Intermediate per-position dimensions update live",
+    "Top camera preset executes without rebuilding iframe",
+    "Real browser PDF downloaded and structurally identified",
+    "PDF filename emitted by application",
+    "AR capability API executes in browser",
+    "AR start API is exposed for parametrik assembly",
+    "No browser page errors",
+    "No browser request failures"
+  ],
+  "checkCount": 32,
+  "pageErrors": [],
+  "requestFailures": [],
+  "consoleWarnings": []
+}

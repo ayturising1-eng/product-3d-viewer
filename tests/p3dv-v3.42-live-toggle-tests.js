@@ -7,7 +7,7 @@ const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
-check(html.includes('p3dv.v3.46'), 'V3.42 HTML version token missing');
+check(html.includes('p3dv.v3.53'), 'V3.42 HTML version token missing');
 
 for (const token of [
   'let viewerLiveProductStateReady = false;',
@@ -49,7 +49,8 @@ const globalStart = app.indexOf('  function toggleProductsOpen() {');
 const globalEnd = app.indexOf('\n  }', globalStart) + 4;
 const globalBlock = app.slice(globalStart, globalEnd);
 check(globalBlock.includes('allProductEntries().forEach'), 'global product toggle must update every placed product');
-check(globalBlock.includes('applyProductOpenStateLive();'), 'global product toggle must use live state sync');
+check(globalBlock.includes('postLiveProductOpenState()'), 'global product toggle must use live product-state sync');
+check(globalBlock.includes('postLivePanelMasterOpen()'), 'global product toggle must use live panel-state sync');
 check(!globalBlock.includes('renderViewer();'), 'global product toggle must not reload the iframe');
 
 const parentToggleStart = app.indexOf("if (event.data.type === 'toggle-panel-state'");

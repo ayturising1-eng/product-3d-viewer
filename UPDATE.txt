@@ -1,19 +1,14 @@
-p3dv.v3.52
+p3dv.v3.54
 
-- İşlevi tanımlanmamış görünür butonlar gerçek `disabled` ve `aria-disabled` durumuna geçirildi.
-- Proje Kodu geçici olarak `-` gösterir.
-- Freedom ve Bio-Rise veri giriş ekranı PLMR Pergo Rise hücre mantığına uyarlandı.
-- Sistem Adedi yalnız rakam; Genişlik yalnız rakam/`;`/`:`/sıralı `NO`; Açılım ve Yükseklik yalnız rakam/`;` kabul eder.
-- Açılım hücresi elle yazılabilir ve 2038–7060 mm arasında 216 mm artan panel sayılı seçim listesi içerir.
-- Freedom/Bio-Rise için Ray Sayısı ve Dikme Sayısı gizlendi; Sistem Ölçüleri kartının yüksekliği spacer ile korundu.
-- Cam Kaydı kaldırıldı. Kumaş alanı `Panel Rengi`, Kumaş Profilleri alanı `Panel Dolgusu` olarak değiştirildi.
-- Panel Rengi tik kapalıyken Sistem Rengine canlı bağlanır; tik açıkken bağımsız panel rengi seçilir.
-- Motor seçenekleri `Yok`, `Somfy Rts`, `Somfy IO`; Kumanda seçenekleri PLMR motor bağımlılığıyla çalışır.
-- LED hücresi `YES/NO` listesinden seçim sonrası elle düzenlenebilir. Dimmer `EVET/HAYIR` seçeneğidir.
-- Üçgen Doğrama kaldırıldı; Su Çıkışı Standart mı? korundu.
-- Büyük önizleme üst toolbarına Yakınlaştır, Uzaklaştır, Sığdır ve AR Gerçek Alan eklendi.
-- Sağ toolbox’tan Cam Kaydı, Ray Sınırlarını Daralt, Üçgen Doğrama ve Su Çıkışı Standart mı? kaldırıldı.
-- Sağ toolbox’a kırmızı/yeşil global ve ürün bazlı `Ürün Durumları` kontrolü eklendi; canlı aç/kapat iframe ve kamera durumunu korur.
-- AR için canlı model grubu artık AR köküne taşınmaz. Ayrı, materyalleri de klonlanmış 1:1 snapshot kullanılır; kaynak hiyerarşi, parça görünürlükleri ve açık/kapalı durumları korunur.
-- Ham `.glb` dosyaları teslim paketinde bulunmaz; gömülü component/template kaynakları korunur.
-- PDF, canlı renk, tam ekran önizleme, Pergo Rise parametrik assembly ve eski ürün regresyonları korunmuştur.
+- Freedom/Bio-Rise ürün, profil ve ölçü düzenlemeleri generic `set-model-state` canlı sahne protokolüne taşındı.
+- Ürün ekleme, ürün değiştirme, ürün silme, profil ekleme, profil silme, dikme/kiriş değişikliği ve alan ölçüsü düzenlemesinde iframe/srcdoc yeniden kurulmaz.
+- Büyük önizleme, canlı düzenlemelerin tamamında açık kalır; kamera, OrbitControls, zoom ve aktif çalışma alanı korunur.
+- Geçerli son zorunlu veri girildiğinde 360 ms debounce ile çizim otomatik oluşturulur; Enter veya Yenile düğmesi gerekmez.
+- Eksik veri sırasında küçük önizleme üzerinde kullanıcı yönlendirmesi gösterilir.
+- Yukarı toplanan giyotin dahil mevcut ürün düzenleme formu, kayıtlı motor yönünü yeniden yükler ve sil-yeniden ekle gerektirmeden günceller.
+- Freedom lamel GLB şablonu 4.290.412 bayttan 526.740 bayta indirildi: pim/silindir meshleri ve iç ayrıntılar kaldırıldı, dış kabuk korundu, uç kapaklar yaklaşık %50 sadeleştirildi.
+- Büyük önizleme sağ toolbox sırası: Çoklu Profil Ekleme / Silme, Çoklu Ürün Ekleme / Silme. Kamerayı Sıfırla kaldırıldı; Ürünü Alana Uydur pasif bırakıldı.
+- Kapı panik bar kolu cam ve profillerin önüne taşındı.
+- Giyotin ve Zip Perde MOTOR etiketleri üst pano ile kesişmeyecek biçimde dış yüzün önüne taşındı.
+- Ham `.glb`, `.bak` ve geçici geliştirme dosyaları teslim paketine alınmaz.
+- Development Protocol, regresyon kuralları, test kayıtları ve manifest V3.54 için güncellendi.

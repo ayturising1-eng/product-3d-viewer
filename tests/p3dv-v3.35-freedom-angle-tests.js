@@ -10,7 +10,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(indexSource.includes('p3dv.v3.46'), 'V3.35 HTML version missing');
+assert(indexSource.includes('p3dv.v3.53'), 'V3.35 HTML version missing');
 assert(appSource.includes('const freedomEffectiveOpenAngle=100;'), 'Freedom effective 100-degree angle missing');
 assert(appSource.includes('const freedomLamelOpenAngle=freedomEffectiveOpenAngle-180;'), 'Freedom pivot derivation missing');
 assert(appSource.includes('const bioRiseEffectiveOpenAngle=100;'), 'Bio-Rise effective angle preservation missing');

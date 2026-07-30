@@ -9,10 +9,10 @@ const colorSource = fs.readFileSync(path.join(root, 'ral-colors.js'), 'utf8');
 function assert(condition, message) { if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
+  'p3dv.v3.53', 'Ürün Giriş Bilgileri', 'Ürün Ailesi', 'Bioclimatic',
   'Ürün Grubu', 'B-Cube', 'Bio-Rise', 'Ürün Alt Grup', 'Module', 'Modul 1',
   'productGroupInput', 'productSubgroupValue', 'projectionOptions',
-  'min="2038"', 'projectionCustomToggleBtn', 'freedomWidthLimitNote', 'freedomDepthLimitNote',
+  'placeholder="Örn. 2308 veya 2308;2524"', 'projectionCustomToggleBtn', 'freedomWidthLimitNote', 'freedomDepthLimitNote',
   'Paneller Açık', 'Zip Perde', 'Sabit Doğrama'
 ]) assert(indexSource.includes(token), `missing HTML token: ${token}`);
 for (const forbidden of ['Freedom Giriş Bilgileri', '>Family<', '<span>Modül 1</span>']) {
@@ -21,7 +21,7 @@ for (const forbidden of ['Freedom Giriş Bilgileri', '>Family<', '<span>Modül 1
 
 for (const token of [
   "productGroup: 'b-cube'", 'const PRODUCT_SPECS = {',
-  "'bio-rise': {", "subgroupLabel: 'None'", 'depthMin: 2038', 'depthMax: 7060',
+  "'bio-rise': {", "subgroupLabel: 'None'", 'depthMin: 2308', 'depthMax: 7060',
   'depthStep: 216', 'depthMin: 2070', 'depthMax: 6070', 'panelPitch: 200',
   'projectionOffset: 470', 'panelMin: 8', 'panelMax: 28',
   "postSection: { x: 150, z: 100 }", "beamSection: { vertical: 218, thickness: 100 }",
@@ -141,7 +141,7 @@ el('productPlacementInput').value = 'BETWEEN POSTS';
 
 const alerts = [];
 const windowListeners = {};
-const document = { getElementById: el, createElement(tag) { return new El('', tag); } };
+const document = { getElementById: el, createElement(tag) { return new El('', tag); }, querySelectorAll() { return []; }, addEventListener() {}, fullscreenElement: null, documentElement: new El('documentElement') };
 const window = {
   addEventListener(type, fn) { (windowListeners[type] ??= []).push(fn); },
   confirm() { return true; }, alert(message) { alerts.push(message); }
@@ -163,13 +163,13 @@ function checkIframeScript(html) {
 assert(el('productGroupInput').value === 'b-cube', 'initial product group must be B-Cube');
 assert(el('productSubgroupValue').textContent === 'Freedom', 'B-Cube subgroup must be Freedom');
 assert(el('positionTitle').textContent === 'B-Cube Freedom Poz1', 'Freedom title missing');
-assert(el('freedomDepthInput').min === '2038' && el('freedomDepthInput').max === '', 'Freedom projection maximum must be advisory only');
+assert(el('freedomDepthInput').min === '' && el('freedomDepthInput').max === '' && el('freedomDepthInput').type === 'text', 'Freedom projection must be editable text with advisory list only');
 assert(el('freedomWidthInput').max === '' && el('freedomPanelCountInput').max === '', 'Freedom width/panel maximums must be advisory only');
 assert(el('freedomWidthLimitNote').textContent.includes('4050'), 'Freedom width recommended maximum note missing');
 assert(el('freedomDepthLimitNote').textContent.includes('7060'), 'Freedom projection recommended maximum note missing');
 assert(el('productFormulaText').textContent === 'Açılım = Panel Sayısı × 216 + 580', 'Freedom formula wrong');
-assert(el('projectionOptions').children[0].value === '2038', 'Freedom projection list must start at 2038');
-assert(el('projectionOptions').children[1].value === '2254', 'Freedom projection list must increment by 216');
+assert(el('projectionOptions').children[0].value === '2308', 'Freedom projection list must start at 2308');
+assert(el('projectionOptions').children[1].value === '2524', 'Freedom projection list must increment by 216');
 assert(el('projectionOptions').children.at(-1).value === '7060', 'Freedom projection list must expose max 7060');
 assert(viewerHtml().includes('B-Cube Freedom · Modul 1'), 'Freedom empty viewer title missing');
 
@@ -206,9 +206,9 @@ assert(el('positionTitle').textContent === 'Bio-Rise Poz1', 'Bio-Rise title miss
 assert(el('freedomDepthInput').value === '' && el('freedomPanelCountInput').value === '', 'group switch must clear dependent projection fields');
 assert(el('freedomWidthInput').max === '', 'Bio-Rise width maximum must be advisory only');
 assert(el('freedomWidthLimitNote').textContent.includes('4000'), 'Bio-Rise width recommended maximum note missing');
-assert(el('freedomDepthInput').min === '2070' && el('freedomDepthInput').max === '', 'Bio-Rise projection maximum must be advisory only');
+assert(el('freedomDepthInput').min === '' && el('freedomDepthInput').max === '' && el('freedomDepthInput').type === 'text', 'Bio-Rise projection must be editable text with advisory list only');
 assert(el('freedomDepthLimitNote').textContent.includes('6070'), 'Bio-Rise projection recommended maximum note missing');
-assert(el('freedomHeightInput').max === '3500', 'Bio-Rise height max wrong');
+assert(el('freedomHeightInput').max === '' && el('freedomHeightInput').type === 'text', 'Bio-Rise height must remain editable text with advisory validation');
 assert(el('freedomPanelCountInput').min === '8' && el('freedomPanelCountInput').max === '', 'Bio-Rise panel maximum must be advisory only');
 assert(el('productFormulaText').textContent === 'Açılım = Panel Sayısı × 200 + 470', 'Bio-Rise formula wrong');
 assert(el('projectionOptions').children.length === 21, 'Bio-Rise must list all 8–28 canonical projections');

@@ -9,7 +9,7 @@ function assert(condition, message) { if (!condition) throw new Error(message); 
 let checks = 0;
 function check(condition, message) { checks += 1; assert(condition, message); }
 
-check(indexSource.includes('p3dv.v3.46'), 'V3.31 version missing');
+check(indexSource.includes('p3dv.v3.53'), 'V3.31 version missing');
 check(indexSource.includes('<script src="./p3dv-pdf.js"></script>'), 'local PDF engine script missing');
 check(!indexSource.includes('cdn.jsdelivr.net/npm/jspdf'), 'external jsPDF CDN must be removed');
 check(indexSource.includes('Hızlı Testler'), 'quick-test section missing');

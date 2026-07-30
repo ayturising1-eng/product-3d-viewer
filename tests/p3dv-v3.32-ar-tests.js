@@ -9,7 +9,7 @@ let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46',
+  'p3dv.v3.53',
   'id="mobileArBtn"',
   '>Gerçek Alanda Gör<',
   'id="mobileArStatus"',
@@ -34,8 +34,13 @@ for (const token of [
   "renderer.xr.setReferenceSpaceType('local')",
   'renderer.setAnimationLoop(animate);',
   'function updateArFrame(frame)',
-  'group.scale.setScalar(AR_METERS_PER_MM);',
-  'group.position.set(0,H*AR_METERS_PER_MM*.5,0);',
+  'snapshot.scale.setScalar(AR_METERS_PER_MM);',
+  'snapshot.position.set(0,H*AR_METERS_PER_MM*.5,0);',
+  'P3DV_AR_FLAT_WORLD_SNAPSHOT',
+  'inverseGroupWorld',
+  'object.matrixWorld',
+  'arRoot.add(snapshot);',
+  'group.visible=false;',
   'camera.near=.01;',
   'camera.far=1000;',
   'function initializeManualArPlacement()',
@@ -65,7 +70,13 @@ for (const token of [
 const scale = 4000 * 0.001;
 check(scale === 4, '4000 mm must convert to exactly 4 metres');
 check((html.match(/id="quickTestBtn\d+"/g) || []).length === 10, 'quick test button count must remain exactly 10');
-check(!app.includes('group.scale.setScalar(.0015)'), 'AR scale must not use arbitrary visual scaling');
+check(!app.includes('snapshot.scale.setScalar(.0015)'), 'AR scale must not use arbitrary visual scaling');
+check(!app.includes('arRoot.add(group)'), 'AR must never reparent the live model group');
+check(!app.includes('const snapshot=group.clone(true);'), 'AR must not preserve nested pivots by direct group clone');
+const prepareStart=app.indexOf('function prepareModelForAr()');
+const prepareEnd=app.indexOf('\nasync function resetArOrientation',prepareStart);
+const prepareBlock=app.slice(prepareStart,prepareEnd);
+check(!prepareBlock.includes('parts.forEach(part=>part.visible=true)'), 'AR preparation must preserve per-product open/closed visibility');
 check(!app.includes('pinch'), 'AR flow must not introduce pinch scale logic');
 check(!app.includes("requiredFeatures:['hit-test']"), 'manual AR must not require floor hit-test');
 check(!app.includes('requestHitTestSource'), 'manual AR must not request a mandatory hit-test source');

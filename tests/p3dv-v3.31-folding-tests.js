@@ -10,7 +10,7 @@ let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46', '<option value="folding">Katlanır Cam</option>',
+  'p3dv.v3.53', '<option value="folding">Katlanır Cam</option>',
   'productFoldingViewWrap', 'productFoldingViewInput',
   'productFoldingOpenDirectionWrap', 'productFoldingOpenDirectionInput',
   'İç Bakış', 'Dış Bakış', 'İçeri', 'Dışarı',

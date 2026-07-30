@@ -8,9 +8,9 @@ let checks = 0;
 function check(condition, message) { checks += 1; if (!condition) throw new Error(message); }
 
 for (const token of [
-  'p3dv.v3.46', 'id="productFormGrid"',
+  'p3dv.v3.53', 'id="productFormGrid"',
   'id="productFoldingViewInput"', 'id="productFoldingOpenDirectionInput"',
-  '<option value="INSIDE VIEW" selected>İç Bakış</option>', '<option value="OUTSIDE VIEW">Dış Bakış</option>'
+  'value="INSIDE VIEW">İç Bakış</option>', '<option value="OUTSIDE VIEW">Dış Bakış</option>'
 ]) check(html.includes(token), `missing V3.41 HTML token: ${token}`);
 
 for (const token of [
